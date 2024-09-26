@@ -1,0 +1,12 @@
+__pycache__/*
+*.pyc
+*.disabled
+*sublime*
+_*
+!__*.py
+*.code*
+.vscode/*
+.ini
+config/secret.toml
+.venv
+.idea
