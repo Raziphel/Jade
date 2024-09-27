@@ -17,6 +17,16 @@ class leaderboard(Cog):
 
 
 
+    async def is_user_in_guild(self, user_id):
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+        try:
+            await guild.fetch_member(user_id)
+            return True
+        except:
+            return False
+
+
+
     @tasks.loop(minutes=5)
     async def five_minute_loop(self):
         """The loop that handles updating things every minute."""
@@ -42,7 +52,8 @@ class leaderboard(Cog):
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
             if user is not None:
-                users.append(user)
+                if await is_user_in_guild(self.bot, guild.id, user.id):
+                    users.append(user)
 
         text = []
         text2 = []
@@ -76,7 +87,8 @@ class leaderboard(Cog):
         for i in ranks:
             user = self.bot.get_user(i.user_id)
             if user is not None:
-                users.append(user)
+                if await is_user_in_guild(self.bot, guild.id, user.id):
+                    users.append(user)
 
         text = []
         text2 = []
@@ -109,7 +121,8 @@ class leaderboard(Cog):
         for i in ranks:
             user = self.bot.get_user(i.user_id)
             if user is not None:
-                users.append(user)
+                if await is_user_in_guild(self.bot, guild.id, user.id):
+                    users.append(user)
 
         text = []
         text2 = []
@@ -143,7 +156,8 @@ class leaderboard(Cog):
         for i in ranks:
             user = self.bot.get_user(i.user_id)
             if user is not None:
-                users.append(user)
+                if await is_user_in_guild(self.bot, guild.id, user.id):
+                    users.append(user)
 
         text = []
         text2 = []
@@ -176,7 +190,8 @@ class leaderboard(Cog):
         for i in ranks:
             user = self.bot.get_user(i.user_id)
             if user is not None:
-                users.append(user)
+                if await is_user_in_guild(self.bot, guild.id, user.id):
+                    users.append(user)
 
         text = []
         text2 = []
