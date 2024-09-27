@@ -1,11 +1,8 @@
-
-# Discord
 from discord import Message
 from discord.ext.commands import Cog
 from discord.ext.tasks import loop
 from more_itertools import unique_everseen
 
-# Additions
 from random import choice
 from datetime import datetime as dt, timedelta
 from re import compile
@@ -18,110 +15,91 @@ class Coin_Generator(Cog):
         self.voice_gen_loop.start()
         self.valid_uri = compile(r"(\b(https?|ftp|file)://)?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 
-
     @Cog.listener('on_message')
-    async def coin_generator(self, message:Message):
-        """Determine Level progression settings!"""
+    async def coin_generator(self, message: Message):
+        """Determine Level progression settings based on messages."""
 
-        #? Better not be in dms.
-        if message.guild == None:
-            return
-        #? Better not be a bot.
-        if message.author.bot:
-            return
-        #? Check if bot DB is connected!
-        if not self.bot.connected:
+        # Ignore DMs, bot messages, and check if DB is connected
+        if message.guild is None or message.author.bot or not self.bot.connected:
             return
 
+        # Load user data
         lvl = utils.Levels.get(message.author.id)
-        c = utils.Currency.get(message.author.id)
-        tr = utils.Tracking.get(message.author.id)
-
+        currency = utils.Currency.get(message.author.id)
+        tracking = utils.Tracking.get(message.author.id)
 
         if lvl.last_xp is None:
             lvl.last_xp = dt.utcnow()
-        if (lvl.last_xp + timedelta(seconds=10)) <= dt.utcnow(): #? Make sure it's not just spam.
 
-            #! Define variables
+        # Ensure message isn't spammed within 10 seconds
+        if (lvl.last_xp + timedelta(seconds=10)) <= dt.utcnow():
+            # Calculate experience and unique words
             exp = 1
             unique_words = len(list(unique_everseen(message.content.split(), str.lower)))
-            if message.attachments is not None:
+            if message.attachments:
                 unique_words += 6
 
-            #! Unique Word Nerf
-            if unique_words > 14:
-                unique_words = 8
+            # Cap unique words to prevent excessive rewards
+            unique_words = min(unique_words, 8)
 
+            # Earn coins and experience points
             await utils.CoinFunctions.earn(earner=message.author, amount=unique_words)
-            exp += 1+unique_words
+            exp += 1 + unique_words
 
+            # Level up user
             await utils.UserFunctions.level_up(user=message.author, channel=message.channel)
 
-            #! Save it to database
-            lvl.exp += exp+5
+            # Update user data
+            lvl.exp += exp + 5
             lvl.last_xp = dt.utcnow()
-            tr.messages += 1
+            tracking.messages += 1
+
+        # Save user data in a single database transaction
         async with self.bot.database() as db:
             await lvl.save(db)
-            await c.save(db)
-            await tr.save(db)
-
-
+            await currency.save(db)
+            await tracking.save(db)
 
     def cog_unload(self):
-        self.exp_voice_gen.cancel()
+        """Cancel the voice generation loop when the cog is unloaded."""
+        self.voice_gen_loop.cancel()
 
     @loop(minutes=10)
     async def voice_gen_loop(self):
-        #? Check if bot DB is connected!
+        """Distribute coins and experience points to users in voice channels."""
         if not self.bot.connected:
             return
-
-        coins_payed = 0
 
         for guild in self.bot.guilds:
             for vc in guild.voice_channels:
                 for member in vc.members:
+                    tracking = utils.Tracking.get(member.id)
+                    tracking.vc_mins += 10
 
-                    tr = utils.Tracking.get(member.id)
-                    tr.vc_mins += 10
-                    async with self.bot.database() as db:
-                        await tr.save(db)
-
-                    #! Checks
-                    checks = [
-                        member.voice.deaf, 
-                        member.voice.mute, 
-                        member.voice.self_deaf, 
-                        member.voice.afk,
-                        member.bot,
-                    ]
-                    if any(checks):
-                        break
+                    # Skip certain conditions like deafened or bots
+                    if any([member.voice.deaf, member.voice.mute, member.voice.self_deaf, member.voice.afk, member.bot]):
+                        continue
                     if len(vc.members) < 2:
-                        break
+                        continue
 
-                    c = utils.Currency.get(member.id)
+                    # Update coins and experience based on voice activity
+                    currency = utils.Currency.get(member.id)
                     lvl = utils.Levels.get(member.id)
-                    lvl.exp += (4 + (len(vc.members)))
+                    lvl.exp += (4 + len(vc.members))
                     await utils.CoinFunctions.earn(earner=member, amount=1 + round(len(vc.members)))
 
                     await utils.UserFunctions.level_up(user=member, channel=None)
 
+                    # Save updated data
                     async with self.bot.database() as db:
-                        await c.save(db)
+                        await currency.save(db)
                         await lvl.save(db)
-                        await tr.save(db)
-
-
-
+                        await tracking.save(db)
 
     @voice_gen_loop.before_loop
     async def before_voice_gen_loop(self):
+        """Ensure the bot is ready before starting the voice generation loop."""
         await self.bot.wait_until_ready()
 
-
-
 def setup(bot):
-    x = Coin_Generator(bot)
-    bot.add_cog(x)
+    bot.add_cog(Coin_Generator(bot))
