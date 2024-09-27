@@ -1,155 +1,125 @@
-
-from discord import Embed, Member, Message, RawReactionActionEvent  
-from discord.ext.commands import Cog 
-
+from discord import Embed, RawReactionActionEvent
+from discord.ext.commands import Cog
 import utils
 
 
-class role_handler(Cog): 
+class RoleHandler(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
-    @property  #+ The Server Logs
+    @property
     def discord_log(self):
-        return self.bot.get_channel(self.bot.config['logs']['server']) 
+        """Server logs channel for logging events."""
+        return self.bot.get_channel(self.bot.config['logs']['server'])
 
+    async def fetch_roles_messages(self):
+        """Fetch and update role messages in the roles channel."""
+        ch = self.bot.get_channel(self.bot.config['channels']['roles'])
+        role_messages = self.bot.config['roles_messages']
+
+        embeds = [
+            Embed(description=f"# Age\n```\nLying about your age will result in a ban!\n```\n"
+                              f"> 🚬<@&{self.bot.config['age_roles']['adult']}>"
+                              "`Gives access to adult-only channels!`\n"
+                              f"> 🍼<@&{self.bot.config['age_roles']['underage']}>"
+                              "`Given automatically if no age role selected.`", color=0x8f00f8),
+            Embed(description=f"# Pings\n```\nGet notifications for things!\n```\n"
+                              f"> 📔<@&{self.bot.config['ping_roles']['changelogs']}> `Recommended!`\n"
+                              f"> ✅<@&{self.bot.config['ping_roles']['voters']}> `Get pinged for votes!`\n"
+                              f"> 📆<@&{self.bot.config['ping_roles']['events']}> `Get pinged for events!`\n"
+                              f"> 🤝<@&{self.bot.config['ping_roles']['welcomer']}> `Greet new members!`\n"
+                              f"> 📊<@&{self.bot.config['ping_roles']['server_status']}> `Ping for server status!`\n"
+                              f"> 💀<@&{self.bot.config['ping_roles']['scp_ping']}> `Ping for SCP servers!`", color=0x8f00f8),
+            Embed(description=f"# Access\n```\nControl what you see!\n```\n"
+                              f"> 🚧<@&{self.bot.config['access_roles']['scpsl']}>"
+                              "`Access SCP:SL section.`\n"
+                              f"> 🎀<@&{self.bot.config['access_roles']['queer']}>"
+                              "`Access Degen Girls section.`\n"
+                              f"> 🎮<@&{self.bot.config['access_roles']['shitposters']}>"
+                              "`Access Toxic Gamers section.`", color=0x8f00f8)
+        ]
+
+        for i, embed in enumerate(embeds):
+            msg = await ch.fetch_message(role_messages[str(i + 1)])
+            await msg.edit(content=" ", embed=embed)
+
+        for msg_id in role_messages.values()[3:]:
+            msg = await ch.fetch_message(msg_id)
+            await msg.edit(content="~")
 
     @Cog.listener()
     async def on_ready(self):
-        """Displays the role handler messages"""
-        ch = self.bot.get_channel(self.bot.config['channels']['roles'])
+        """Initial setup on bot ready event."""
+        await self.fetch_roles_messages()
 
-        msg1 = await ch.fetch_message(self.bot.config['roles_messages']['1']) 
-        msg2 = await ch.fetch_message(self.bot.config['roles_messages']['2'])
-        msg3 = await ch.fetch_message(self.bot.config['roles_messages']['3'])
-        msg4 = await ch.fetch_message(self.bot.config['roles_messages']['4'])
-        msg5 = await ch.fetch_message(self.bot.config['roles_messages']['5'])
-        msg6 = await ch.fetch_message(self.bot.config['roles_messages']['6'])
+    @Cog.listener()
+    async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
+        """Handle role addition when a reaction is added."""
+        await self.handle_role_change(payload, add_role=True)
 
-        embed1=Embed(description=f"# Age\n```\nLying about your age will result in a ban!\n```\n> 🚬<@&{self.bot.config['age_roles']['adult']}>`Gives access to adult only channels!`\n> 🍼<@&{self.bot.config['age_roles']['underage']}>`Given automatically if you don't get an age role.`", color=0x8f00f8)
+    @Cog.listener()
+    async def on_raw_reaction_remove(self, payload: RawReactionActionEvent):
+        """Handle role removal when a reaction is removed."""
+        await self.handle_role_change(payload, add_role=False)
 
-        embed2=Embed(description=f"# Pings\n```\nGet notifications for things!\n```\n> 📔<@&{self.bot.config['ping_roles']['changelogs']}> `Recommended! Get pinged about changes!`\n> ✅<@&{self.bot.config['ping_roles']['voters']}> `Get pinged when a vote is held!`\n> 📆<@&{self.bot.config['ping_roles']['events']}> `Get pinged for info on server events!`\n> 🤝<@&{self.bot.config['ping_roles']['welcomer']}> `Get pinged to greet any new members!`\n> 📊<@&{self.bot.config['ping_roles']['server_status']}> `Get pinged when our servers are down!`\n> 💀<@&{self.bot.config['ping_roles']['scp_ping']}> `Get pinged to come play on the scp servers!`", color=0x8f00f8)
-
-        embed3=Embed(description=f"# Access\n```\nWhat parts of the server would you like to see!\n```\n> 🚧<@&{self.bot.config['access_roles']['scpsl']}>`Gives access to the SCP:SL section.`\n> 🎀<@&{self.bot.config['access_roles']['queer']}>`Gives access to the Degen Girls section.`\n> 🎮<@&{self.bot.config['access_roles']['shitposters']}>`Gives access to the Toxic Gamers section.`", color=0x8f00f8)
-
-        await msg1.edit(content=f" ", embed=embed1)
-        await msg2.edit(content=f" ", embed=embed2)
-        await msg3.edit(content=f" ", embed=embed3)
-        await msg4.edit(content=f"~")
-        await msg5.edit(content=f"~")
-        await msg6.edit(content=f"~")
-
-
-
-
-    @Cog.listener('on_raw_reaction_add')
-    async def role_add(self, payload:RawReactionActionEvent):
-        """Reaction role add handler"""
-
-        # Validate channel
+    async def handle_role_change(self, payload, add_role: bool):
+        """Helper to handle adding/removing roles based on reactions."""
         if payload.channel_id != self.bot.config['channels']['roles']:
             return
 
-        # Not bot
         if self.bot.get_user(payload.user_id).bot:
             return
 
-        # See what the emoji is
-        if payload.emoji.is_unicode_emoji():
-            emoji = payload.emoji.name
-        else:
-            emoji = payload.emoji.id
-
-
-        # Work out cached items
-        channel = self.bot.get_channel(payload.channel_id)
-        guild = channel.guild
-        member = guild.get_member(payload.user_id)
-
-        # Get the right role
-        role = await self.get_role(guild=guild, emoji=emoji, member=member)
-        if role:
-            await member.add_roles(role, reason="Role picker entry")
-
-
-        # Check to see total reactions on the message
-        message = await channel.fetch_message(payload.message_id)
-        emoji = [i.emoji for i in message.reactions]
-        if sum([i.count for i in message.reactions]) > 4000:
-            await message.clear_reactions()
-        for e in emoji:
-            await message.add_reaction(e)
-
-    @Cog.listener('on_raw_reaction_remove')
-    async def role_remove(self, payload:RawReactionActionEvent):
-        """Reaction role removal handler"""
-
-        if payload.channel_id != self.bot.config['channels']['roles']:
-            return
-
-        # See what the emoji is
-        if payload.emoji.is_unicode_emoji():
-            emoji = payload.emoji.name
-        else:
-            emoji = payload.emoji.id
-        # Get the right role
+        emoji = payload.emoji.name if payload.emoji.is_unicode_emoji() else payload.emoji.id
         guild = self.bot.get_guild(payload.guild_id)
         member = guild.get_member(payload.user_id)
-        role = await self.get_role(guild=guild, emoji=emoji, member=member)
-        if role is None:
+
+        if not member:
             return
 
-        # Add to the user
-        member = guild.get_member(payload.user_id)
-        await member.remove_roles(role, reason="Role picker entry")
+        role = await self.get_role(guild, emoji, member)
+        if role:
+            if add_role:
+                await member.add_roles(role, reason="Reaction role added")
+            else:
+                await member.remove_roles(role, reason="Reaction role removed")
 
-
+        # Manage reactions if needed
+        channel = self.bot.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        if sum([i.count for i in message.reactions]) > 4000:
+            await message.clear_reactions()
+            for reaction in message.reactions:
+                await message.add_reaction(reaction.emoji)
 
     async def get_role(self, guild, emoji, member):
-        """Gets the role given a picked emoji If the user has picked to enable mention alerts or VC messages, the bot will configure that _here_"""
-
-        role = None
-        # Role picker emoji
+        """Fetch the correct role based on the emoji reaction."""
         mod = utils.Moderation.get(member.id)
-        if emoji == "🚬":
-            if not mod.child:
-                role = utils.DiscordGet(guild.roles, id=self.bot.config['age_roles']['adult'])
-            else: 
-                await member.send(f"You are unable to get the Adult role, message staff.")
-                await self.discord_log.send(f"<@{member.id}> failed to get ADULT role.")
-        elif emoji == "🍼":
-            if not mod.adult:
-                role = utils.DiscordGet(guild.roles, id=self.bot.config['age_roles']['underage'])
-            else: 
-                await member.send(f"You are unable to get the Child role, message staff.")
-                await self.discord_log.send(f"<@{member.id}> failed to get CHILD role.")
+        roles = {
+            "🚬": self.bot.config['age_roles']['adult'] if not mod.child else None,
+            "🍼": self.bot.config['age_roles']['underage'] if not mod.adult else None,
+            "📔": self.bot.config['ping_roles']['changelogs'],
+            "✅": self.bot.config['ping_roles']['voters'],
+            "📆": self.bot.config['ping_roles']['events'],
+            "🤝": self.bot.config['ping_roles']['welcomer'],
+            "📊": self.bot.config['ping_roles']['server_status'],
+            "💀": self.bot.config['ping_roles']['scp_ping'],
+            "🚧": self.bot.config['access_roles']['scpsl'],
+            "🎀": self.bot.config['access_roles']['queer'],
+            "🎮": self.bot.config['access_roles']['shitposters']
+        }
 
-        if emoji == "📔":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['ping_roles']['changelogs'])
-        elif emoji == "✅":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['ping_roles']['voters'])
-        elif emoji == "📆":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['ping_roles']['events'])
-        elif emoji == "🤝":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['ping_roles']['welcomer'])
-        elif emoji == "📊":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['ping_roles']['server_status'])
-        elif emoji == "💀":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['ping_roles']['scp_ping'])
-
-        elif emoji == "🚧":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['access_roles']['scpsl'])
-        elif emoji == "🎀":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['access_roles']['queer'])
-        elif emoji == "🎮":
-            role = utils.DiscordGet(guild.roles, id=self.bot.config['access_roles']['shitposters'])
-
-        if role:
+        role_id = roles.get(emoji)
+        role = None
+        if role_id:
+            role = utils.DiscordGet(guild.roles, id=role_id)
             return role
 
+        # Log if user fails to get role
+        if not role:
+            await member.send(f"Failed to get the role, please contact staff.")
+            await self.discord_log.send(f"<@{member.id}> failed to get the role for emoji: {emoji}.")
 
 
 def setup(bot):
-    x = role_handler(bot)
-    bot.add_cog(x)
+    bot.add_cog(RoleHandler(bot))
