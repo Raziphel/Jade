@@ -17,7 +17,7 @@ class Daily(Cog):
         return self.bot.get_channel(self.bot.config['logs']['coins'])
 
     @cooldown(1, 30, BucketType.user)
-    @command()
+    @command(application_command_meta=ApplicationCommandMeta())
     async def daily(self, ctx):
         """Claim your daily rewards."""
         # Load user data
