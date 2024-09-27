@@ -47,13 +47,15 @@ class leaderboard(Cog):
 
         #* Add in level rankings
         sorted_rank = utils.Levels.sort_levels()
-        ranks = sorted_rank[:10]
         users = []
+
+        # Ensure we have enough valid users (up to 10)
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None:
-                if await self.is_user_in_guild(user.id):
-                    users.append(user)
+            if user is not None and await is_user_in_guild(user.id):
+                users.append((user, i))  # Append both user and rank data
+            if len(users) == 10:  # Stop when we have 10 users
+                break
 
         text = []
         text2 = []
@@ -82,13 +84,15 @@ class leaderboard(Cog):
 
 
         sorted_rank = utils.Currency.sort_coins()
-        ranks = sorted_rank[:10]
         users = []
-        for i in ranks:
+
+        # Ensure we have enough valid users (up to 10)
+        for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None:
-                if await self.is_user_in_guild(user.id):
-                    users.append(user)
+            if user is not None and await is_user_in_guild(user.id):
+                users.append((user, i))  # Append both user and rank data
+            if len(users) == 10:  # Stop when we have 10 users
+                break
 
         text = []
         text2 = []
@@ -116,13 +120,15 @@ class leaderboard(Cog):
 
 
         sorted_rank = utils.Tracking.sorted_messages()
-        ranks = sorted_rank[:10]
         users = []
-        for i in ranks:
+
+        # Ensure we have enough valid users (up to 10)
+        for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None:
-                if await self.is_user_in_guild(user.id):
-                    users.append(user)
+            if user is not None and await is_user_in_guild(user.id):
+                users.append((user, i))  # Append both user and rank data
+            if len(users) == 10:  # Stop when we have 10 users
+                break
 
         text = []
         text2 = []
@@ -151,13 +157,15 @@ class leaderboard(Cog):
 
 
         sorted_rank = utils.Tracking.sorted_vc_mins()
-        ranks = sorted_rank[:10]
         users = []
-        for i in ranks:
+
+        # Ensure we have enough valid users (up to 10)
+        for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None:
-                if await self.is_user_in_guild(user.id):
-                    users.append(user)
+            if user is not None and await is_user_in_guild(user.id):
+                users.append((user, i))  # Append both user and rank data
+            if len(users) == 10:  # Stop when we have 10 users
+                break
 
         text = []
         text2 = []
@@ -185,13 +193,15 @@ class leaderboard(Cog):
 
 
         sorted_rank = utils.Daily.sorted_daily()
-        ranks = sorted_rank[:10]
         users = []
-        for i in ranks:
+
+        # Ensure we have enough valid users (up to 10)
+        for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None:
-                if await self.is_user_in_guild(user.id):
-                    users.append(user)
+            if user is not None and await is_user_in_guild(user.id):
+                users.append((user, i))  # Append both user and rank data
+            if len(users) == 10:  # Stop when we have 10 users
+                break
 
         text = []
         text2 = []
