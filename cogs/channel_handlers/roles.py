@@ -43,7 +43,7 @@ class RoleHandler(Cog):
             msg = await ch.fetch_message(role_messages[str(i + 1)])
             await msg.edit(content=" ", embed=embed)
 
-        for msg_id in role_messages.values()[3:]:
+        for msg_id in list(role_messages.values())[3:]:  # Fixed by converting to list
             msg = await ch.fetch_message(msg_id)
             await msg.edit(content="~")
 
