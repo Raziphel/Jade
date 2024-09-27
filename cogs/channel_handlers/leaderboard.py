@@ -52,7 +52,7 @@ class leaderboard(Cog):
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
             if user is not None:
-                if await self.is_user_in_guild(self.bot, guild.id, user.id):
+                if await self.is_user_in_guild(user.id):
                     users.append(user)
 
         text = []
@@ -87,7 +87,7 @@ class leaderboard(Cog):
         for i in ranks:
             user = self.bot.get_user(i.user_id)
             if user is not None:
-                if await self.is_user_in_guild(self.bot, guild.id, user.id):
+                if await self.is_user_in_guild(user.id):
                     users.append(user)
 
         text = []
