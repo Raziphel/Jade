@@ -1,237 +1,121 @@
 from math import floor
-from asyncio import sleep
-from datetime import datetime as dt, timedelta
-from random import randint, choice
-
-from discord import Game, Embed
-from discord.ext import tasks
-from discord.ext.commands import Cog
+from discord import Embed
+from discord.ext import tasks, commands
 
 import utils
 
 
-class leaderboard(Cog):
+class Leaderboard(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.five_minute_loop.start()
 
-
-
-    async def is_user_in_guild(self, user_id):
-        guild = self.bot.get_guild(self.bot.config['guild_id'])
+    async def is_user_in_guild(self, guild, user_id):
+        """Check if a user is in the guild."""
         try:
             await guild.fetch_member(user_id)
             return True
         except:
             return False
 
+    async def update_leaderboard(self, channel_id, message_ids, sorted_ranks, embed_color, metric, label):
+        """Helper function to update leaderboard for a given metric."""
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+        channel = self.bot.get_channel(channel_id)
+        if not guild or not channel:
+            return
 
+        # Prepare the embed messages
+        msg = await channel.fetch_message(message_ids[0])
+        msg2 = await channel.fetch_message(message_ids[1])
+        embed = Embed(color=embed_color)
+        embed2 = Embed(color=embed_color)
+
+        users = []
+        for rank in sorted_ranks:
+            user = self.bot.get_user(rank.user_id)
+            if user and await self.is_user_in_guild(guild, user.id):
+                users.append((user, rank))
+            if len(users) == 10:  # Limit to top 10
+                break
+
+        text, text2 = [], []
+        for index, (user, rank) in enumerate(users):
+            line = f"#{index + 1} **{user.name}** ─── {metric(rank)}"
+            if index < 5:
+                text.append(line)
+            else:
+                text2.append(line)
+
+        # Update embeds
+        embed.description = '\n'.join(text)
+        embed2.description = '\n'.join(text2)
+        await msg.edit(content=f"# {label} Leaderboard", embed=embed)
+        await msg2.edit(content=" ", embed=embed2)
 
     @tasks.loop(minutes=5)
     async def five_minute_loop(self):
-        """The loop that handles updating things every minute."""
+        """Main loop to update all leaderboards every 5 minutes."""
 
-        #! Database check
+        # Database check
         if not self.bot.connected:
             return
 
-
-        #+ Levels Leaderboard
-        channel = self.bot.get_channel(self.bot.config['channels']['leaderboard'])
-        msg = await channel.fetch_message(self.bot.config['leaderboard_messages']['1'])
-        msg2 = await channel.fetch_message(self.bot.config['leaderboard_messages']['2'])
-
-        #* Set up the embeds
-        embed = Embed(color=0xFFBF00)
-        embed2 = Embed(color=0xFFBF00)
-
-        #* Add in level rankings
-        sorted_rank = utils.Levels.sort_levels()
-        users = []
-
-        # Ensure we have enough valid users (up to 10)
-        for i in sorted_rank:
-            user = self.bot.get_user(i.user_id)
-            if user is not None and await self.is_user_in_guild(user.id):
-                users.append((user, i))  # Append both user and rank data
-            if len(users) == 10:  # Stop when we have 10 users
-                break
-
-        text = []
-        text2 = []
-        for index, (user, rank) in enumerate(users):
-            if index < 5:
-                text.append(f"#{index+1} **{user.name}** ─── Lvl.{floor(rank.level):,}")
-            else:
-                text2.append(f"#{index+1} **{user.name}** ─── Lvl.{floor(rank.level):,}")
-
-        embed.description = '\n'.join(text)
-        embed2.description = '\n'.join(text2)
-
-        await msg.edit(content=f"# Level Leaderboard", embed=embed)
-        await msg2.edit(content=f" ", embed=embed2)
-
-
-
+        #+ Level Leaderboard
+        await self.update_leaderboard(
+            channel_id=self.bot.config['channels']['leaderboard'],
+            message_ids=[self.bot.config['leaderboard_messages']['1'], self.bot.config['leaderboard_messages']['2']],
+            sorted_ranks=utils.Levels.sort_levels(),
+            embed_color=0xFFBF00,
+            metric=lambda rank: f"Lvl.{floor(rank.level):,}",
+            label="Level"
+        )
 
         #+ Coin Leaderboard
-        msg = await channel.fetch_message(self.bot.config['leaderboard_messages']['3'])
-        msg2 = await channel.fetch_message(self.bot.config['leaderboard_messages']['4'])
-
-        #* Set up the embeds
-        embed = Embed(color=0x00ff00)
-        embed2 = Embed(color=0x00ff00)
-
-
-        sorted_rank = utils.Currency.sort_coins()
-        users = []
-
-        # Ensure we have enough valid users (up to 10)
-        for i in sorted_rank:
-            user = self.bot.get_user(i.user_id)
-            if user is not None and await self.is_user_in_guild(user.id):
-                users.append((user, i))  # Append both user and rank data
-            if len(users) == 10:  # Stop when we have 10 users
-                break
-
-        text = []
-        text2 = []
-        for index, (user, rank) in enumerate(users):
-            if index < 5:
-                text.append(f"#{index+1} **{user.name}** ─── {self.bot.config['emojis']['coin']}{floor(rank.coins):,}x")
-            else:
-                text2.append(f"#{index+1} **{user.name}** ─── {self.bot.config['emojis']['coin']}{floor(rank.coins):,}x")
-
-        embed.description = '\n'.join(text)
-        embed2.description = '\n'.join(text2)
-
-        await msg.edit(content="# Coin Leaderboard", embed=embed)
-        await msg2.edit(content=" ", embed=embed2)
-
-
+        await self.update_leaderboard(
+            channel_id=self.bot.config['channels']['leaderboard'],
+            message_ids=[self.bot.config['leaderboard_messages']['3'], self.bot.config['leaderboard_messages']['4']],
+            sorted_ranks=utils.Currency.sort_coins(),
+            embed_color=0x00FF00,
+            metric=lambda rank: f"{self.bot.config['emojis']['coin']}{floor(rank.coins):,}x",
+            label="Coin"
+        )
 
         #+ Message Leaderboard
-        msg = await channel.fetch_message(self.bot.config['leaderboard_messages']['5'])
-        msg2 = await channel.fetch_message(self.bot.config['leaderboard_messages']['6'])
+        await self.update_leaderboard(
+            channel_id=self.bot.config['channels']['leaderboard'],
+            message_ids=[self.bot.config['leaderboard_messages']['5'], self.bot.config['leaderboard_messages']['6']],
+            sorted_ranks=utils.Tracking.sorted_messages(),
+            embed_color=0xFF0000,
+            metric=lambda rank: f"{rank.messages:,} msgs",
+            label="Message"
+        )
 
-        #* Set up the embeds
-        embed = Embed(color=0xFF0000)
-        embed2 = Embed(color=0xFF0000)
+        #+ VC Hour Leaderboard
+        await self.update_leaderboard(
+            channel_id=self.bot.config['channels']['leaderboard'],
+            message_ids=[self.bot.config['leaderboard_messages']['7'], self.bot.config['leaderboard_messages']['8']],
+            sorted_ranks=utils.Tracking.sorted_vc_mins(),
+            embed_color=0x0000FF,
+            metric=lambda rank: f"{floor(rank.vc_mins / 60):,} hours",
+            label="VC Hour"
+        )
 
-
-        sorted_rank = utils.Tracking.sorted_messages()
-        users = []
-
-        # Ensure we have enough valid users (up to 10)
-        for i in sorted_rank:
-            user = self.bot.get_user(i.user_id)
-            if user is not None and await self.is_user_in_guild(user.id):
-                users.append((user, i))  # Append both user and rank data
-            if len(users) == 10:  # Stop when we have 10 users
-                break
-
-        text = []
-        text2 = []
-        for index, (user, rank) in enumerate(users):
-            if index < 5:
-                text.append(f"#{index+1} **{user.name}** ─── {rank.messages:,} msgs")
-            else:
-                text2.append(f"#{index+1} **{user.name}** ─── {rank.messages:,} msgs")
-
-        embed.description = '\n'.join(text)
-        embed2.description = '\n'.join(text2)
-
-        await msg.edit(content="# Message Leaderboard", embed=embed)
-        await msg2.edit(content=" ", embed=embed2)
-
-
-
-
-        #+ VC MINS Leaderboard
-        msg = await channel.fetch_message(self.bot.config['leaderboard_messages']['7'])
-        msg2 = await channel.fetch_message(self.bot.config['leaderboard_messages']['8'])
-
-        #* Set up the embeds
-        embed = Embed(color=0x0000FF)
-        embed2 = Embed(color=0x0000FF)
-
-
-        sorted_rank = utils.Tracking.sorted_vc_mins()
-        users = []
-
-        # Ensure we have enough valid users (up to 10)
-        for i in sorted_rank:
-            user = self.bot.get_user(i.user_id)
-            if user is not None and await self.is_user_in_guild(user.id):
-                users.append((user, i))  # Append both user and rank data
-            if len(users) == 10:  # Stop when we have 10 users
-                break
-
-        text = []
-        text2 = []
-        for index, (user, rank) in enumerate(users):
-            if index < 5:
-                text.append(f"#{index+1} **{user.name}** ─── {floor(rank.vc_mins/60):,} hours")
-            else:
-                text2.append(f"#{index+1} **{user.name}** ─── {floor(rank.vc_mins/60):,} hours")
-
-        embed.description = '\n'.join(text)
-        embed2.description = '\n'.join(text2)
-
-        await msg.edit(content="# VC Hour Leaderboard", embed=embed)
-        await msg2.edit(content=" ", embed=embed2)
-
-
-
-        #+ DAILY Leaderboard
-        msg = await channel.fetch_message(self.bot.config['leaderboard_messages']['9'])
-        msg2 = await channel.fetch_message(self.bot.config['leaderboard_messages']['10'])
-
-        #* Set up the embeds
-        embed = Embed(color=0xFF00FF)
-        embed2 = Embed(color=0xFF00FF)
-
-
-        sorted_rank = utils.Daily.sorted_daily()
-        users = []
-
-        # Ensure we have enough valid users (up to 10)
-        for i in sorted_rank:
-            user = self.bot.get_user(i.user_id)
-            if user is not None and await self.is_user_in_guild(user.id):
-                users.append((user, i))  # Append both user and rank data
-            if len(users) == 10:  # Stop when we have 10 users
-                break
-
-        text = []
-        text2 = []
-        for index, (user, rank) in enumerate(users):
-            if index < 5:
-                text.append(f"#{index+1} **{user.name}** ─── {rank.daily:,}th daily")
-            else:
-                text2.append(f"#{index+1} **{user.name}** ─── {rank.daily:,}th daily")
-
-        embed.description = '\n'.join(text)
-        embed2.description = '\n'.join(text2)
-
-        await msg.edit(content="# Daily Leaderboard", embed=embed)
-        await msg2.edit(content=" ", embed=embed2)
-
-
-
-
-
+        #+ Daily Leaderboard
+        await self.update_leaderboard(
+            channel_id=self.bot.config['channels']['leaderboard'],
+            message_ids=[self.bot.config['leaderboard_messages']['9'], self.bot.config['leaderboard_messages']['10']],
+            sorted_ranks=utils.Daily.sorted_daily(),
+            embed_color=0xFF00FF,
+            metric=lambda rank: f"{rank.daily:,}th daily",
+            label="Daily"
+        )
 
     @five_minute_loop.before_loop
     async def before_five_minute_loop(self):
-        """Waits until the cache loads up before running the leaderboard loop"""
-
+        """Wait until the bot is ready before running the loop."""
         await self.bot.wait_until_ready()
 
 
-
-
-
 def setup(bot):
-    x = leaderboard(bot)
-    bot.add_cog(x)
+    bot.add_cog(Leaderboard(bot))
