@@ -1,5 +1,6 @@
-asyncpg
+asyncpg~=0.29.0
 discord
 more_itertools
-toml
+toml~=0.10.2
 pillow
+
