@@ -66,7 +66,7 @@ class Daily(Cog):
 
         # Send success message to the user
         await ctx.send(embed=utils.Embed(
-            desc=f"**This is your {day.daily}{ordinal} daily claimed in a row!**\n"
+            desc=f"# **This is your {day.daily}{ordinal} daily claimed in a row!**\n"
                  f"```\nYou have been rewarded:\n```"
                  f"***{self.bot.config['emojis']['coin']}{floor(coins):,} coins***",
             user=ctx.author))
