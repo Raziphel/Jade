@@ -1,5 +1,5 @@
 from discord import Embed
-from discord.ext.commands import command, Cog, cooldown, BucketType
+from discord.ext.commands import command, Cog, cooldown, BucketType, ApplicationCommandMeta
 from random import choice
 from datetime import datetime as dt, timedelta
 from calendar import day_name
