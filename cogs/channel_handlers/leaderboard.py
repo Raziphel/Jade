@@ -52,7 +52,7 @@ class leaderboard(Cog):
         # Ensure we have enough valid users (up to 10)
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None and await is_user_in_guild(user.id):
+            if user is not None and await self.is_user_in_guild(user.id):
                 users.append((user, i))  # Append both user and rank data
             if len(users) == 10:  # Stop when we have 10 users
                 break
@@ -89,7 +89,7 @@ class leaderboard(Cog):
         # Ensure we have enough valid users (up to 10)
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None and await is_user_in_guild(user.id):
+            if user is not None and await self.is_user_in_guild(user.id):
                 users.append((user, i))  # Append both user and rank data
             if len(users) == 10:  # Stop when we have 10 users
                 break
@@ -125,7 +125,7 @@ class leaderboard(Cog):
         # Ensure we have enough valid users (up to 10)
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None and await is_user_in_guild(user.id):
+            if user is not None and await self.is_user_in_guild(user.id):
                 users.append((user, i))  # Append both user and rank data
             if len(users) == 10:  # Stop when we have 10 users
                 break
@@ -162,7 +162,7 @@ class leaderboard(Cog):
         # Ensure we have enough valid users (up to 10)
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None and await is_user_in_guild(user.id):
+            if user is not None and await self.is_user_in_guild(user.id):
                 users.append((user, i))  # Append both user and rank data
             if len(users) == 10:  # Stop when we have 10 users
                 break
@@ -198,7 +198,7 @@ class leaderboard(Cog):
         # Ensure we have enough valid users (up to 10)
         for i in sorted_rank:
             user = self.bot.get_user(i.user_id)
-            if user is not None and await is_user_in_guild(user.id):
+            if user is not None and await self.is_user_in_guild(user.id):
                 users.append((user, i))  # Append both user and rank data
             if len(users) == 10:  # Stop when we have 10 users
                 break
