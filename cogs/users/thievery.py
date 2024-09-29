@@ -1,61 +1,47 @@
 from discord.ext.commands import command, Cog, BucketType, cooldown, group, RoleConverter, ApplicationCommandMeta
-from discord import Member, Message, User, Game, Embed, TextChannel, Role, RawReactionActionEvent, ApplicationCommandOption, ApplicationCommandOptionType
-
-#* Additions
+from discord import Member, Embed, ApplicationCommandOption, ApplicationCommandOptionType
 from datetime import datetime as dt, timedelta
-from asyncio import iscoroutine, gather, sleep
-from math import floor 
-from random import choice, randint
+from random import randint, choice
 
 import utils
 
 
-
-class thievery(Cog):
+class Thievery(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
-
-    @property  #! The currency logs
+    @property
     def coin_logs(self):
         return self.bot.get_channel(self.bot.config['logs']['coins'])
 
-
-
-
     @command(application_command_meta=ApplicationCommandMeta())
     async def larceny(self, ctx):
-        """Enables or disabled the ability to steal."""
+        """Enable or disable the ability to steal."""
         skills = utils.Skills.get(ctx.author.id)
+        cooldown_time = timedelta(hours=2)
 
-        if (skills.larceny_stamp + timedelta(hours=2)) >= dt.utcnow():
-            tf = skills.larceny_stamp + timedelta(hours=2)
-            t = dt(1, 1, 1) + (tf - dt.utcnow())
-            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"You can change your larceny setting in:\n**{t.hour} hours and {t.minute} minutes!**", user=ctx.author))
+        if (skills.larceny_stamp + cooldown_time) >= dt.utcnow():
+            remaining_time = skills.larceny_stamp + cooldown_time - dt.utcnow()
+            hours, minutes = divmod(remaining_time.seconds // 60, 60)
+            return await ctx.interaction.response.send_message(
+                embed=utils.Embed(
+                    desc=f"You can change your larceny setting in **{hours} hours and {minutes} minutes!**",
+                    user=ctx.author
+                )
+            )
 
-        
-        if not skills.larceny:
-            skills.larceny = True
-            await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"# Larceny Enabled!\nYou can now steal in 2 hours and be stolen from!", user=ctx.author))
-
-        elif skills.larceny:
-            skills.larceny = False
-            await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"# Larceny Disabled!\nYou can no longer steal or be stolen from!", user=ctx.author))
-
+        skills.larceny = not skills.larceny
+        status = "enabled" if skills.larceny else "disabled"
         skills.larceny_stamp = dt.utcnow()
+
+        await ctx.interaction.response.send_message(
+            embed=utils.Embed(desc=f"# Larceny {status.capitalize()}!\nYou can now {'' if skills.larceny else 'no longer '}steal or be stolen from.", user=ctx.author)
+        )
 
         async with self.bot.database() as db:
             await skills.save(db)
 
-
-
-
-
-
-
-
-    @command(        
+    @command(
         aliases=['yoink'],
         application_command_meta=ApplicationCommandMeta(
             options=[
@@ -68,76 +54,71 @@ class thievery(Cog):
             ],
         ),
     )
-    async def steal(self, ctx, user:Member=None):
-        """Use your gloves to steal from other users!!"""
+    async def steal(self, ctx, user: Member = None):
+        """Attempt to steal coins from another user."""
+        if not user:
+            return await ctx.interaction.response.send_message(embed=utils.Embed(desc="Please mention a user to steal from.", user=ctx.author))
 
-        #! Define Variables
-        amount = choice([5, 10, 15, 20, 25])
-        gem_type = choice(['diamond', 'ruby', 'sapphire'])
-        g = utils.Gems.get(ctx.author.id)
-        og = utils.Gems.get(user.id)
+        if user.id in [self.bot.user.id, ctx.author.id]:
+            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"You can't steal from {'' if user.id == ctx.author.id else 'yourself or '}the bot!", user=ctx.author))
+
+        # Variables
         skills = utils.Skills.get(ctx.author.id)
-        oskills = utils.Skills.get(user.id)
+        target_skills = utils.Skills.get(user.id)
 
-
-        #? Check everything!
-        if user.id == self.bot.user.id:
-            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"You can't steal from the master of thieves!", user=ctx.author))
-
-        if user.id == ctx.author.id:
-            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"You can't steal from yourself!", user=ctx.author))
-
+        # Checks
         if not skills.thievery:
-            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"You are not capable of stealing until you buy it from the shop!", user=ctx.author))
+            return await ctx.interaction.response.send_message(embed=utils.Embed(desc="You need to buy the thievery skill from the shop first!", user=ctx.author))
 
         if not skills.larceny:
-            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"You have not enabled `/larceny` to be able to steal!", user=ctx.author))
+            return await ctx.interaction.response.send_message(embed=utils.Embed(desc="You need to enable `/larceny` to steal!", user=ctx.author))
 
-        if not oskills.larceny:
-            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"{user.mention} has not enabled larceny!", user=ctx.author))
+        if not target_skills.larceny:
+            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"{user.mention} hasn't enabled larceny!", user=ctx.author))
 
-        if (skills.larceny_stamp + timedelta(hours=2)) >= dt.utcnow():
-            tf = skills.larceny_stamp + timedelta(hours=2)
-            t = dt(1, 1, 1) + (tf - dt.utcnow())
-            return await ctx.interaction.response.send_message(embed=utils.Embed(desc=f"You are not capable of stealing for another:\n**{t.hour} hours and {t.minute} minutes!**", user=ctx.author))
+        cooldown_time = timedelta(hours=2)
+        if (skills.larceny_stamp + cooldown_time) >= dt.utcnow():
+            remaining_time = skills.larceny_stamp + cooldown_time - dt.utcnow()
+            hours, minutes = divmod(remaining_time.seconds // 60, 60)
+            return await ctx.interaction.response.send_message(
+                embed=utils.Embed(
+                    desc=f"You can't steal for another **{hours} hours and {minutes} minutes!**",
+                    user=ctx.author
+                )
+            )
 
-        gems_stolen = None
+        # Process stealing
+        target_coins = utils.Currency.get(user.id)
+        thief_coins = utils.Currency.get(ctx.author.id)
+        amount = randint(target_coins.coins*0.005, target_coins.coins*0.02) # .05 - 2% of persons coins!
+
+        if target_coins.amount < amount:
+            amount = target_coins.amount  # You can only steal what's available
+
+        target_coins.amount -= amount
+        thief_coins.amount += amount
+
         skills.larceny_stamp = dt.utcnow()
 
-        diamonds = 0
-        rubys = 0
-        sapphires = 0
-
-        if gem_type == 'diamond':
-            og.diamond -= amount
-            g.diamond += amount
-            diamonds = amount
-
-        elif gem_type == 'ruby':
-            og.ruby -= amount
-            g.ruby += amount
-            rubys = amount
-
-        elif gem_type == 'sapphire':
-            og.sapphire -= amount
-            g.sapphire += amount
-            sapphires = amount
-
-        gem_string = await utils.GemFunctions.gems_to_text(diamonds=diamonds, rubys=rubys, sapphires=sapphires)
-
+        # Notifications
         await ctx.interaction.response.send_message(
-                content=f"{user.mention}", embed=utils.Embed(title=f"🧤 Gems Stolen 🧤", desc=f"**{ctx.author.name}** Stole gems from **{user.name}**!\n# Stealing {gem_string}", user=ctx.author))
-        await self.coin_logs.send(f"**{ctx.author.name}** Stole gems from **{user.name}** and they gained **{gem_string}**")
+            content=f"{user.mention}",
+            embed=utils.Embed(
+                title="🧤 Coins Stolen 🧤",
+                desc=f"**{ctx.author.name}** stole **{amount} coins** from **{user.name}**!",
+                user=ctx.author
+            )
+        )
+        await self.coin_logs.send(
+            f"**{ctx.author.name}** stole **{amount} coins** from **{user.name}**"
+        )
 
-
+        # Save data
         async with self.bot.database() as db:
             await skills.save(db)
-            await g.save(db)
-            await og.save(db)
-
-
+            await thief_coins.save(db)
+            await target_coins.save(db)
 
 
 def setup(bot):
-    x = thievery(bot)
-    bot.add_cog(x)
+    bot.add_cog(Thievery(bot))
