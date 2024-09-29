@@ -78,7 +78,7 @@ class log_handler(Cog):
         await self.bot_log.send(embed=utils.Embed(color=0xc74822, title=f"The bot has left {guild.name}", desc=f"Bot now manages: {user_count:,} users"))
 
     @Cog.listener()
-    async def on_command_error(self, error):
+    async def on_command_error(self,ctx, error):
         await self.bot_log.send(f"Command failed - `{error!s}`;")
         raise error
 
