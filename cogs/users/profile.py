@@ -5,7 +5,7 @@ from io import BytesIO
 from math import floor
 
 import discord
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from discord import Member, ApplicationCommandOption, ApplicationCommandOptionType, File, NotFound
 from discord.ext.commands import command, Cog, BucketType, cooldown, ApplicationCommandMeta
 
@@ -22,7 +22,10 @@ level_details_x = 100
 parent_progress_bar_h_w = (113, 25)
 parent_progress_bar_x_y = (17, 161)
 inner_progress_bar_padding = 2.5  # px
-progress_bar_color = "aqua"
+
+# Cool gradient colors for XP bar
+progress_bar_start_color = (0, 255, 255)  # Start color (aqua)
+progress_bar_end_color = (0, 128, 255)  # End color (blue)
 
 # Font settings #
 
@@ -44,38 +47,20 @@ progress_bar_fnt = ImageFont.truetype(ttf_font_path, progress_bar_ttf_size)
 
 
 def determine_primary_color(image):
-    # Load the image and convert it to the RGB color space
     image = image.convert('RGB')
-
-    # Resize the image to a smaller size
     image = image.resize((50, 50))
-
-    # Get the pixel data of the image
     pixels = image.getdata()
-
-    # Count the number of occurrences of each color using a Counter object
     color_count = Counter(pixels)
-
-    # Find the color with the highest count
     primary_color = color_count.most_common(1)[0][0]
-
     return primary_color
 
 
 def calculate_contrasting_color(background_color):
-    # Convert the background color to the HSV color space
-    h, s, v = colorsys.rgb_to_hsv(*background_color)
-
-    # Calculate the value of the background color
     value = max(background_color) / 255
-
-    # Choose a text color based on the value of the background color
     if value < 0.5:
-        text_color = (255, 255, 255)  # white
+        return (255, 255, 255)  # white
     else:
-        text_color = (0, 0, 0)  # black
-
-    return text_color
+        return (0, 0, 0)  # black
 
 
 def calculate_xy_size(
@@ -84,7 +69,6 @@ def calculate_xy_size(
         height: Number,
         width: Number
 ) -> typing.Tuple[Number, Number, Number, Number]:
-    """A helper function for simply calculating an image's size."""
     return (
         x,
         y,
@@ -102,6 +86,17 @@ def format_number(num):
         return f"{num / 1000000:.1f}m"
     else:
         return f"{num / 1000000000:.1f}b"
+
+
+def gradient_horizontal(draw: ImageDraw.Draw, xy: tuple, start_color: tuple, end_color: tuple):
+    left, top, right, bottom = xy
+    width = right - left
+
+    for i in range(width):
+        r = start_color[0] + (end_color[0] - start_color[0]) * i // width
+        g = start_color[1] + (end_color[1] - start_color[1]) * i // width
+        b = start_color[2] + (end_color[2] - start_color[2]) * i // width
+        draw.line([(left + i, top), (left + i, bottom)], fill=(r, g, b))
 
 
 class Profile(Cog):
@@ -126,20 +121,14 @@ class Profile(Cog):
         if not user:
             user = ctx.author
 
-        # await self.base_profile(ctx=ctx, user=user, msg=None)
         file = await self.generate_screenshot(user)
-
-        # await ctx.send(file=file)
         await ctx.interaction.response.send_message(file=file)
 
     async def get_user_avatar(self, member: Member) -> BytesIO:
         avatar = member.display_avatar
-
         try:
             data = await avatar.read()
-
         except NotFound:
-            # Avatar was changed and our cache wasn't updated for whatever reason
             user = await self.bot.fetch_user(member.id)
             avatar = user.display_avatar
             data = await avatar.read()
@@ -151,9 +140,8 @@ class Profile(Cog):
         member_level = utils.Levels.get(member.id)
         try:
             level_rank = sorted_levels.index(member_level)
-
-            return level_rank + 1  # Add 1 because indexes start from 0
-        except ValueError:  # User is not in the list yet maybe?
+            return level_rank + 1
+        except ValueError:
             return -1
 
     def get_wealth_rank(self, member: discord.Member) -> int:
@@ -161,13 +149,11 @@ class Profile(Cog):
         member_wealth = utils.Currency.get(member.id)
         try:
             wealth_rank = sorted_wealth.index(member_wealth)
-
             return wealth_rank + 1
         except ValueError:
             return -1
 
     async def generate_screenshot(self, member: Member):
-        moderation = utils.Moderation.get(member.id)
         levels = utils.Levels.get(member.id)
         currency = utils.Currency.get(member.id)
         tracking = utils.Tracking.get(member.id)
@@ -184,7 +170,6 @@ class Profile(Cog):
         title = str(member.top_role)
         current_level = levels.level
         current_experience = floor(levels.exp)
-        badges = []  # TODO: replace with real data
         networth = format_number(currency.coins)
         messages = format_number(tracking.messages)
 
@@ -197,39 +182,23 @@ class Profile(Cog):
         experience_percentage = current_experience / required_exp
         relative_inner_progress_bar_width = experience_percentage * parent_progress_bar_h_w[0]
 
-        # Create a new page and set the HTML content of the page
         progress_bar = Image.new(
             mode='RGBA',
             size=parent_progress_bar_h_w,
-            color="white"
+            color=(255, 255, 255, 0)
         )
 
-        # Prepare to draw text as well as the inner and outer progress bars
         progress_bar_draw = ImageDraw.Draw(progress_bar)
 
-        # Draw progress bar outline
-        progress_bar_draw.rectangle(
-            (
-                0, 0,
-                parent_progress_bar_h_w[0] - 0.1,
-                parent_progress_bar_h_w[1] - 0.1
-            ),
-            fill="white",
-            outline="black"
-        )
-
-        # Draw inner progress bar
+        # Cool gradient for inner progress bar
         inner_progress_bar_size = calculate_xy_size(
             inner_progress_bar_padding,
             inner_progress_bar_padding,
-            relative_inner_progress_bar_width,  # User's progress towards their next level
+            relative_inner_progress_bar_width,
             parent_progress_bar_h_w[1] - inner_progress_bar_padding * 2
         )
 
-        progress_bar_draw.rectangle(
-            inner_progress_bar_size,
-            fill=progress_bar_color
-        )
+        gradient_horizontal(progress_bar_draw, inner_progress_bar_size, progress_bar_start_color, progress_bar_end_color)
 
         # Center alignment for progress bar text
         progress_bar_text_x_y = (
@@ -237,7 +206,6 @@ class Profile(Cog):
             progress_bar.size[1] / 2
         )
 
-        # Add the text to the progress bar
         progress_bar_draw.text(
             progress_bar_text_x_y,
             f'XP: {current_experience:,} / {required_exp:,}',
@@ -249,22 +217,16 @@ class Profile(Cog):
 
         progress_bar.putalpha(225)
 
-        # Create our base image
         canvas = Image.new('RGBA', base_image_size, color=128)
-
-        # User's background image
         background = Image.open(f'{resources_directory}/default-background.jpg')
         canvas.paste(background)
 
-        # Determine the primary color of the background
         primary_color = determine_primary_color(background)
-
-        # Calculate a contrasting color for the primary color
         text_color = calculate_contrasting_color(primary_color)
 
         draw = ImageDraw.Draw(canvas)
 
-        # Draw the main border
+        # Draw the main border with shadow
         draw.rectangle(
             xy=calculate_xy_size(
                 4, 4,
@@ -275,20 +237,8 @@ class Profile(Cog):
             width=3
         )
 
-        # Place the user's profile picture on the canvas
+        # User's profile picture
         profile_picture = Image.open(avatar).convert('RGBA')
-
-        # Determine the primary color of the background
-        profile_picture_primary_color = determine_primary_color(profile_picture)
-
-        # Draw the border we'll be putting the avatar in using the avatar's primary color
-        draw.rectangle(
-            xy=calculate_xy_size(18, 18, 110, 110),
-            outline=profile_picture_primary_color,
-            width=1
-        )
-
-        # noinspection PyUnresolvedReferences
         profile_picture = profile_picture.resize((103, 103), Image.Resampling.LANCZOS)
         canvas.paste(profile_picture, (22, 22))
 
@@ -299,8 +249,6 @@ class Profile(Cog):
             font=fnt
         )
 
-        # Temporary solution for long usernames? In the future, it'd be nice to adjust the text's size dynamically so
-        # that it fits. Although we will have to set a limit either way, so.
         if len(username) > 16:
             username = username[:16] + '..'
 
@@ -320,7 +268,7 @@ class Profile(Cog):
 
         draw.text(
             xy=(17, 190),
-            text=f'Level rank:  {level_rank}#',  # Extra spacing to line up the ranks
+            text=f'Level rank:  {level_rank}#',
             fill=text_color,
             font=fnt
         )
@@ -332,143 +280,28 @@ class Profile(Cog):
             font=fnt
         )
 
-        # Toss in all the basic information
-        speech_balloon = Image.open(f'{resources_directory}/speech-balloon.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(speech_balloon, dest=(140, 90))
-
         draw.text(
-            xy=(168, 90),
-            text=f': {messages} Messages',
+            xy=(17, 240),
+            text=f'Messages:    {messages}',
             fill=text_color,
             font=fnt
         )
 
-        microphone = Image.open(f'{resources_directory}/microphone-3.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(microphone, dest=(140, 123))
-
         draw.text(
-            xy=(168, 123),
-            text=f': {voice_activity} VC hours',
+            xy=(17, 265),
+            text=f'Voice:       {voice_activity}hrs',
             fill=text_color,
             font=fnt
         )
 
-        coin = Image.open(f'{resources_directory}/gold-coin.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(coin, dest=(140, 156))
-
-        draw.text(
-            xy=(168, 156),
-            text=f': {networth} Coins',
-            fill=text_color,
-            font=fnt
-        )
-
-        # Add progress bar to the base image
-        canvas.alpha_composite(progress_bar, dest=parent_progress_bar_x_y)
-
-        # Badges
-        """
-        This is for testing purposes only.
-        blue_diamond = Image.open('large-blue-diamond.png').convert('RGBA').resize((33, 33))
-        canvas.alpha_composite(blue_diamond, dest=(30, 200))
-
-        cross_mark = Image.open('cross-mark.png').convert('RGBA').resize((33, 33))
-        canvas.alpha_composite(cross_mark, dest=(80, 200))
-        """
+        # Paste the XP bar into the final canvas
+        canvas.paste(progress_bar, parent_progress_bar_x_y)
 
         buffer = BytesIO()
         canvas.save(buffer, "png")
         buffer.seek(0)
-        canvas.close()
-
-        file = File(buffer, filename='profile.png')
-
-        return file
+        return File(buffer, filename='profile.png')
 
 
-    # async def base_profile(self, ctx, user, msg):
-    #     if msg == None:
-    #         msg = await ctx.send(embed=utils.ProfileEmbed(type="Default", user=user))
-    #     else:
-    #         await msg.edit(embed=utils.ProfileEmbed(type="Default", user=user))
-
-    #     await msg.clear_reactions()
-    #     # ! adds the reactions
-    #     if ctx.channel.id in self.bot.config['fur-channels'].values():
-    #         await msg.add_reaction("✨")
-    #     if ctx.channel.id in self.bot.config['nsfw-fur-channels'].values():
-    #         await msg.add_reaction("🔞")
-    #     # for role in user.roles:
-    #     #     if role.id == self.bot.config['roles']['council']:
-    #     #         await msg.add_reaction("🍃")
-
-    #     # Watches for the reactions
-    #     check = lambda x, y: y.id == ctx.author.id and x.message.id == msg.id and x.emoji in ["✨", "🍃"]
-    #     r, _ = await self.bot.wait_for('reaction_add', check=check)
-    #     if ctx.channel.id in self.bot.config['fur-channels'].values():
-    #         if r.emoji == "✨":
-    #             await msg.edit(embed=utils.ProfileEmbed(type="Sfw_Sona", user=user))
-    #             pass
-    #     if r.emoji == "🍃":
-    #         await msg.edit(embed=utils.ProfileEmbed(type="Staff-Track", user=user))
-    #         pass
-    #     await msg.clear_reactions()
-    #     await msg.add_reaction("🔷")
-    #     check = lambda x, y: y.id == ctx.author.id and x.message.id == msg.id and x.emoji in ["🔷"]
-    #     r, _ = await self.bot.wait_for('reaction_add', check=check)
-    #     if r.emoji == "🔷":
-    #         await self.base_profile(ctx=ctx, user=user, msg=msg)
-    #         return
-
-
-
-
-    @command(application_command_meta=ApplicationCommandMeta(), aliases=['i', 'inv', 'items', 'Inv'])
-    async def inventory(self, ctx, user:Member=None):
-        """Quick Check inventory"""
-        if not user:
-            user = ctx.author
-        await ctx.interaction.response.send_message(embed=utils.Embed(type="Items", user=user, quick=True))
-
-
-
-    @cooldown(1, 5, BucketType.user)
-    @command(aliases=['color', 'Color', 'Setcolor', 'SetColor'],
-            application_command_meta=ApplicationCommandMeta(
-            options=[
-                ApplicationCommandOption(
-                    name="colour",
-                    description="the color you are wanting...",
-                    type=ApplicationCommandOptionType.string,
-                    required=False
-                    )
-                ],
-            ),
-        )
-    async def setcolor(self, ctx, colour=None):
-        """Sets your user color"""
-
-        if colour is None:
-            file = discord.File('config/lists/colors.py', filename='config/lists/colors.py')
-            await ctx.interaction.response.send_message(f"**Here's a list of colors you can use!**", file=file)
-            return
-
-        colour_value = utils.Colors.get(colour.lower())
-        tr = utils.Tracking.get(ctx.author.id)
-
-        if colour_value is None:
-            try:
-                colour_value = int(colour.strip('#'), 16)
-            except ValueError:
-                await ctx.interaction.response.send_message(embed=utils.Embed(title="Incorrect colour usage!"))
-                return
-
-        tr.color = colour_value
-        async with self.bot.database() as db:
-            await tr.save(db)
-
-        await ctx.interaction.response.send_message(embed=utils.Embed(title="Your color setting has been set!", user=ctx.author))
-
-def setup(bot):
-    x = Profile(bot)
-    bot.add_cog(x)
+async def setup(bot):
+    await bot.add_cog(Profile(bot))
