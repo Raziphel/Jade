@@ -6,36 +6,33 @@ from math import floor
 
 import discord
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from discord import Member, ApplicationCommandOption, ApplicationCommandOptionType, File, NotFound
-from discord.ext.commands import command, Cog, BucketType, cooldown, ApplicationCommandMeta
+from discord import Member, File, NotFound
+from discord.ext.commands import command, Cog
 
 import utils
 
 Number = int | float
 
-# base_image_size = (475, 356)
+# Basic settings for the profile card
 base_image_size = (375, 281)
-
 resources_directory = "resources"
 
+# Coordinates and dimensions for the progress bar
 level_details_x = 100
 parent_progress_bar_h_w = (113, 25)
 parent_progress_bar_x_y = (17, 161)
 inner_progress_bar_padding = 2.5  # px
 
-# Cool gradient colors for XP bar
+# Gradient colors for XP bar
 progress_bar_start_color = (0, 255, 255)  # Start color (aqua)
 progress_bar_end_color = (0, 128, 255)  # End color (blue)
 
-# Font settings #
-
+# Font settings
 ttf_font_path = f'{resources_directory}/SourceSansPro-Regular.ttf'
 ttf_bold_font_path = f'{resources_directory}/SourceSansPro-SemiBold.ttf'
 ttf_italic_font_path = f'{resources_directory}/SourceSansPro-Italic.ttf'
 
-# The default size for all text that's not the username, title (i.e. their highest Discord role), or the progress bar.
 default_ttf_size = 19
-
 username_ttf_size = 24
 title_ttf_size = 20
 progress_bar_ttf_size = 13
@@ -45,7 +42,6 @@ username_fnt = ImageFont.truetype(ttf_bold_font_path, username_ttf_size)
 title_fnt = ImageFont.truetype(ttf_italic_font_path, title_ttf_size)
 progress_bar_fnt = ImageFont.truetype(ttf_font_path, progress_bar_ttf_size)
 
-
 def determine_primary_color(image):
     image = image.convert('RGB')
     image = image.resize((50, 50))
@@ -54,14 +50,12 @@ def determine_primary_color(image):
     primary_color = color_count.most_common(1)[0][0]
     return primary_color
 
-
 def calculate_contrasting_color(background_color):
     value = max(background_color) / 255
     if value < 0.5:
         return (255, 255, 255)  # white
     else:
         return (0, 0, 0)  # black
-
 
 def calculate_xy_size(
         x: Number,
@@ -76,7 +70,6 @@ def calculate_xy_size(
         y + width
     )
 
-
 def format_number(num):
     if num < 1000:
         return str(floor(num))
@@ -86,7 +79,6 @@ def format_number(num):
         return f"{num / 1000000:.1f}m"
     else:
         return f"{num / 1000000000:.1f}b"
-
 
 def gradient_horizontal(draw: ImageDraw.Draw, xy: tuple, start_color: tuple, end_color: tuple):
     left, top, right, bottom = xy
@@ -98,23 +90,12 @@ def gradient_horizontal(draw: ImageDraw.Draw, xy: tuple, start_color: tuple, end
         b = start_color[2] + (end_color[2] - start_color[2]) * i // width
         draw.line([(left + i, top), (left + i, bottom)], fill=(r, g, b))
 
-
 class Profile(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @command(
-        aliases=['p', 'P', 'Profile'],
-        application_command_meta=ApplicationCommandMeta(
-            options=[
-                ApplicationCommandOption(
-                    name="user",
-                    description="The user you want to get the profile of.",
-                    type=ApplicationCommandOptionType.user,
-                    required=False,
-                ),
-            ],
-        ),
+        aliases=['p', 'Profile']
     )
     async def profile(self, ctx, user: Member = None):
         '''Shows a user's profile'''
@@ -122,7 +103,7 @@ class Profile(Cog):
             user = ctx.author
 
         file = await self.generate_screenshot(user)
-        await ctx.interaction.response.send_message(file=file)
+        await ctx.send(file=file)
 
     async def get_user_avatar(self, member: Member) -> BytesIO:
         avatar = member.display_avatar
@@ -295,7 +276,7 @@ class Profile(Cog):
         )
 
         # Paste the XP bar into the final canvas
-        canvas.paste(progress_bar, parent_progress_bar_x_y)
+        canvas.paste(progress_bar, parent_progress_bar_x_y, progress_bar)
 
         buffer = BytesIO()
         canvas.save(buffer, "png")
@@ -303,6 +284,5 @@ class Profile(Cog):
         return File(buffer, filename='profile.png')
 
 
-def setup(bot):
-    x = Profile(bot)
-    bot.add_cog(x)
+async def setup(bot):
+    await bot.add_cog(Profile(bot))
