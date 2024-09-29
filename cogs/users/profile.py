@@ -284,5 +284,6 @@ class Profile(Cog):
         return File(buffer, filename='profile.png')
 
 
-async def setup(bot):
-    await bot.add_cog(Profile(bot))
+def setup(bot):
+    x = Profile(bot)
+    bot.add_cog(x)
