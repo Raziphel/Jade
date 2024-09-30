@@ -12,39 +12,43 @@ class log_handler(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @property  #+ The Server Logs
+    @property
     def bot_log(self):
-        return self.bot.get_channel(self.bot.config['logs']['bot']) 
+        """Returns the bot log channel."""
+        return self.bot.get_channel(self.bot.config['logs']['bot'])
 
-    @property  #+ The Server Logs
+    @property
     def discord_log(self):
-        return self.bot.get_channel(self.bot.config['logs']['server']) 
+        """Returns the server log channel."""
+        return self.bot.get_channel(self.bot.config['logs']['server'])
 
-    @property  #+ The Message Logs
+    @property
     def message_log(self):
-        return self.bot.get_channel(self.bot.config['logs']['messages']) 
+        """Returns the message log channel."""
+        return self.bot.get_channel(self.bot.config['logs']['messages'])
 
-    @property  #+ The Staff Logs
+    @property
     def staff_log(self):
+        """Returns the staff log channel."""
         return self.bot.get_channel(self.bot.config['logs']['staff'])
 
-    @property  #+ The Adult Logs
+    @property
     def adult_log(self):
+        """Returns the adult log channel."""
         return self.bot.get_channel(self.bot.config['logs']['adult'])
 
-#? ---  COLOR PICKER  ---
-#? 
-#? GREEN -> 0x339c2a ... Positive logs
-#? RED -> 0xc74822 ... Negative logs
-#? WARN -> 0xc77f22 ... Warning logs
-#? SPECIAL -> randint(1, 0xffffff)
-#? 
-
+    # Colors for logging
+    COLORS = {
+        'positive': 0x339c2a,
+        'negative': 0xc74822,
+        'warning': 0xc77f22,
+        'special': lambda: randint(1, 0xffffff)
+    }
 
     #! Brand-new members joining
     @Cog.listener()
     async def on_member_join(self, member):
-        await self.discord_log.send(embed=utils.Embed(color=0x339c2a, title=f"{member.name} has entered the garden and needs verification."))
+        await self.discord_log.send(embed=utils.Embed(color=self.COLORS['positive'], title=f"{member.name} has entered the garden and needs verification."))
 
 
     #! Logs
@@ -59,23 +63,23 @@ class log_handler(Cog):
 
         #+ Secret bullshit bro...  Don't question this...
         if math.floor(self.bot.latency*1000) <= 100: 
-            await self.bot_log.send(embed=utils.Embed(color=0x339c2a, title=f"Serpent is Online!", desc=f"Perfect Restart."))
+            await self.bot_log.send(embed=utils.Embed(color=self.COLORS['positive'], title=f"Serpent is Online!", desc=f"Perfect Restart."))
         elif math.floor(self.bot.latency*1000) <= 420:
-            await self.bot_log.send(embed=utils.Embed(color=0xc74822, title=f"Serpent is Online!", desc=f"Weird Restart."))
+            await self.bot_log.send(embed=utils.Embed(color=self.COLORS['negative'], title=f"Serpent is Online!", desc=f"Weird Restart."))
         elif math.floor(self.bot.latency*1000) > 200:
-            await self.bot_log.send(embed=utils.Embed(color=0xc77f22, title=f"Serpent is Online!", desc=f"Discord Connection Refresh"))
+            await self.bot_log.send(embed=utils.Embed(color=self.COLORS['warning'], title=f"Serpent is Online!", desc=f"Discord Connection Refresh"))
 
 
     @Cog.listener()
     async def on_guild_join(self, guild):
         user_count = len(set(self.bot.get_all_members()))
-        await self.bot_log.send(embed=utils.Embed(color=0x339c2a, title=f"The bot has joined {guild.name}", desc=f"Bot now manages: {user_count:,} users"))
+        await self.bot_log.send(embed=utils.Embed(color=self.COLORS['positive'], title=f"The bot has joined {guild.name}", desc=f"Bot now manages: {user_count:,} users"))
         
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
         user_count = len(set(self.bot.get_all_members()))
-        await self.bot_log.send(embed=utils.Embed(color=0xc74822, title=f"The bot has left {guild.name}", desc=f"Bot now manages: {user_count:,} users"))
+        await self.bot_log.send(embed=utils.Embed(color=self.COLORS['negative'], title=f"The bot has left {guild.name}", desc=f"Bot now manages: {user_count:,} users"))
 
     @Cog.listener()
     async def on_command_error(self,ctx, error):
@@ -89,7 +93,7 @@ class log_handler(Cog):
     async def on_member_remove(self, member):
         try:
             if member.bot: return
-            await self.discord_log.send(embed=utils.Embed(color=0xc74822, title=f"{member.name} has left the Cult.", thumbnail=member.avatar.url))
+            await self.discord_log.send(embed=utils.Embed(color=self.COLORS['negative'], title=f"{member.name} has left the Cult.", thumbnail=member.avatar.url))
             c = utils.Currency.get(member.id)
             c.coins = 0
             async with self.bot.database() as db:
@@ -100,14 +104,14 @@ class log_handler(Cog):
     @Cog.listener()
     async def on_member_ban(self, member):
         try:
-            await self.discord_log.send(embed=utils.Embed(color=0xc77f22, title=f"Member Banned", desc=f"{member} has been banned!"))
+            await self.discord_log.send(embed=utils.Embed(color=self.COLORS['warning'], title=f"Member Banned", desc=f"{member} has been banned!"))
         except: pass #? Fail Silently
 
 
     @Cog.listener()
     async def on_member_unban(self, member):
         try:
-            await self.discord_log.send(embed=utils.Embed(color=0x339c2a, title=f"Member Unbanned", desc=f"{member} has been unbanned!"))
+            await self.discord_log.send(embed=utils.Embed(color=self.COLORS['positive'], title=f"Member Unbanned", desc=f"{member} has been unbanned!"))
         except: pass #? Fail Silently
 
 
@@ -134,7 +138,7 @@ class log_handler(Cog):
         else: channel = self.message_log
 
         try:
-            await channel.send(embed=utils.Embed(color=0xc74822, title=f"Message Deleted", desc=f"\"{message.content}\"\n**Channel:** <#{message.channel.id}>\n**Author:** {message.author.mention}", thumbnail=message.author.avatar.url, image=image))
+            await channel.send(embed=utils.Embed(color=self.COLORS['negative'], title=f"Message Deleted", desc=f"\"{message.content}\"\n**Channel:** <#{message.channel.id}>\n**Author:** {message.author.mention}", thumbnail=message.author.avatar.url, image=image))
         except: pass
 
 
@@ -154,7 +158,7 @@ class log_handler(Cog):
             return
         else: channel = self.message_log
         try:
-            await channel.send(embed=utils.Embed(color=0xc77f22, title=f"Message Edited", desc=f"**Author:** {before.author.mention}\n**Channel:** <#{before.channel.id}>\n**Before:**\n{before.content}\n\n**after:**\n{after.content}", thumbnail=before.author.avatar.url))
+            await channel.send(embed=utils.Embed(color=self.COLORS['warning'], title=f"Message Edited", desc=f"**Author:** {before.author.mention}\n**Channel:** <#{before.channel.id}>\n**Before:**\n{before.content}\n\n**after:**\n{after.content}", thumbnail=before.author.avatar.url))
         except: pass
 
 
@@ -162,7 +166,7 @@ class log_handler(Cog):
     @Cog.listener()
     async def on_guild_channel_pins_update(self, channel, last_pin):
         try:
-            await self.message_log.send(embed=utils.Embed(type=randint(1, 0xffffff), title=f"Message Pinned", desc=f"A pinned in: <#{channel.id}>\n{last_pin} was made/modify!"))
+            await self.message_log.send(embed=utils.Embed(type=self.COLORS['special'], title=f"Message Pinned", desc=f"A pinned in: <#{channel.id}>\n{last_pin} was made/modify!"))
         except: pass #? Fail Silently
 
 
