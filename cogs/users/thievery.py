@@ -90,7 +90,7 @@ class Thievery(Cog):
         # Process stealing
         target_coins = utils.Currency.get(user.id)
         thief_coins = utils.Currency.get(ctx.author.id)
-        amount = randint(target_coins.coins*0.005, target_coins.coins*0.02) # .05 - 2% of persons coins!
+        amount = randint(int(target_coins.coins * 0.005), int(target_coins.coins * 0.02)) # .05 - 2% of persons coins!
 
         if target_coins.amount < amount:
             amount = target_coins.amount  # You can only steal what's available
