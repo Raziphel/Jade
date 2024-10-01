@@ -31,7 +31,8 @@ class SteamLink(Cog):
         if existing_link:  # Check if the query returned any rows
             steam_id_linked = existing_link[0]['steam_id']  # Access the first row and get 'steam_id'
             await ctx.send(
-                f"# Your Discord account is already linked to the Steam ID `{steam_id_linked}`. You cannot link another Steam ID. Please contact a staff member if you need assistance.")
+                f"Your Discord account is already linked to the Steam ID `{steam_id_linked}`.\n You cannot link "
+                f"another Steam ID. Please contact a staff member if you need assistance.")
             return
 
         # Check if the steam_id is already linked to another Discord account
@@ -41,7 +42,8 @@ class SteamLink(Cog):
         if steam_link:  # Check if the query returned any rows
             discord_id_linked = steam_link[0]['discord_id']  # Access the first row and get 'discord_id'
             await ctx.send(
-                f"# The Steam ID `{steam_id}` is already linked to another Discord account. Please contact a staff member.")
+                f"**The Steam ID `{steam_id}` is already linked to another Discord account. Please contact a staff "
+                f"member.**")
             return
 
         try:
@@ -52,7 +54,7 @@ class SteamLink(Cog):
             async with self.bot.database() as db:
                 await user_link.save(db)
 
-            await ctx.send(f"# Successfully linked your Discord account with Steam ID: {steam_id}")
+            await ctx.send(f"**Successfully linked your Discord account with Steam ID: {steam_id}**")
         except Exception as e:
             await ctx.send(f"An error occurred: {str(e)}")
 
