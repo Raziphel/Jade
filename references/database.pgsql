@@ -10,6 +10,11 @@ CREATE TABLE moderation (
     PRIMARY KEY (user_id)
 );
 
+CREATE TABLE user_link (
+    discord_id BIGINT NOT NULL,
+    steam_id VARCHAR(255) NOT NULL,
+    PRIMARY KEY (discord_id, steam_id)
+);
 #############################################################################
 ############################## USER VALUES ##################################
 #############################################################################

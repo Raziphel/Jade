@@ -13,6 +13,7 @@ from utils.sql.levels import Levels
 from utils.sql.tracking import Tracking
 from utils.sql.daily import Daily
 from utils.sql.skills import Skills
+from utils.sql.user_link import UserLink
 
 #? Functions
 from utils.functions.coins import CoinFunctions

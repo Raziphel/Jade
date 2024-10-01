@@ -49,6 +49,7 @@ class Serpent(commands.AutoShardedBot):
             utils.Tracking.all_tracking.clear()
             utils.Daily.all_dailys.clear()
             utils.Skills.all_skills.clear()
+            utils.UserLink.all_user_links.clear()
 
 
             #! Collect from Database
@@ -60,6 +61,7 @@ class Serpent(commands.AutoShardedBot):
                 tracking = await db('SELECT * FROM tracking')
                 daily = await db('SELECT * FROM daily')
                 skills = await db('SELECT * FROM skills')
+                user_link = await db('SELECT * FROM user_link')
 
 
             #! Cache all into local objects
@@ -77,6 +79,8 @@ class Serpent(commands.AutoShardedBot):
                 utils.Daily(**i)
             for i in skills:
                 utils.Skills(**i)
+            for i in user_link:
+                utils.UserLink(**i)
 
         except Exception as e:
             print(f"Couldn't connect to the database... :: {e}")
