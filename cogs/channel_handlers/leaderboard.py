@@ -35,6 +35,8 @@ class Leaderboard(commands.Cog):
         for rank in sorted_ranks:
             user = self.bot.get_user(rank.user_id)
             if user and await self.is_user_in_guild(guild, user.id):
+                if user.id == self.bot.user.id:
+                    continue  # Skip bot's own ID
                 users.append((user, rank))
             if len(users) == 10:  # Limit to top 10
                 break
