@@ -61,6 +61,8 @@ class log_handler(Cog):
         else:
             await self.bot.change_presence(activity=Game(name=f"in the mind..."))
 
+        await self.bot.tree.sync()
+
         #+ Secret bullshit bro...  Don't question this...
         if math.floor(self.bot.latency*1000) <= 100: 
             await self.bot_log.send(embed=utils.Embed(color=self.COLORS['positive'], title=f"Serpent is Online!", desc=f"Perfect Restart."))
