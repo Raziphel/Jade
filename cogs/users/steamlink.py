@@ -9,19 +9,18 @@ class SteamLink(Cog):
         self.bot = bot
 
     @command(
-        # Remove aliases if this is a slash command (application command)
         application_command_meta=ApplicationCommandMeta(
             options=[
                 ApplicationCommandOption(
-                    name="steamid",  # Fix the typo, remove the extra `)`
+                    name="steam_id",  # Ensure this matches the function parameter
                     description="Please put your STEAM64ID (DEC)",
-                    type=ApplicationCommandOptionType.string,
+                    type=ApplicationCommandOptionType.string,  # Change to string type for Steam ID
                     required=True,
                 ),
             ],
         ),
     )
-    async def steamlink(self, ctx, steam_id: int):
+    async def steamlink(self, ctx, steam_id: str):  # Match the parameter name with the option name
         """Links the user's Discord account with their STEAM 64 ID (DEC)"""
         discord_id = ctx.author.id  # Get the Discord user ID from the context
 
