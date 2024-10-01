@@ -1,5 +1,5 @@
+from discord import ApplicationCommandOption, ApplicationCommandOptionType
 from discord.ext.commands import command, Cog, ApplicationCommandMeta
-
 
 import utils
 
@@ -10,10 +10,29 @@ class SteamLink(Cog):
 
 
 
-    @command(application_command_meta=ApplicationCommandMeta())
+    @command(
+        aliases=['linksteam'],
+        application_command_meta=ApplicationCommandMeta(
+            options=[
+                ApplicationCommandOption(
+                    name="STEAM64ID(dec)",
+                    description="Please put your STEAM64ID(dec)",
+                    type=ApplicationCommandOptionType.string,
+                    required=True,
+                ),
+            ],
+        ),
+    )
     async def steamlink(self, ctx, steam_id:str):
         """Links the user's Discord account with their STEAM 64 ID (DEC)"""
         discord_id = ctx.author.id  # Get the Discord user ID from the context
+
+        async with self.bot.database() as db:
+            existing_link = await db('SELECT discord_id FROM user_link WHERE steam_id = $1', steam_id)
+
+        if existing_link:
+            await ctx.send(f"The Steam ID `{steam_id}` is already linked to another account.  Contact a staff.")
+            return
 
         try:
             # Create or get the UserLink instance
