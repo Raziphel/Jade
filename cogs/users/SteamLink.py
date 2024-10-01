@@ -11,7 +11,7 @@ class SteamLink(Cog):
 
 
     @command(application_command_meta=ApplicationCommandMeta())
-    async def link_steam(self, ctx, steam_id: str):
+    async def steamlink(self, ctx):
         """Links the user's Discord account with their Steam ID if connected."""
         discord_id = ctx.author.id  # Get the Discord user ID from the context
         user = ctx.author  # Get the user object
