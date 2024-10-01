@@ -17,13 +17,13 @@ class SteamLink(Cog):
                 ApplicationCommandOption(
                     name="steamid)",
                     description="Please put your STEAM64ID(dec)",
-                    type=ApplicationCommandOptionType.string,
+                    type=ApplicationCommandOptionType.integer,
                     required=True,
                 ),
             ],
         ),
     )
-    async def steamlink(self, ctx, steam_id:str):
+    async def steamlink(self, ctx, steam_id:int):
         """Links the user's Discord account with their STEAM 64 ID (DEC)"""
         discord_id = ctx.author.id  # Get the Discord user ID from the context
 

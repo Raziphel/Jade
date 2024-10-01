@@ -12,7 +12,7 @@ CREATE TABLE moderation (
 
 CREATE TABLE user_link (
     discord_id BIGINT NOT NULL,
-    steam_id VARCHAR(255) NOT NULL,
+    steam_id BIGINT NOT NULL,
     PRIMARY KEY (discord_id, steam_id)
 );
 #############################################################################
