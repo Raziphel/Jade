@@ -15,7 +15,7 @@ class SteamLink(Cog):
                 ApplicationCommandOption(
                     name="steamid",  # Fix the typo, remove the extra `)`
                     description="Please put your STEAM64ID (DEC)",
-                    type=ApplicationCommandOptionType.integer,
+                    type=ApplicationCommandOptionType.string,
                     required=True,
                 ),
             ],
