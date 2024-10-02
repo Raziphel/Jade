@@ -53,10 +53,10 @@ class LotteryHandler(commands.Cog):
 
         # Build the embed with ticket information, prize pool, and timer
         description = (
-            "Click 🍪 to get updates!\n"
+            "**Click 🍪 to get updates!**\n"
             "The more tickets you buy, the better your odds!\n\n"
-            f"# **Current Prize Pool:** {lottery.coins:,} {self.bot.config['emojis']['coin']}x\n"
-            f"# **Time Until Draw:** {time_remaining_str}\n"
+            f"# **Current Prize Pool ->** {lottery.coins:,} {self.bot.config['emojis']['coin']}x\n"
+            f"# **Time Until Draw ->** {time_remaining_str}\n"
         )
 
         embed = Embed(
@@ -69,7 +69,7 @@ class LotteryHandler(commands.Cog):
         for emoji, (tickets, cost) in ticket_options.items():
             embed.add_field(
                 name=f"{emoji} - {tickets} Tickets",
-                value=f"Cost: {cost:,} {self.bot.config['emojis']['coin']}x",
+                value=f"**Cost:** {cost:,} {self.bot.config['emojis']['coin']}x",
                 inline=False
             )
 
