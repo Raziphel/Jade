@@ -51,10 +51,17 @@ class LotteryHandler(commands.Cog):
         else:
             time_remaining_str = "Lottery not started yet."
 
-        # Build the embed with ticket information and timer
+        # Build the embed with ticket information, prize pool, and timer
+        description = (
+            "Click 🍪 to get updates!\n"
+            "The more tickets you buy, the better your odds!\n\n"
+            f"**Current Prize Pool:** {lottery.coins:,} coins\n"
+            f"**Time Until Draw:** {time_remaining_str}\n"
+        )
+
         embed = Embed(
             title="Welcome to the Lottery!",
-            description="Click 🍪 to get updates!\nThe more tickets you buy, the better your odds!",
+            description=description,
             color=0xff00ff
         )
 
@@ -65,10 +72,6 @@ class LotteryHandler(commands.Cog):
                 value=f"Cost: {cost:,} coins",
                 inline=False
             )
-
-        # Add current prize pool and time remaining
-        embed.add_field(name="Current Prize Pool", value=f"Coins: {lottery.coins:,}", inline=False)
-        embed.add_field(name="Time Until Draw", value=time_remaining_str, inline=False)
 
         # Edit the message with updated content
         await msg.edit(embed=embed)
