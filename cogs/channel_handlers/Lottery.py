@@ -1,11 +1,13 @@
 import asyncio
-
-import discord
-from discord.ext import commands, tasks
-from discord import Embed
 from datetime import datetime as dt, timedelta
 from random import choice
+
+import discord
+from discord import Embed
+from discord.ext import commands, tasks
+
 import utils
+
 
 class LotteryHandler(commands.Cog):
     def __init__(self, bot):
@@ -197,8 +199,6 @@ class LotteryHandler(commands.Cog):
                 c.lot_tickets = 0
                 async with self.bot.database() as db:
                     await c.save(db)
-
-    import asyncio
 
     @commands.Cog.listener('on_raw_reaction_add')
     async def lot_buy(self, payload):
