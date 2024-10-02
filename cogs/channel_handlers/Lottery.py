@@ -55,8 +55,8 @@ class LotteryHandler(commands.Cog):
         description = (
             "**Click 🍪 to get updates!**\n"
             "The more tickets you buy, the better your odds!\n\n"
-            f"# **Current Prize Pool**\n{lottery.coins:,} {self.bot.config['emojis']['coin']}x\n"
-            f"# **Time Until Draw**\n{time_remaining_str}\n"
+            f"# Current Prize Pool\n**{lottery.coins:,} {self.bot.config['emojis']['coin']}x**\n"
+            f"# Time Until Draw\n**{time_remaining_str}**\n\n"
         )
 
         embed = Embed(
