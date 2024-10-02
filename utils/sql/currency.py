@@ -4,10 +4,10 @@ import asyncpg
 class Currency(object):
     all_currency = {}
 
-    def __init__(self, user_id:int, coins:int=0, credits:int=0):
+    def __init__(self, user_id:int, coins:int=0, tickets:int=0):
         self.user_id = user_id
         self.coins = coins
-        self.credits = credits
+        self.tickets = tickets
 
         self.all_currency[self.user_id] = self
 
@@ -19,16 +19,16 @@ class Currency(object):
                 VALUES
                 ($1, $2, $3)
                 ''',
-                self.user_id, self.coins, self.credits
+                self.user_id, self.coins, self.tickets
             )
         except asyncpg.exceptions.UniqueViolationError: 
             await db('''
                 UPDATE currency SET
-                coins=$2, credits=$3
+                coins=$2, tickets=$3
                 WHERE
                 user_id=$1
                 ''',
-                self.user_id, self.coins, self.credits
+                self.user_id, self.coins, self.tickets
             )
 
     @classmethod
@@ -62,3 +62,18 @@ class Currency(object):
             del cls.all_currency[user_id]
         except KeyError:
             pass
+
+
+    @classmethod
+    def sort_tickets(cls):
+        """sorts the user's by tickets. getting ranks!"""
+        sorted_tickets = sorted(cls.all_currency.values(), key=lambda u: u.lot_tickets, reverse=True)
+        return sorted_tickets
+
+    @classmethod
+    def get_total_tickets(cls):
+        """Gets total tickets"""
+        total = 0
+        for i in cls.all_currency.values():
+            total += i.lot_tickets
+        return total

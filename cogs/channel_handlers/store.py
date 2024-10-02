@@ -100,6 +100,7 @@ class StoreHandler(Cog):
                                                              desc=f"# Purchase Confirmation:\nWould you like to buy {item['name']} for {item['price']} {self.bot.config['emojis']['coin']}x?"))
 
         if await self.purchasing(confirmation_msg, payload, item):
+            # Handle the successful purchase
             if item.get("role"):
                 role = utils.DiscordGet(guild.roles, id=self.bot.config['purchase_roles'][item["role"]])
                 await user.add_roles(role, reason=f"Given {item['name']} role.")
@@ -107,7 +108,19 @@ class StoreHandler(Cog):
             if item.get("ability"):
                 setattr(utils.Skills.get(user.id), item["ability"], True)
 
+            # Send confirmation with remaining coins
+            user_currency = utils.Currency.get(user.id)
+            embed = Embed(
+                title="Purchase Successful",
+                description=f"You have successfully bought **{item['name']}** for **{item['price']} coins**!",
+                color=0x339c2a
+            )
+            embed.add_field(name="Remaining Coins", value=f"{user_currency.coins:,} coins", inline=False)
+            await user.send(embed=embed)
+
+            # Log the transaction
             await self.coin_logs.send(f"# {user} bought {item['name']}!")
+
         else:
             await self.coin_logs.send(f"# {user} tried to purchase: {item['name']}!")
 
@@ -135,6 +148,7 @@ class StoreHandler(Cog):
             reaction, _ = await self.bot.wait_for('reaction_add', check=check)
 
             if str(reaction.emoji) == "✔":
+                # Attempt the transaction
                 if not await utils.CoinFunctions.pay_for(payer=user, amount=item["price"]):
                     await msg.edit(embed=utils.Embed(color=0xc74822,
                                                      desc=f"# You don't have enough coins {self.bot.config['emojis']['coin']}!"))

@@ -50,6 +50,7 @@ class Serpent(commands.AutoShardedBot):
             utils.Daily.all_dailys.clear()
             utils.Skills.all_skills.clear()
             utils.UserLink.all_user_links.clear()
+            utils.Lottery.all_lotterys.clear()
 
 
             #! Collect from Database
@@ -62,6 +63,7 @@ class Serpent(commands.AutoShardedBot):
                 daily = await db('SELECT * FROM daily')
                 skills = await db('SELECT * FROM skills')
                 user_link = await db('SELECT * FROM user_link')
+                lottery = await db('SELECT * FROM lottery')
 
 
             #! Cache all into local objects
@@ -81,6 +83,8 @@ class Serpent(commands.AutoShardedBot):
                 utils.Skills(**i)
             for i in user_link:
                 utils.UserLink(**i)
+            for i in lottery:
+                utils.Lottery(**i)
 
         except Exception as e:
             print(f"Couldn't connect to the database... :: {e}")

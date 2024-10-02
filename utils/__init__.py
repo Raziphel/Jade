@@ -14,6 +14,7 @@ from utils.sql.tracking import Tracking
 from utils.sql.daily import Daily
 from utils.sql.skills import Skills
 from utils.sql.user_link import UserLink
+from utils.sql.lottery import Lottery
 
 #? Functions
 from utils.functions.coins import CoinFunctions
