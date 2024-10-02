@@ -99,8 +99,8 @@ class LotteryHandler(commands.Cog):
         # Fetch the leaderboard message
         msg = await channel.fetch_message(self.bot.config['lottery_messages']['2'])
 
-        # Get the top 10 users with the most tickets using the sort_tickets method
-        sorted_users = utils.Currency.sort_tickets()[:10]
+        # Get the top 10 users with the most tickets using the sort_tickets method, filter out users with zero tickets
+        sorted_users = [user for user in utils.Currency.sort_tickets()[:10] if user.tickets > 0]
 
         # Build the leaderboard embed
         embed = Embed(
@@ -122,7 +122,6 @@ class LotteryHandler(commands.Cog):
 
         # Update the leaderboard message
         await msg.edit(content=" ", embed=embed)
-
 
     @tasks.loop(hours=1)
     async def lottery_pot_increaser(self):
