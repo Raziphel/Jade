@@ -175,7 +175,7 @@ class LotteryHandler(commands.Cog):
             if currency.coins >= cost:
                 # Deduct the coins and add tickets
                 currency.coins -= cost
-                currency.lot_tickets += tickets
+                currency.tickets += tickets
                 lottery.coins += cost
 
                 # Confirmation via DM with details of the purchase
@@ -184,7 +184,7 @@ class LotteryHandler(commands.Cog):
                     description=f"You have successfully purchased {tickets} tickets for {cost} coins!",
                     color=discord.Color.green()
                 )
-                embed.add_field(name="Current Tickets", value=f"{currency.lot_tickets} tickets", inline=False)
+                embed.add_field(name="Current Tickets", value=f"{currency.tickets} tickets", inline=False)
                 embed.add_field(name="Remaining Coins", value=f"{currency.coins} coins", inline=False)
 
                 await member.send(embed=embed)
@@ -244,7 +244,7 @@ async def lottery_leaderboard_update(self):
         # Add top users to the embed
         for idx, row in enumerate(top_users, 1):
             user = self.bot.get_user(row['user_id']) or (await self.bot.fetch_user(row['user_id']))
-            tickets = row['lot_tickets']
+            tickets = row['tickets']
             embed.add_field(
                 name=f"#{idx} {user.display_name}",
                 value=f"{tickets:,} tickets",
