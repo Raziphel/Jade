@@ -59,7 +59,7 @@ class LotteryHandler(commands.Cog):
         description = (
             "🎉 **Welcome to the Weekly Lottery!** 🎉\n\n"
             "💰 **Prize Pool:**\n"
-            f"```css\n{lottery.coins:,} {self.bot.config['emojis']['coin']} coins\n```\n"
+            f"```css\n{lottery.coins:,} coins\n```\n"
             "⏳ **Time Until Draw:**\n"
             f"```css\n{time_remaining_str}\n```\n"
             "**The more tickets you buy, the better your odds of winning!**\n\n"
