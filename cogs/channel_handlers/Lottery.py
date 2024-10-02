@@ -111,8 +111,7 @@ class LotteryHandler(commands.Cog):
             lottery.lot_time = dt.now()
 
             # Fetch all tickets and select a winner based on the weight of tickets
-            users_with_tickets = await self.bot.database().fetch(
-                "SELECT user_id, tickets FROM currency WHERE tickets > 0")
+            users_with_tickets = await self.bot.database()("SELECT user_id, tickets FROM currency WHERE tickets > 0")
             all_tickets = [user_id for user_id, tickets in users_with_tickets for _ in range(tickets)]
 
             if not all_tickets:
@@ -142,7 +141,7 @@ class LotteryHandler(commands.Cog):
                 await winner_currency.save(db)
 
             # Reset everyone's tickets
-            await self.bot.database().execute("UPDATE currency SET tickets = 0")
+            await self.bot.database()("UPDATE currency SET tickets = 0")
 
     @commands.Cog.listener('on_raw_reaction_add')
     async def lot_buy(self, payload):
@@ -229,11 +228,9 @@ class LotteryHandler(commands.Cog):
 
         # Fetch the top 10 users with the most tickets from the database
         async with self.bot.database() as db:
-            # Execute the query to get the top 10 users with the most tickets
-            await db.execute(
+            top_users = await db(
                 "SELECT user_id, tickets FROM currency WHERE tickets > 0 ORDER BY tickets DESC LIMIT 10"
             )
-            top_users = await db.fetchall()  # Fetch all results from the executed query
 
         # Build the leaderboard embed
         embed = Embed(
