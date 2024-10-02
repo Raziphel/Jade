@@ -15,6 +15,19 @@ CREATE TABLE user_link (
     steam_id VARCHAR(255) NOT NULL,
     PRIMARY KEY (discord_id, steam_id)
 );
+
+
+CREATE TABLE lottery (
+    lottery_id BIGINT NOT NULL,
+    last_winner_id BIGINT,
+    last_amount INT,
+    coins INT,
+    lot_time TIMESTAMP,
+    last_msg_id INT,
+    PRIMARY KEY (lottery_id)
+);
+
+
 #############################################################################
 ############################## USER VALUES ##################################
 #############################################################################
@@ -71,8 +84,3 @@ CREATE TABLE coins_record (
 #############################################################################
 
 
-CREATE TABLE account_link (
-    user_id bigint NOT NULL,
-    steam_id bigint NOT NULL,
-    PRIMARY KEY (user_id)
-);

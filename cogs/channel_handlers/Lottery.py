@@ -174,7 +174,8 @@ class LotteryHandler(commands.Cog):
             # Remove the previous winner message if it exists
             if self.previous_winner_message:
                 try:
-                    await self.previous_winner_message.delete()
+                    msg = await channel.fetch_message(lottery.last_msg_id)
+                    await msg.delete()
                 except discord.NotFound:
                     pass  # Message was already deleted or not found
 
@@ -216,8 +217,6 @@ class LotteryHandler(commands.Cog):
                 color=discord.Color.gold()
             ))
 
-            self.previous_winner_message = winner_message  # Store the winner message for later removal
-
             # Distribute the prize
             winner_currency = utils.Currency.get(winner.id)
             winner_currency.coins += lottery.coins
@@ -226,6 +225,8 @@ class LotteryHandler(commands.Cog):
             lottery.last_winner_id = winner.id
             lottery.last_amount = lottery.coins
             lottery.coins = 0
+            lottery.last_msg_id = winner_message.id  # Store the winner message for later removal
+
 
             # Save changes to the database
             async with self.bot.database() as db:
