@@ -108,7 +108,7 @@ class LotteryHandler(commands.Cog):
             leaderboard_text = ""
             for idx, user in enumerate(sorted_users, 1):
                 discord_user = await self.bot.fetch_user(user.user_id)
-                leaderboard_text += f"**#{idx}** {discord_user.display_name} - {user.tickets:,} tickets\n"
+                leaderboard_text += f"**#{idx}** {discord_user.display_name} - {user.tickets:,} 🎟\n"
 
             embed.description += f"\n{leaderboard_text}"
 
