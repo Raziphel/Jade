@@ -120,7 +120,12 @@ class LotteryHandler(commands.Cog):
             for idx, user in enumerate(sorted_users, 1):
                 discord_user = await self.bot.fetch_user(user.user_id)
                 win_chance = (user.tickets / total_tickets) * 100 if total_tickets > 0 else 0
-                leaderboard_text += f"**#{idx}** {discord_user.display_name} - {user.tickets:,} 🎟 - Chance: {win_chance:.2f}%\n"
+                leaderboard_text += (
+                    f"**#{idx}** "
+                    f"{discord_user.display_name:<20} "  # Align the display name to the left with a width of 20
+                    f"| 🎟 {user.tickets:>5,} "  # Align the ticket count to the right with commas for thousands
+                    f"| 🏆 {win_chance:>6.2f}%\n"  # Align the chance to win to the right with two decimal places
+                )
 
             embed.description += f"\n{leaderboard_text}"
 

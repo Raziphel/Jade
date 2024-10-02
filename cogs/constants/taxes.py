@@ -30,9 +30,9 @@ class Taxes(Cog):
         for member in guild.members:
             try:
                 currency = utils.Currency.get(member.id)
-                if currency.coins > 100:
-                    currency.coins -= 100
-                    total_taxed += 100
+                if currency.coins > 50:
+                    currency.coins -= 50
+                    total_taxed += 50
                     async with self.bot.database() as db:
                         await currency.save(db)
                 elif currency.coins > 0:
