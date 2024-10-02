@@ -78,11 +78,8 @@ class LotteryHandler(commands.Cog):
         # Fetch the leaderboard message
         msg = await channel.fetch_message(self.bot.config['lottery_messages']['2'])
 
-        # Fetch the top 10 users with the most tickets from the database
-        async with self.bot.database() as db:
-            top_users = await db(
-                "SELECT user_id, tickets FROM currency WHERE tickets > 0 ORDER BY tickets DESC LIMIT 10"
-            )
+        # Get the top 10 users with the most tickets using the sort_tickets method
+        sorted_users = utils.Currency.sort_tickets()[:10]
 
         # Build the leaderboard embed
         embed = Embed(
@@ -91,16 +88,15 @@ class LotteryHandler(commands.Cog):
             color=0xffd700
         )
 
-        if not top_users:
+        if not sorted_users:
             embed.add_field(name="No tickets yet!", value="Be the first to buy some tickets!", inline=False)
         else:
             # Add top users to the embed
-            for idx, row in enumerate(top_users, 1):
-                user = self.bot.get_user(row['user_id']) or (await self.bot.fetch_user(row['user_id']))
-                tickets = row['tickets']
+            for idx, user in enumerate(sorted_users, 1):
+                discord_user = await self.bot.fetch_user(user.id)
                 embed.add_field(
-                    name=f"#{idx} {user.display_name}",
-                    value=f"{tickets:,} tickets",
+                    name=f"#{idx} {discord_user.display_name}",
+                    value=f"{user.tickets:,} tickets",
                     inline=False
                 )
 
@@ -139,16 +135,19 @@ class LotteryHandler(commands.Cog):
 
             lottery.lot_time = dt.now()
 
-            # Fetch all tickets and select a winner based on the weight of tickets
-            users_with_tickets = await self.bot.database()(
-                "SELECT user_id, tickets FROM currency WHERE tickets > 0"
-            )
-            all_tickets = [user_id for user_id, tickets in users_with_tickets for _ in range(tickets)]
-
-            if not all_tickets:
+            # Get all tickets using the get_total_tickets method
+            total_tickets = utils.Currency.get_total_tickets()
+            if total_tickets == 0:
                 await channel.send(embed=Embed(description="No one entered the lottery this week. No winner."))
                 return
 
+            # Fetch all users with tickets using the sort_tickets method
+            all_tickets = []
+            sorted_users = utils.Currency.sort_tickets()
+            for user in sorted_users:
+                all_tickets.extend([user.id] * user.tickets)
+
+            # Select a winner
             winner_id = choice(all_tickets)
             winner = guild.get_member(winner_id)
 
@@ -173,7 +172,11 @@ class LotteryHandler(commands.Cog):
                 await winner_currency.save(db)
 
             # Reset everyone's tickets
-            await self.bot.database()("UPDATE currency SET tickets = 0")
+            for member in guild.members:
+                c = utils.Currency.get(member.id)
+                c.lot_tickets = 0
+                async with self.bot.database() as db:
+                    await c.save(db)
 
     @commands.Cog.listener('on_raw_reaction_add')
     async def lot_buy(self, payload):

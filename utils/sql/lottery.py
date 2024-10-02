@@ -46,3 +46,4 @@ class Lottery(object):
                 lot_time = dt.utcnow(),
             )
         return lot
+
