@@ -144,8 +144,24 @@ class LotteryHandler(commands.Cog):
         guild = self.bot.get_guild(self.bot.config['guild_id'])
         channel = guild.get_channel(self.bot.config['channels']['lottery'])
 
+        # Check if the lottery time has been set
+        if lottery.lot_time is None:
+            return  # Skip processing if the lottery hasn't started yet
+
+        # Calculate time remaining for the lottery
+        time_remaining = (lottery.lot_time + timedelta(days=7)) - dt.now()
+
+        # Check if it's 1 hour before the draw and send a ping to the lottery ping role
+        if timedelta(hours=0) < time_remaining <= timedelta(hours=1):
+            # Fetch the lottery ping role
+            lottery_ping_role = guild.get_role(self.bot.config['lottery_roles']['ping'])
+
+            # Send a reminder message and ping the role
+            await channel.send(
+                f"{lottery_ping_role.mention} ⏳ The lottery draw will take place in 1 hour! Get your tickets now!")
+
         # Check if it's time to run the lottery
-        if lottery.lot_time is None or dt.now() >= lottery.lot_time + timedelta(days=7):
+        if time_remaining <= timedelta(0):
             # Remove the previous winner message if it exists
             if self.previous_winner_message:
                 try:
@@ -158,8 +174,7 @@ class LotteryHandler(commands.Cog):
             # Get all tickets using the get_total_tickets method
             total_tickets = utils.Currency.get_total_tickets()
             if total_tickets == 0:
-                await channel.send(content=" ", embed=Embed(description="No one entered the lottery this week. No "
-                                                                      "winner."))
+                await channel.send(embed=Embed(description="No one entered the lottery this week. No winner."))
                 return
 
             # Fetch all users with tickets using the sort_tickets method
