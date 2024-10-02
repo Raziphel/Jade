@@ -5,7 +5,6 @@ from datetime import datetime as dt, timedelta
 from random import choice
 import utils
 
-
 class LotteryHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -42,7 +41,17 @@ class LotteryHandler(commands.Cog):
             "🍋": (50, 50000)
         }
 
-        # Build the embed with ticket information
+        # Calculate time remaining for the lottery
+        if lottery.lot_time is not None:
+            time_remaining = (lottery.lot_time + timedelta(days=7)) - dt.now()
+            if time_remaining.total_seconds() > 0:
+                time_remaining_str = str(time_remaining).split('.')[0]  # Format time without milliseconds
+            else:
+                time_remaining_str = "Lottery ended. Drawing soon..."
+        else:
+            time_remaining_str = "Lottery not started yet."
+
+        # Build the embed with ticket information and timer
         embed = Embed(
             title="Welcome to the Lottery!",
             description="Click 🍪 to get updates!\nThe more tickets you buy, the better your odds!",
@@ -57,14 +66,16 @@ class LotteryHandler(commands.Cog):
                 inline=False
             )
 
-        # Add current prize pool
+        # Add current prize pool and time remaining
         embed.add_field(name="Current Prize Pool", value=f"Coins: {lottery.coins:,}", inline=False)
+        embed.add_field(name="Time Until Draw", value=time_remaining_str, inline=False)
 
         # Edit the message with updated content
         await msg.edit(embed=embed)
 
         # Call manage reactions to maintain the reactions on the lottery message
         await self.manage_reactions(msg)
+
 
     @tasks.loop(minutes=10)
     async def lottery_leaderboard_update(self):
@@ -93,7 +104,7 @@ class LotteryHandler(commands.Cog):
         else:
             # Add top users to the embed
             for idx, user in enumerate(sorted_users, 1):
-                discord_user = await self.bot.fetch_user(user.id)
+                discord_user = await self.bot.fetch_user(user.user_id)
                 embed.add_field(
                     name=f"#{idx} {discord_user.display_name}",
                     value=f"{user.tickets:,} tickets",
