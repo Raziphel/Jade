@@ -31,9 +31,8 @@ class Taxes(Cog):
             try:
                 currency = utils.Currency.get(member.id)
                 if currency.coins > 9:
-                    tax_amount = 10
-                    currency.coins -= tax_amount * 10
-                    total_taxed += tax_amount
+                    currency.coins -= 100
+                    total_taxed += 100
                     async with self.bot.database() as db:
                         await currency.save(db)
                 elif currency.coins > 0:
