@@ -76,7 +76,7 @@ class Profile(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(aliases=['profile'])
+    @command(aliases=['Profile'])
     async def profile(self, ctx, user: Member = None):
         if not user:
             user = ctx.author
