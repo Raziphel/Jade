@@ -76,7 +76,6 @@ class LotteryHandler(commands.Cog):
         # Call manage reactions to maintain the reactions on the lottery message
         await self.manage_reactions(msg)
 
-
     @tasks.loop(minutes=10)
     async def lottery_leaderboard_update(self):
         """Updates the lottery leaderboard message every 10 minutes."""
@@ -102,17 +101,17 @@ class LotteryHandler(commands.Cog):
         if not sorted_users:
             embed.add_field(name="No tickets yet!", value="Be the first to buy some tickets!", inline=False)
         else:
-            # Add top users to the embed
+            # Create a leaderboard list in a more compact format
+            leaderboard_text = ""
             for idx, user in enumerate(sorted_users, 1):
                 discord_user = await self.bot.fetch_user(user.user_id)
-                embed.add_field(
-                    name=f"#{idx} {discord_user.display_name}",
-                    value=f"{user.tickets:,} tickets",
-                    inline=False
-                )
+                leaderboard_text += f"**#{idx}** {discord_user.display_name} - {user.tickets:,} tickets\n"
+
+            embed.description += f"\n{leaderboard_text}"
 
         # Update the leaderboard message
         await msg.edit(embed=embed)
+
 
     @tasks.loop(hours=1)
     async def lottery_pot_increaser(self):
