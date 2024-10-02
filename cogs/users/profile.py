@@ -107,71 +107,32 @@ def format_number(num):
 class Profile(Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.speech_balloon = Image.open(f'{resources_directory}/speech-balloon.png').convert('RGBA').resize((27, 27))
+        self.microphone = Image.open(f'{resources_directory}/microphone-3.png').convert('RGBA').resize((27, 27))
+        self.coin = Image.open(f'{resources_directory}/gold-coin.png').convert('RGBA').resize((27, 27))
 
-    @command(
-        aliases=['p', 'P', 'Profile'],
-        application_command_meta=ApplicationCommandMeta(
-            options=[
-                ApplicationCommandOption(
-                    name="user",
-                    description="The user you want to get the profile of.",
-                    type=ApplicationCommandOptionType.user,
-                    required=False,
-                ),
-            ],
-        ),
-    )
-    async def profile(self, ctx, user: Member = None):
-        '''Shows a user's profile'''
-        if not user:
-            user = ctx.author
+    def generate_rounded_bar(self, width, height, fill_color, outline_color, border_radius, progress_percent):
+        # Create a new RGBA image for the progress bar
+        bar = Image.new("RGBA", (width, height), (0, 0, 0, 0))
 
-        # await self.base_profile(ctx=ctx, user=user, msg=None)
-        file = await self.generate_screenshot(user)
+        # Draw a rounded rectangle with the specified border radius
+        draw = ImageDraw.Draw(bar)
+        rect = [0, 0, width, height]
+        draw.rounded_rectangle(rect, radius=border_radius, fill=outline_color)
 
-        # await ctx.send(file=file)
-        await ctx.interaction.response.send_message(file=file)
+        # Calculate the progress based on the percentage
+        progress_width = int(progress_percent * width)
+        draw.rounded_rectangle([0, 0, progress_width, height], radius=border_radius, fill=fill_color)
 
-    async def get_user_avatar(self, member: Member) -> BytesIO:
-        avatar = member.display_avatar
-
-        try:
-            data = await avatar.read()
-
-        except NotFound:
-            # Avatar was changed and our cache wasn't updated for whatever reason
-            user = await self.bot.fetch_user(member.id)
-            avatar = user.display_avatar
-            data = await avatar.read()
-
-        return BytesIO(data)
-
-    def get_level_rank(self, member: discord.Member) -> int:
-        sorted_levels = utils.Levels.sort_levels()
-        member_level = utils.Levels.get(member.id)
-        try:
-            level_rank = sorted_levels.index(member_level)
-
-            return level_rank + 1  # Add 1 because indexes start from 0
-        except ValueError:  # User is not in the list yet maybe?
-            return -1
-
-    def get_wealth_rank(self, member: discord.Member) -> int:
-        sorted_wealth = utils.Currency.sort_coins()
-        member_wealth = utils.Currency.get(member.id)
-        try:
-            wealth_rank = sorted_wealth.index(member_wealth)
-
-            return wealth_rank + 1
-        except ValueError:
-            return -1
+        return bar
 
     async def generate_screenshot(self, member: Member):
-        moderation = utils.Moderation.get(member.id)
+        # Fetch user data
         levels = utils.Levels.get(member.id)
         currency = utils.Currency.get(member.id)
         tracking = utils.Tracking.get(member.id)
 
+        # Calculate experience percentage and required experience for next level
         if levels.level == 0:
             required_exp = 10
         elif levels.level < 5:
@@ -179,210 +140,76 @@ class Profile(Cog):
         else:
             required_exp = round(levels.level ** 2.75)
 
+        experience_percentage = levels.exp / required_exp
+
+        # Increase size for the level bar and make it rounded
+        level_bar_width = base_image_size[0] - 40  # Spanning the bottom of the image
+        level_bar_height = 40  # A thicker level bar
+        level_bar_radius = 20  # Rounded corners
+
+        # Create a rounded progress bar at the bottom
+        progress_bar = self.generate_rounded_bar(
+            width=level_bar_width,
+            height=level_bar_height,
+            fill_color="aqua",
+            outline_color="gray",
+            border_radius=level_bar_radius,
+            progress_percent=experience_percentage
+        )
+
+        # User's avatar
         avatar = await self.get_user_avatar(member)
-        username = str(member.name)
-        title = str(member.top_role)
-        current_level = levels.level
-        current_experience = floor(levels.exp)
-        badges = []  # TODO: replace with real data
-        networth = format_number(currency.coins)
-        messages = format_number(tracking.messages)
 
-        voice_activity = floor(tracking.vc_mins / 60)
-        voice_activity = format_number(voice_activity)
+        # Create a new blank canvas for the profile card
+        canvas = Image.new('RGBA', base_image_size, color=(255, 255, 255, 0))  # Transparent background
 
-        level_rank = self.get_level_rank(member)
-        wealth_rank = self.get_wealth_rank(member)
+        # Paste the background image
+        background = Image.open(f'{resources_directory}/default-background.jpg').convert('RGBA')
+        canvas.paste(background, (0, 0))
 
-        experience_percentage = current_experience / required_exp
-        relative_inner_progress_bar_width = experience_percentage * parent_progress_bar_h_w[0]
+        # Draw the rounded level bar on the canvas at the bottom
+        canvas.alpha_composite(progress_bar, dest=(20, base_image_size[1] - 60))
 
-        # Create a new page and set the HTML content of the page
-        progress_bar = Image.new(
-            mode='RGBA',
-            size=parent_progress_bar_h_w,
-            color="white"
-        )
+        # Draw the avatar with a circular mask
+        avatar_image = Image.open(avatar).convert('RGBA').resize((100, 100), Image.Resampling.LANCZOS)
+        mask = Image.new('L', avatar_image.size, 0)
+        draw_mask = ImageDraw.Draw(mask)
+        draw_mask.ellipse((0, 0) + avatar_image.size, fill=255)
 
-        # Prepare to draw text as well as the inner and outer progress bars
-        progress_bar_draw = ImageDraw.Draw(progress_bar)
+        canvas.paste(avatar_image, (22, 22), mask)
 
-        # Draw progress bar outline
-        progress_bar_draw.rectangle(
-            (
-                0, 0,
-                parent_progress_bar_h_w[0] - 0.1,
-                parent_progress_bar_h_w[1] - 0.1
-            ),
-            fill="white",
-            outline="black"
-        )
-
-        # Draw inner progress bar
-        inner_progress_bar_size = calculate_xy_size(
-            inner_progress_bar_padding,
-            inner_progress_bar_padding,
-            relative_inner_progress_bar_width,  # User's progress towards their next level
-            parent_progress_bar_h_w[1] - inner_progress_bar_padding * 2
-        )
-
-        progress_bar_draw.rectangle(
-            inner_progress_bar_size,
-            fill=progress_bar_color
-        )
-
-        # Center alignment for progress bar text
-        progress_bar_text_x_y = (
-            progress_bar.size[0] / 2,
-            progress_bar.size[1] / 2
-        )
-
-        # Add the text to the progress bar
-        progress_bar_draw.text(
-            progress_bar_text_x_y,
-            f'XP: {current_experience:,} / {required_exp:,}',
-            font=progress_bar_fnt,
-            fill="black",
-            anchor="mm",
-            align="center"
-        )
-
-        progress_bar.putalpha(225)
-
-        # Create our base image
-        canvas = Image.new('RGBA', base_image_size, color=128)
-
-        # User's background image
-        background = Image.open(f'{resources_directory}/default-background.jpg')
-        canvas.paste(background)
-
-        # Determine the primary color of the background
-        primary_color = determine_primary_color(background)
-
-        # Calculate a contrasting color for the primary color
-        text_color = calculate_contrasting_color(primary_color)
-
+        # Adjust text for improved readability
         draw = ImageDraw.Draw(canvas)
 
-        # Draw the main border
-        draw.rectangle(
-            xy=calculate_xy_size(
-                4, 4,
-                canvas.size[0] - 8,
-                canvas.size[1] - 8
-            ),
-            outline=text_color,
-            width=3
-        )
+        # Determine the primary color for the text contrast
+        primary_color = determine_primary_color(background)
+        text_color = calculate_contrasting_color(primary_color)
 
-        # Place the user's profile picture on the canvas
-        profile_picture = Image.open(avatar).convert('RGBA')
+        # Draw the username and title with improved spacing
+        username = member.name[:16] + ".." if len(member.name) > 16 else member.name
+        draw.text((140, 30), username, font=username_fnt, fill=text_color)
+        draw.text((140, 65), member.top_role.name, font=title_fnt, fill=text_color)
 
-        # Determine the primary color of the background
-        profile_picture_primary_color = determine_primary_color(profile_picture)
+        # Level text with larger font for emphasis
+        draw.text((30, base_image_size[1] - 100), f'Level {levels.level}', font=fnt, fill=text_color)
 
-        # Draw the border we'll be putting the avatar in using the avatar's primary color
-        draw.rectangle(
-            xy=calculate_xy_size(18, 18, 110, 110),
-            outline=profile_picture_primary_color,
-            width=1
-        )
+        # Add messages, voice hours, and coins data
+        draw.text((170, 100), f': {format_number(tracking.messages)} Messages', font=fnt, fill=text_color)
+        draw.text((170, 140), f': {format_number(tracking.vc_mins // 60)} VC hours', font=fnt, fill=text_color)
+        draw.text((170, 180), f': {format_number(currency.coins)} Coins', font=fnt, fill=text_color)
 
-        # noinspection PyUnresolvedReferences
-        profile_picture = profile_picture.resize((103, 103), Image.Resampling.LANCZOS)
-        canvas.paste(profile_picture, (22, 22))
+        # Draw the preloaded icons for messages, voice hours, and coins
+        canvas.alpha_composite(self.speech_balloon, dest=(140, 100))
+        canvas.alpha_composite(self.microphone, dest=(140, 140))
+        canvas.alpha_composite(self.coin, dest=(140, 180))
 
-        draw.text(
-            xy=(38 if current_level > 10 else 40, 132),
-            text=f'Level {current_level}',
-            fill=text_color,
-            font=fnt
-        )
-
-        # Temporary solution for long usernames? In the future, it'd be nice to adjust the text's size dynamically so
-        # that it fits. Although we will have to set a limit either way, so.
-        if len(username) > 16:
-            username = username[:16] + '..'
-
-        draw.text(
-            xy=(140, 20),
-            text=username,
-            fill=text_color,
-            font=username_fnt
-        )
-
-        draw.text(
-            xy=(140, 50),
-            text=title,
-            fill=text_color,
-            font=title_fnt
-        )
-
-        draw.text(
-            xy=(17, 190),
-            text=f'Level rank:  {level_rank}#',  # Extra spacing to line up the ranks
-            fill=text_color,
-            font=fnt
-        )
-
-        draw.text(
-            xy=(17, 215),
-            text=f'Coin rank:   {wealth_rank}#',
-            fill=text_color,
-            font=fnt
-        )
-
-        # Toss in all the basic information
-        speech_balloon = Image.open(f'{resources_directory}/speech-balloon.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(speech_balloon, dest=(140, 90))
-
-        draw.text(
-            xy=(168, 90),
-            text=f': {messages} Messages',
-            fill=text_color,
-            font=fnt
-        )
-
-        microphone = Image.open(f'{resources_directory}/microphone-3.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(microphone, dest=(140, 123))
-
-        draw.text(
-            xy=(168, 123),
-            text=f': {voice_activity} VC hours',
-            fill=text_color,
-            font=fnt
-        )
-
-        coin = Image.open(f'{resources_directory}/gold-coin.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(coin, dest=(140, 156))
-
-        draw.text(
-            xy=(168, 156),
-            text=f': {networth} Coins',
-            fill=text_color,
-            font=fnt
-        )
-
-        # Add progress bar to the base image
-        canvas.alpha_composite(progress_bar, dest=parent_progress_bar_x_y)
-
-        # Badges
-        """
-        This is for testing purposes only.
-        blue_diamond = Image.open('large-blue-diamond.png').convert('RGBA').resize((33, 33))
-        canvas.alpha_composite(blue_diamond, dest=(30, 200))
-
-        cross_mark = Image.open('cross-mark.png').convert('RGBA').resize((33, 33))
-        canvas.alpha_composite(cross_mark, dest=(80, 200))
-        """
-
+        # Save the final image to a buffer and return it
         buffer = BytesIO()
         canvas.save(buffer, "png")
         buffer.seek(0)
         canvas.close()
 
         file = File(buffer, filename='profile.png')
-
         return file
 
 
