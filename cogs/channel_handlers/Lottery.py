@@ -8,6 +8,21 @@ from discord.ext import commands, tasks
 import utils
 
 
+async def manage_reactions(message):
+    """Handle message reactions cleanup and re-adding of correct reactions."""
+    # Maximum reaction threshold before clearing all reactions
+    max_reactions = 69
+    current_reactions = sum(reaction.count for reaction in message.reactions)
+
+    if current_reactions > max_reactions:
+        await message.clear_reactions()
+
+        # Add back the appropriate reactions
+        ticket_options = ["🍏", "🍎", "🍐", "🍋", "🍪"]
+        for emoji in ticket_options:
+            await message.add_reaction(emoji)
+
+
 class LotteryHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -196,21 +211,7 @@ class LotteryHandler(commands.Cog):
             # Call manage reactions to maintain the reactions on the lottery message
             channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
-            await self.manage_reactions(message)
-
-    async def manage_reactions(self, message):
-        """Handle message reactions cleanup and re-adding of correct reactions."""
-        # Maximum reaction threshold before clearing all reactions
-        max_reactions = 69
-        current_reactions = sum(reaction.count for reaction in message.reactions)
-
-        if current_reactions > max_reactions:
-            await message.clear_reactions()
-
-            # Add back the appropriate reactions
-            ticket_options = ["🍏", "🍎", "🍐", "🍋", "🍪"]
-            for emoji in ticket_options:
-                await message.add_reaction(emoji)
+            await manage_reactions(message)
 
 
 @tasks.loop(minutes=10)
@@ -219,7 +220,7 @@ async def lottery_leaderboard_update(self):
     await self.bot.wait_until_ready()
 
     # Fetch the necessary Discord objects
-    guild = self.bot.get_guild(self.bot.config['RaziRealmID'])
+    guild = self.bot.get_guild(self.bot.config['guild_id'])
     channel = guild.get_channel(self.bot.config['channels']['lottery'])
 
     # Fetch the leaderboard message
