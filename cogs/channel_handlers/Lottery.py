@@ -113,7 +113,7 @@ class LotteryHandler(commands.Cog):
             embed.description += f"\n{leaderboard_text}"
 
         # Update the leaderboard message
-        await msg.edit(embed=embed)
+        await msg.edit(content=" ", embed=embed)
 
 
     @tasks.loop(hours=1)
