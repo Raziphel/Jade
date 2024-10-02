@@ -143,7 +143,7 @@ class Profile(Cog):
             user = await self.bot.fetch_user(member.id)
             avatar = user.display_avatar
             data = await avatar.read()
-
+        return BytesIO(data)
 
     # async def base_profile(self, ctx, user, msg):
     #     if msg == None:
