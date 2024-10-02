@@ -122,12 +122,10 @@ class Profile(Cog):
         ),
     )
     async def profile(self, ctx, user: Member = None):
-        '''Shows a user's profile'''
+        """Shows a user's profile"""
         if not user:
             user = ctx.author
 
-        #! Quest 2 Complete
-        await self.bot.get_cog('Quests').get_quest(user=user, quest_no=2, completed=True)
 
         # await self.base_profile(ctx=ctx, user=user, msg=None)
         file = await self.generate_screenshot(user)
@@ -174,7 +172,7 @@ class Profile(Cog):
         levels = utils.Levels.get(member.id)
         currency = utils.Currency.get(member.id)
         tracking = utils.Tracking.get(member.id)
-        staff_tracking = utils.Staff_Track.get(member.id)
+        #staff_tracking = utils.Staff_Track.get(member.id)
 
         if levels.level == 0:
             required_exp = 10
