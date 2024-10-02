@@ -216,46 +216,46 @@ class LotteryHandler(commands.Cog):
             await manage_reactions(message)
 
 
-@tasks.loop(minutes=10)
-async def lottery_leaderboard_update(self):
-    """Updates the lottery leaderboard message every 10 minutes."""
-    await self.bot.wait_until_ready()
+    @tasks.loop(minutes=10)
+    async def lottery_leaderboard_update(self):
+        """Updates the lottery leaderboard message every 10 minutes."""
+        await self.bot.wait_until_ready()
 
-    # Fetch the necessary Discord objects
-    guild = self.bot.get_guild(self.bot.config['guild_id'])
-    channel = guild.get_channel(self.bot.config['channels']['lottery'])
+        # Fetch the necessary Discord objects
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+        channel = guild.get_channel(self.bot.config['channels']['lottery'])
 
-    # Fetch the leaderboard message
-    msg = await channel.fetch_message(self.bot.config['lottery_messages']['2'])
+        # Fetch the leaderboard message
+        msg = await channel.fetch_message(self.bot.config['lottery_messages']['2'])
 
-    # Fetch the top 10 users with the most tickets from the database
-    async with self.bot.database() as db:
-        top_users = await db.fetch(
-            "SELECT user_id, tickets FROM currency WHERE tickets > 0 ORDER BY tickets DESC LIMIT 10"
-        )
-
-    # Build the leaderboard embed
-    embed = Embed(
-        title="🎟️ Lottery Leaderboard",
-        description="Top 10 users with the most tickets",
-        color=0xffd700
-    )
-
-    if not top_users:
-        embed.add_field(name="No tickets yet!", value="Be the first to buy some tickets!", inline=False)
-    else:
-        # Add top users to the embed
-        for idx, row in enumerate(top_users, 1):
-            user = self.bot.get_user(row['user_id']) or (await self.bot.fetch_user(row['user_id']))
-            tickets = row['tickets']
-            embed.add_field(
-                name=f"#{idx} {user.display_name}",
-                value=f"{tickets:,} tickets",
-                inline=False
+        # Fetch the top 10 users with the most tickets from the database
+        async with self.bot.database() as db:
+            top_users = await db.fetch(
+                "SELECT user_id, tickets FROM currency WHERE tickets > 0 ORDER BY tickets DESC LIMIT 10"
             )
 
-    # Update the leaderboard message
-    await msg.edit(embed=embed)
+        # Build the leaderboard embed
+        embed = Embed(
+            title="🎟️ Lottery Leaderboard",
+            description="Top 10 users with the most tickets",
+            color=0xffd700
+        )
+
+        if not top_users:
+            embed.add_field(name="No tickets yet!", value="Be the first to buy some tickets!", inline=False)
+        else:
+            # Add top users to the embed
+            for idx, row in enumerate(top_users, 1):
+                user = self.bot.get_user(row['user_id']) or (await self.bot.fetch_user(row['user_id']))
+                tickets = row['tickets']
+                embed.add_field(
+                    name=f"#{idx} {user.display_name}",
+                    value=f"{tickets:,} tickets",
+                    inline=False
+                )
+
+        # Update the leaderboard message
+        await msg.edit(embed=embed)
 
 
 
