@@ -29,12 +29,14 @@ class LotteryHandler(commands.Cog):
         self.lottery_update.start()
         self.lottery_runner.start()
         self.lottery_pot_increaser.start()
+        self.lottery_leaderboard_update.start()  # Start the leaderboard update task
         self.previous_winner_message = None
 
     def cog_unload(self):
         self.lottery_update.cancel()
         self.lottery_runner.cancel()
         self.lottery_pot_increaser.cancel()
+        self.lottery_leaderboard_update.cancel()
 
     @tasks.loop(minutes=1)
     async def lottery_update(self):
