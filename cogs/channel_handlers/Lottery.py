@@ -55,25 +55,29 @@ class LotteryHandler(commands.Cog):
 
         # Build the embed with ticket information, prize pool, and timer
         description = (
-            "**Click 🍪 to get updates!**\n"
-            "The more tickets you buy, the better your odds!\n\n"
-            f"# Current Prize Pool\n# **{lottery.coins:,} {self.bot.config['emojis']['coin']}x**\n"
-            f"# Time Until Draw\n# **{time_remaining_str}**\n\n~"
+            "🎉 **Welcome to the Weekly Lottery!** 🎉\n\n"
+            "💰 **Prize Pool:**\n"
+            f"```css\n{lottery.coins:,} {self.bot.config['emojis']['coin']} coins\n```\n"
+            "⏳ **Time Until Draw:**\n"
+            f"```css\n{time_remaining_str}\n```\n"
+            "**The more tickets you buy, the better your odds of winning!**\n\n"
+            "Click 🍪 to get updates!"
         )
 
         embed = Embed(
-            title="Welcome to the Lottery!",
+            title="🎟️ Lottery Information 🎟️",
             description=description,
-            color=0xff00ff
+            color=discord.Color.purple()  # Use a more vibrant color for the embed
         )
 
         # Add ticket options to the embed
-        for emoji, (tickets, cost) in ticket_options.items():
-            embed.add_field(
-                name=f"{emoji} - {tickets} Tickets",
-                value=f"**Cost:** {cost:,} {self.bot.config['emojis']['coin']}x",
-                inline=False
-            )
+        embed.add_field(
+            name="🎫 **Ticket Options:**",
+            value="\n".join(
+                [f"{emoji} - **{tickets} Tickets**\nCost: {cost:,} {self.bot.config['emojis']['coin']} coins"
+                 for emoji, (tickets, cost) in ticket_options.items()]),
+            inline=False
+        )
 
         # Edit the message with updated content
         await msg.edit(content=" ", embed=embed)
