@@ -193,10 +193,24 @@ class LotteryHandler(commands.Cog):
                 # If not enough coins
                 await member.send(f"You don't have enough coins to buy {tickets} tickets.")
 
-        # Save updates to the database
-        async with self.bot.database() as db:
-            await currency.save(db)
-            await lottery.save(db)
+            # Call manage reactions to maintain the reactions on the lottery message
+            channel = self.bot.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+            await self.manage_reactions(message)
+
+    async def manage_reactions(self, message):
+        """Handle message reactions cleanup and re-adding of correct reactions."""
+        # Maximum reaction threshold before clearing all reactions
+        max_reactions = 69
+        current_reactions = sum(reaction.count for reaction in message.reactions)
+
+        if current_reactions > max_reactions:
+            await message.clear_reactions()
+
+            # Add back the appropriate reactions
+            ticket_options = ["🍏", "🍎", "🍐", "🍋", "🍪"]
+            for emoji in ticket_options:
+                await message.add_reaction(emoji)
 
 
 def setup(bot):
