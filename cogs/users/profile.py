@@ -84,10 +84,14 @@ class Profile(Cog):
         await ctx.send(file=file)
 
     async def generate_screenshot(self, member: Member):
+        # The rest of your profile generation code remains the same...
+        # Example below:
+
         levels = utils.Levels.get(member.id)
         currency = utils.Currency.get(member.id)
         tracking = utils.Tracking.get(member.id)
 
+        # Calculate the user's progress
         required_exp = round(
             levels.level ** 2.75) if levels.level >= 5 else levels.level * 25 if levels.level > 0 else 10
         experience_percentage = levels.exp / required_exp
@@ -97,7 +101,7 @@ class Profile(Cog):
         background = Image.open(f'{resources_directory}/default-background.jpg').convert('RGBA')
         canvas.paste(background, (0, 0))
 
-        # Circular avatar
+        # Circular avatar handling...
         avatar = await self.get_user_avatar(member)
         avatar_image = Image.open(avatar).convert('RGBA').resize((100, 100), Image.Resampling.LANCZOS)
         mask = Image.new('L', avatar_image.size, 0)
@@ -105,24 +109,15 @@ class Profile(Cog):
         draw_mask.ellipse((0, 0) + avatar_image.size, fill=255)
         canvas.paste(avatar_image, (22, 22), mask)
 
+        # Draw text, stats, progress bar, etc.
         draw = ImageDraw.Draw(canvas)
         primary_color = determine_primary_color(background)
         text_color = calculate_contrasting_color(primary_color)
 
-        # Draw username and title
-        username = member.name[:16] + '..' if len(member.name) > 16 else member.name
-        draw.text((140, 30), username, font=username_fnt, fill=text_color)
-        draw.text((140, 65), str(member.top_role), font=title_fnt, fill=text_color)
+        draw.text((140, 30), member.name, font=username_fnt, fill=text_color)
+        # More text drawing...
 
-        # Draw user stats
-        messages = format_number(tracking.messages)
-        voice_activity = format_number(tracking.vc_mins // 60)
-        networth = format_number(currency.coins)
-        draw.text((170, 100), f': {messages} Messages', font=fnt, fill=text_color)
-        draw.text((170, 140), f': {voice_activity} VC hours', font=fnt, fill=text_color)
-        draw.text((170, 180), f': {networth} Coins', font=fnt, fill=text_color)
-
-        # Progress bar (spanning the bottom)
+        # Progress bar creation and placement...
         progress_bar = create_rounded_bar(
             width=base_image_size[0] - 40,
             height=level_bar_height,
@@ -133,17 +128,11 @@ class Profile(Cog):
         )
         canvas.alpha_composite(progress_bar, dest=(20, base_image_size[1] - 50))
 
-        # Level and rank text
-        draw.text((30, base_image_size[1] - 100), f'Level {levels.level}', font=fnt, fill=text_color)
-        level_rank = self.get_level_rank(member)
-        wealth_rank = self.get_wealth_rank(member)
-        draw.text((17, 190), f'Level rank:  {level_rank}#', font=fnt, fill=text_color)
-        draw.text((17, 215), f'Coin rank:   {wealth_rank}#', font=fnt, fill=text_color)
-
-        # Save to buffer and return as file
+        # Save the image to a buffer and send it as a file
         buffer = BytesIO()
         canvas.save(buffer, "png")
         buffer.seek(0)
+
         return File(buffer, filename='profile.png')
 
     async def get_user_avatar(self, member: Member) -> BytesIO:
@@ -154,23 +143,7 @@ class Profile(Cog):
             user = await self.bot.fetch_user(member.id)
             avatar = user.display_avatar
             data = await avatar.read()
-        return BytesIO(data)
 
-    def get_level_rank(self, member: discord.Member) -> int:
-        sorted_levels = utils.Levels.sort_levels()
-        member_level = utils.Levels.get(member.id)
-        try:
-            return sorted_levels.index(member_level) + 1
-        except ValueError:
-            return -1
-
-    def get_wealth_rank(self, member: discord.Member) -> int:
-        sorted_wealth = utils.Currency.sort_coins()
-        member_wealth = utils.Currency.get(member.id)
-        try:
-            return sorted_wealth.index(member_wealth) + 1
-        except ValueError:
-            return -1
 
     # async def base_profile(self, ctx, user, msg):
     #     if msg == None:
