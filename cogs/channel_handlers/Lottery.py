@@ -55,7 +55,7 @@ class LotteryHandler(commands.Cog):
         description = (
             "Click 🍪 to get updates!\n"
             "The more tickets you buy, the better your odds!\n\n"
-            f"# **Current Prize Pool:** {lottery.coins:,} coins\n"
+            f"# **Current Prize Pool:** {lottery.coins:,} {self.bot.config['emojis']['coin']}x\n"
             f"# **Time Until Draw:** {time_remaining_str}\n"
         )
 
@@ -69,7 +69,7 @@ class LotteryHandler(commands.Cog):
         for emoji, (tickets, cost) in ticket_options.items():
             embed.add_field(
                 name=f"{emoji} - {tickets} Tickets",
-                value=f"Cost: {cost:,} coins",
+                value=f"Cost: {cost:,} {self.bot.config['emojis']['coin']}x",
                 inline=False
             )
 
@@ -246,11 +246,11 @@ class LotteryHandler(commands.Cog):
                 # Confirmation via DM with details of the purchase
                 embed = Embed(
                     title="Lottery Ticket Purchase Confirmation",
-                    description=f"You have successfully purchased {tickets} tickets for {cost} coins!",
+                    description=f"You have successfully purchased {tickets} tickets for {cost} {self.bot.config['emojis']['coin']}x!",
                     color=discord.Color.green()
                 )
                 embed.add_field(name="Current Tickets", value=f"{currency.tickets} tickets", inline=False)
-                embed.add_field(name="Remaining Coins", value=f"{currency.coins:,} coins", inline=False)
+                embed.add_field(name="Remaining {self.bot.config['emojis']['coin']}x", value=f"{currency.coins:,} coins", inline=False)
 
                 await member.send(embed=embed)
 
