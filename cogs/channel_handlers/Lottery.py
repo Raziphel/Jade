@@ -74,7 +74,7 @@ class LotteryHandler(commands.Cog):
             )
 
         # Edit the message with updated content
-        await msg.edit(embed=embed)
+        await msg.edit(content=" ", embed=embed)
 
         # Call manage reactions to maintain the reactions on the lottery message
         await self.manage_reactions(msg)
@@ -151,7 +151,8 @@ class LotteryHandler(commands.Cog):
             # Get all tickets using the get_total_tickets method
             total_tickets = utils.Currency.get_total_tickets()
             if total_tickets == 0:
-                await channel.send(embed=Embed(description="No one entered the lottery this week. No winner."))
+                await channel.send(content=" ", embed=Embed(description="No one entered the lottery this week. No "
+                                                                      "winner."))
                 return
 
             # Fetch all users with tickets using the sort_tickets method
