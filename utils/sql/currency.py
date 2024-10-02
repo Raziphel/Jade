@@ -67,7 +67,7 @@ class Currency(object):
     @classmethod
     def sort_tickets(cls):
         """sorts the user's by tickets. getting ranks!"""
-        sorted_tickets = sorted(cls.all_currency.values(), key=lambda u: u.lot_tickets, reverse=True)
+        sorted_tickets = sorted(cls.all_currency.values(), key=lambda u: u.tickets, reverse=True)
         return sorted_tickets
 
     @classmethod
@@ -75,5 +75,5 @@ class Currency(object):
         """Gets total tickets"""
         total = 0
         for i in cls.all_currency.values():
-            total += i.lot_tickets
+            total += i.tickets
         return total
