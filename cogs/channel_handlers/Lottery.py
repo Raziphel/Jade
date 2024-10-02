@@ -180,15 +180,16 @@ class LotteryHandler(commands.Cog):
 
             lottery.lot_time = dt.now()
 
-            # Get all tickets using the get_total_tickets method
+            # Get total tickets and participants
             total_tickets = utils.Currency.get_total_tickets()
+            sorted_users = [user for user in utils.Currency.sort_tickets() if user.tickets > 0]
+
             if total_tickets == 0:
                 await channel.send(embed=Embed(description="No one entered the lottery this week. No winner."))
                 return
 
-            # Fetch all users with tickets using the sort_tickets method
+            # Collect all tickets into a list for the draw
             all_tickets = []
-            sorted_users = utils.Currency.sort_tickets()
             for user in sorted_users:
                 all_tickets.extend([user.id] * user.tickets)
 
@@ -196,10 +197,25 @@ class LotteryHandler(commands.Cog):
             winner_id = choice(all_tickets)
             winner = guild.get_member(winner_id)
 
-            # Announce the winner and store the message
-            winner_message = await channel.send(
-                embed=Embed(description=f"🎉 Congratulations! The winner of the lottery is: **{winner.display_name}**!")
-            )
+            # Calculate winner's chance of winning
+            winner_info = next(user for user in sorted_users if user.id == winner_id)
+            win_chance = (winner_info.tickets / total_tickets) * 100
+
+            # Announce the winner with additional details
+            winner_message = await channel.send(embed=Embed(
+                title="🎉 Lottery Winner Announcement 🎉",
+                description=(
+                    f"**Congratulations! The winner of this week's lottery is:** **{winner.display_name}**\n\n"
+                    f"**Details:**\n"
+                    f"- **Total Tickets Purchased:** {total_tickets}\n"
+                    f"- **Total Participants:** {len(sorted_users)}\n"
+                    f"- **{winner.display_name}'s Tickets:** {winner_info.tickets:,}\n"
+                    f"- **Winning Chance:** {win_chance:.2f}%\n"
+                    f"- **Prize Amount:** {lottery.coins:,} Coins"
+                ),
+                color=discord.Color.gold()
+            ))
+
             self.previous_winner_message = winner_message  # Store the winner message for later removal
 
             # Distribute the prize
