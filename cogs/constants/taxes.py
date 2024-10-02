@@ -30,7 +30,7 @@ class Taxes(Cog):
         for member in guild.members:
             try:
                 currency = utils.Currency.get(member.id)
-                if currency.coins > 9:
+                if currency.coins > 100:
                     currency.coins -= 100
                     total_taxed += 100
                     async with self.bot.database() as db:
@@ -41,6 +41,10 @@ class Taxes(Cog):
                         await currency.save(db)
             except Exception as e:
                 print(f"Error taxing {member.name}: {str(e)}")
+
+        server_currency.coins += total_taxed
+        async with self.bot.database() as db:
+            await server_currency.save(db)
 
         print(f"Taxed the server for a total of: {total_taxed:,} coins")
 
