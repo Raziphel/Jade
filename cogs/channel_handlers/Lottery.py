@@ -215,7 +215,6 @@ class LotteryHandler(commands.Cog):
             message = await channel.fetch_message(payload.message_id)
             await manage_reactions(message)
 
-
     @tasks.loop(minutes=10)
     async def lottery_leaderboard_update(self):
         """Updates the lottery leaderboard message every 10 minutes."""
@@ -230,9 +229,11 @@ class LotteryHandler(commands.Cog):
 
         # Fetch the top 10 users with the most tickets from the database
         async with self.bot.database() as db:
-            top_users = await db.fetch(
+            # Execute the query to get the top 10 users with the most tickets
+            await db.execute(
                 "SELECT user_id, tickets FROM currency WHERE tickets > 0 ORDER BY tickets DESC LIMIT 10"
             )
+            top_users = await db.fetchall()  # Fetch all results from the executed query
 
         # Build the leaderboard embed
         embed = Embed(
@@ -247,7 +248,7 @@ class LotteryHandler(commands.Cog):
             # Add top users to the embed
             for idx, row in enumerate(top_users, 1):
                 user = self.bot.get_user(row['user_id']) or (await self.bot.fetch_user(row['user_id']))
-                tickets = row['tickets']
+                tickets = row['lot_tickets']
                 embed.add_field(
                     name=f"#{idx} {user.display_name}",
                     value=f"{tickets:,} tickets",
