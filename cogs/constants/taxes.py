@@ -3,9 +3,6 @@ from discord.ext.commands import Cog
 import utils
 import logging
 
-# Setting up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 class Taxes(Cog):
     def __init__(self, bot):
@@ -26,7 +23,7 @@ class Taxes(Cog):
             server_currency.coins += difference
             async with self.bot.database() as db:
                 await server_currency.save(db)
-            logger.info(f"Adjusted economy by {difference:,} coins.")
+            print(f"Adjusted economy by {difference:,} coins.")
 
         # Tax members
         total_taxed = 0
@@ -44,9 +41,9 @@ class Taxes(Cog):
                     async with self.bot.database() as db:
                         await currency.save(db)
             except Exception as e:
-                logger.error(f"Error taxing {member.name}: {str(e)}")
+                print(f"Error taxing {member.name}: {str(e)}")
 
-        logger.info(f"Taxed the server for a total of: {total_taxed:,} coins")
+        print(f"Taxed the server for a total of: {total_taxed:,} coins")
 
     @daily_loop.before_loop
     async def before_daily_loop(self):
