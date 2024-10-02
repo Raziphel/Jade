@@ -102,21 +102,25 @@ class LotteryHandler(commands.Cog):
         # Get the top 10 users with the most tickets using the sort_tickets method, filter out users with zero tickets
         sorted_users = [user for user in utils.Currency.sort_tickets()[:10] if user.tickets > 0]
 
+        # Calculate the total number of tickets for the chance calculation
+        total_tickets = sum(user.tickets for user in sorted_users)
+
         # Build the leaderboard embed
         embed = Embed(
             title="🎟️ Lottery Leaderboard",
-            description="Top 10 users with the most tickets",
+            description="Top 10 users with the most tickets and their chances of winning:",
             color=0xffd700
         )
 
         if not sorted_users:
             embed.add_field(name="No tickets yet!", value="Be the first to buy some tickets!", inline=False)
         else:
-            # Create a leaderboard list in a more compact format
+            # Create a leaderboard list with winning chances
             leaderboard_text = ""
             for idx, user in enumerate(sorted_users, 1):
                 discord_user = await self.bot.fetch_user(user.user_id)
-                leaderboard_text += f"**#{idx}** {discord_user.display_name} - {user.tickets:,} 🎟\n"
+                win_chance = (user.tickets / total_tickets) * 100 if total_tickets > 0 else 0
+                leaderboard_text += f"**#{idx}** {discord_user.display_name} - {user.tickets:,} 🎟 - Chance: {win_chance:.2f}%\n"
 
             embed.description += f"\n{leaderboard_text}"
 
