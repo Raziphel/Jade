@@ -4,3 +4,4 @@ more_itertools
 toml~=0.10.2
 pillow
 redis==5.0.0b2
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
