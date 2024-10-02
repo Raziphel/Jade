@@ -27,7 +27,7 @@ class LotteryHandler(commands.Cog):
         await self.bot.wait_until_ready()
 
         # Fetch the lottery and the necessary Discord objects
-        guild = self.bot.get_guild(self.bot.config['RaziRealmID'])
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
         channel = guild.get_channel(self.bot.config['channels']['lottery'])
         lottery = utils.Lottery.get(1)
         tickets = utils.Currency.get_total_tickets()
@@ -79,7 +79,7 @@ class LotteryHandler(commands.Cog):
         await self.bot.wait_until_ready()
 
         lottery = utils.Lottery.get(1)
-        guild = self.bot.get_guild(self.bot.config['RaziRealmID'])
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
         channel = guild.get_channel(self.bot.config['channels']['lottery'])
 
         # Check if it's time to run the lottery
