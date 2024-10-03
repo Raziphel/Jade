@@ -85,12 +85,12 @@ class UserFunctions(object):
     async def determine_required_exp(cls, level:int):
         """Determines how much exp is needed to level up!"""
         if level == 0:
-            required_exp = 10
+            return 10
         elif level < 4:
-            required_exp = level*20
+            return level * 20
         else:
-            required_exp = round(level**2.75)
-        return required_exp
+            # Adjust the formula to scale more smoothly to higher levels
+            return round(10 + (level ** 2.1) * 30)
 
 
     @classmethod
