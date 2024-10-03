@@ -112,10 +112,10 @@ class StoreHandler(Cog):
             user_currency = utils.Currency.get(user.id)
             embed = Embed(
                 title="Purchase Successful",
-                description=f"You have successfully bought **{item['name']}** for **{item['price']} coins**!",
+                description=f"You have successfully bought **{item['name']}** for **{item['price']:,} {self.bot.config['emojis']['coin']}x**!",
                 color=0x339c2a
             )
-            embed.add_field(name="Remaining Coins", value=f"{user_currency.coins:,} coins", inline=False)
+            embed.add_field(name="Remaining Coins", value=f"{user_currency.coins:,} {self.bot.config['emojis']['coin']}x", inline=False)
             await user.send(embed=embed)
 
             # Log the transaction
@@ -131,7 +131,7 @@ class StoreHandler(Cog):
         """Handle message reactions cleanup."""
         channel = self.bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-        if sum(reaction.count for reaction in message.reactions) > 1:
+        if sum(reaction.count for reaction in message.reactions) > 100:
             await message.clear_reactions()
         for reaction in message.reactions:
             await message.add_reaction(reaction.emoji)
