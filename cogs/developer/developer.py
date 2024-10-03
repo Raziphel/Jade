@@ -131,12 +131,14 @@ class Developer(Cog):
                 break
 
         line = ""
+        text = ""
         for index, (user, rank) in enumerate(users):
             line = f"{user.mention}"
         text.append(line)
 
+
         # Send the leaderboard message, pinging the top 10 users
-        if leaderboard:
+        if text:
             await ctx.send("🏆 **Top 10 Members with the Most Coins** 🏆\n".join(text))
         else:
             await ctx.send("No users found with coins.")
