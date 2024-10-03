@@ -9,7 +9,7 @@ class Taxes(Cog):
         self.bot = bot
         self.daily_loop.start()
 
-    @tasks.loop(hours=24)
+    @tasks.loop(hours=1)
     async def daily_loop(self):
         """Main loop to tax and fix the economy every 24 hours."""
         guild = self.bot.get_guild(self.bot.config['guild_id'])
@@ -30,9 +30,9 @@ class Taxes(Cog):
         for member in guild.members:
             try:
                 currency = utils.Currency.get(member.id)
-                if currency.coins > 50:
-                    currency.coins -= 50
-                    total_taxed += 50
+                if currency.coins > 10:
+                    currency.coins -= 10
+                    total_taxed += 10
                     async with self.bot.database() as db:
                         await currency.save(db)
                 else:
