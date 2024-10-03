@@ -229,7 +229,8 @@ class LotteryHandler(commands.Cog):
 
             # Distribute the prize
             winner_currency = utils.Currency.get(winner.id)
-            winner_currency.coins += lottery.coins
+            winnings = utils.CoinFunctions.pay_tax(payer=winner, amount=lottery.coins)
+            winner_currency.coins += winnings
 
             # Reset lottery
             lottery.last_winner_id = winner.id
