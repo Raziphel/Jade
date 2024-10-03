@@ -116,6 +116,7 @@ class Developer(Cog):
     @command()
     async def test_lottery(self, ctx):
         """Simulates a test lottery and announces a random winner without affecting real data."""
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
 
         # Get total tickets and participants (simulate this)
         total_tickets = utils.Currency.get_total_tickets()
@@ -128,13 +129,13 @@ class Developer(Cog):
         # Simulate collecting all tickets into a list for the draw
         all_tickets = []
         for user in sorted_users:
-            all_tickets.extend([user_id] * user.tickets)
+            all_tickets.extend([user.id] * user.tickets)
 
-        # Select a winner from the simulated pool
+        # Select a winner
         winner_id = choice(all_tickets)
-        winner = ctx.guild.get_member(winner_id)
+        winner = guild.get_member(winner_id)
 
-        # Calculate the winner's chance of winning
+        # Calculate winner's chance of winning
         winner_info = next(user for user in sorted_users if user.id == winner_id)
         win_chance = (winner_info.tickets / total_tickets) * 100
 
