@@ -1,7 +1,7 @@
 
 #* Discord
 from discord.ext.commands import command, Cog
-from discord import Member, PermissionOverwrite, Permissions
+from discord import Member, PermissionOverwrite, Permissions, Color
 
 #*Additions
 from asyncio import sleep, iscoroutine
@@ -112,8 +112,46 @@ class Developer(Cog):
         await ctx.message.delete()
         await ctx.send('placeholder message!')
 
+    @utils.is_dev()
+    @command()
+    async def test_lottery(self, ctx):
+        """Simulates a test lottery and announces a random winner without affecting real data."""
 
+        # Get total tickets and participants (simulate this)
+        total_tickets = utils.Currency.get_total_tickets()
+        sorted_users = [user for user in utils.Currency.sort_tickets() if user.tickets > 0]
 
+        if total_tickets == 0:
+            await ctx.send(embed=utils.Embed(description="No one entered the lottery. No winner."))
+            return
+
+        # Simulate collecting all tickets into a list for the draw
+        all_tickets = []
+        for user in sorted_users:
+            all_tickets.extend([user.id] * user.tickets)
+
+        # Select a winner from the simulated pool
+        winner_id = choice(all_tickets)
+        winner = ctx.guild.get_member(winner_id)
+
+        # Calculate the winner's chance of winning
+        winner_info = next(user for user in sorted_users if user.id == winner_id)
+        win_chance = (winner_info.tickets / total_tickets) * 100
+
+        # Announce the simulated winner with their winning chance
+        embed = utils.Embed(
+            title="🎉 Test Lottery Winner 🎉",
+            description=(
+                f"**Simulated Winner**: **{winner.display_name}**\n\n"
+                f"**Details**:\n"
+                f"- **Total Tickets**: {total_tickets}\n"
+                f"- **{winner.display_name}'s Tickets**: {winner_info.tickets}\n"
+                f"- **Winning Chance**: {win_chance:.2f}%"
+            ),
+            color=Color.green()
+        )
+
+        await ctx.send(embed=embed)
 
 
 
