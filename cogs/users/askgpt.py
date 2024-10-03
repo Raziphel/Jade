@@ -15,7 +15,7 @@ class Askgbt(Cog):
         try:
             # Call OpenAI API
             response = openai.Completion.create(
-                engine="text-davinci-003",  # Use GPT-4 engine
+                engine="gpt-4o-mini",  # Use GPT-4 engine
                 prompt=question,
                 max_tokens=150,
                 n=1,
