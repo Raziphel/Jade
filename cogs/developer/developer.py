@@ -121,7 +121,7 @@ class Developer(Cog):
         # Fetch all users and their coin balances from the database or tracking system
         sorted_ranks = utils.Currency.sort_coins() # Assuming this fetches a list of (user_id, coin_amount)
 
-
+        users = []
         for rank in sorted_ranks:
             user = self.bot.get_user(rank.user_id)
             if user.id == self.bot.user.id:
