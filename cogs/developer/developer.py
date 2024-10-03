@@ -114,35 +114,6 @@ class Developer(Cog):
 
 
 
-    @utils.is_dev()
-    @command()
-    async def top10coins(self, ctx):
-        """Ping the top 10 members with the most coins"""
-        # Fetch all users and their coin balances from the database or tracking system
-        sorted_ranks = utils.Currency.sort_coins() # Assuming this fetches a list of (user_id, coin_amount)
-
-        users = []
-        for rank in sorted_ranks:
-            user = self.bot.get_user(rank.user_id)
-            if user.id == self.bot.user.id:
-                continue  # Skip bot's own ID
-            users.append((user, rank))
-            if len(users) == 10:  # Limit to top 10
-                break
-
-        line = ""
-        text = []
-        for index, (user, rank) in enumerate(users):
-            line = f"{user.mention}"
-        text.append(line)
-
-
-        # Send the leaderboard message, pinging the top 10 users
-        if text:
-            await ctx.send("🏆 **Top 10 Members with the Most Coins** 🏆\n".join(text))
-        else:
-            await ctx.send("No users found with coins.")
-
 
 
 
