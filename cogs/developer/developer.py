@@ -131,7 +131,7 @@ class Developer(Cog):
                 break
 
         line = ""
-        text = ""
+        text = []
         for index, (user, rank) in enumerate(users):
             line = f"{user.mention}"
         text.append(line)
