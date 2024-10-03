@@ -136,7 +136,7 @@ class Developer(Cog):
         winner = guild.get_member(winner_id)
 
         # Calculate winner's chance of winning
-        winner_info = next(user for user in sorted_users if user.id == winner_id)
+        winner_info = next(user for user in sorted_users if user.user_id == winner_id)
         win_chance = (winner_info.tickets / total_tickets) * 100
 
         # Announce the simulated winner with their winning chance
