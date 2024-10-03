@@ -41,50 +41,40 @@ class Serpent(commands.AutoShardedBot):
     async def startup(self):
         """Load database"""
         try:  #? Try this to prevent resetting the database on accident!
-            #! Clear cache
-            utils.Moderation.all_moderation.clear()
-            utils.Levels.all_levels.clear()
-            utils.Currency.all_currency.clear()
-            utils.Coins_Record.all_coins_record.clear()
-            utils.Tracking.all_tracking.clear()
-            utils.Daily.all_dailys.clear()
-            utils.Skills.all_skills.clear()
-            utils.UserLink.all_user_links.clear()
-            utils.Lottery.all_lotterys.clear()
+            # Define a mapping of table names to their corresponding utility classes
+            table_mapping = {
+                'moderation': utils.Moderation,
+                'levels': utils.Levels,
+                'currency': utils.Currency,
+                'coins_record': utils.Coins_Record,
+                'tracking': utils.Tracking,
+                'daily': utils.Daily,
+                'skills': utils.Skills,
+                'user_link': utils.UserLink,
+                'lottery': utils.Lottery
+            }
 
+            # Step 1: Clear all caches dynamically
+            for utility_class in table_mapping.values():
+                if hasattr(utility_class, 'clear_all'):
+                    utility_class.clear_all()  # Assuming each class has a 'clear_all' method to clear the cache
+                else:
+                    cache_attr = [attr for attr in dir(utility_class) if attr.startswith('all_')]
+                    if cache_attr:
+                        getattr(utility_class, cache_attr[0]).clear()  # Clear the first 'all_*' attribute found
 
-            #! Collect from Database
+            # Step 2: Collect data from the database dynamically
             async with self.database() as db:
-                moderation = await db('SELECT * FROM moderation')
-                levels = await db('SELECT * FROM levels')
-                currency = await db('SELECT * FROM currency')
-                coins_record = await db('SELECT * FROM coins_record')
-                tracking = await db('SELECT * FROM tracking')
-                daily = await db('SELECT * FROM daily')
-                skills = await db('SELECT * FROM skills')
-                user_link = await db('SELECT * FROM user_link')
-                lottery = await db('SELECT * FROM lottery')
+                data_collections = {}
+                for table in table_mapping.keys():
+                    data_collections[table] = await db(f'SELECT * FROM {table}')  # Fetch data for each table
 
+            # Step 3: Cache all data into local objects dynamically
+            for table, rows in data_collections.items():
+                utility_class = table_mapping[table]
+                for row in rows:
+                    utility_class(**row)  # Instantiate and cache the utility objects dynamically
 
-            #! Cache all into local objects
-            for i in moderation:
-                utils.Moderation(**i)
-            for i in levels:
-                utils.Levels(**i)
-            for i in currency:
-                utils.Currency(**i)
-            for i in coins_record:
-                utils.Coins_Record(**i)
-            for i in tracking:
-                utils.Tracking(**i)
-            for i in daily:
-                utils.Daily(**i)
-            for i in skills:
-                utils.Skills(**i)
-            for i in user_link:
-                utils.UserLink(**i)
-            for i in lottery:
-                utils.Lottery(**i)
 
         except Exception as e:
             print(f"Couldn't connect to the database... :: {e}")
