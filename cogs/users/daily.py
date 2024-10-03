@@ -10,6 +10,38 @@ import utils
 class Daily(Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.daily_reset_checker.start()  # Start the task when the cog is loaded
+
+    def cog_unload(self):
+        self.daily_reset_checker.cancel()  # Stop the task when the cog is unloaded
+
+    @tasks.loop(hours=24)  # Check once a day
+    async def daily_reset_checker(self):
+        """Checks for users who have missed their daily reward and resets their daily streak."""
+        await self.bot.wait_until_ready()
+
+        # Get the current time
+        now = dt.utcnow()
+
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+
+        # Loop through each user and check their last daily claim
+        for user in guild.members:
+            day = utils.Daily.get(user.id)
+
+            # Check if the user has missed their daily
+            if (day.last_daily + timedelta(days=3)) <= dt.utcnow():
+                # Reset their daily streak/counter
+                user.daily = 0
+
+                # Save the update to the database
+                async with self.bot.database() as db:
+                    await user.save(db)
+
+    @daily_reset_checker.before_loop
+    async def before_reset_checker(self):
+        """Ensure the bot is ready before running the task."""
+        await self.bot.wait_until_ready()
 
     @property
     def coin_logs(self):

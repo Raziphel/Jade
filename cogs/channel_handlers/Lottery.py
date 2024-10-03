@@ -132,7 +132,7 @@ class LotteryHandler(commands.Cog):
         # Update the leaderboard message
         await msg.edit(content=" ", embed=embed)
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=2)
     async def lottery_pot_increaser(self):
         """Increases the lottery pot every hour."""
         await self.bot.wait_until_ready()
