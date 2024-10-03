@@ -17,7 +17,6 @@ class Serpent(commands.AutoShardedBot):
         self.logger = logger or logging.getLogger("Serpent")
         self.config = config
         self.secret = secret
-        openai.api_key = self.secret['openai_key']
 
         with open(self.config) as z:
             self.config = toml.load(z)
@@ -29,6 +28,9 @@ class Serpent(commands.AutoShardedBot):
         utils.Embed.bot = self
         utils.CoinFunctions.bot = self
         utils.UserFunctions.bot = self
+
+        #+ Get OpenAI key setup
+        openai.api_key = self.secret['openai_key']
 
         self.database = DatabaseConnection
         self.database.config = self.secret['database']
