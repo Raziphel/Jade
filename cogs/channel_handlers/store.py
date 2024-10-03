@@ -131,7 +131,7 @@ class StoreHandler(Cog):
         """Handle message reactions cleanup."""
         channel = self.bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-        if sum(reaction.count for reaction in message.reactions) > 69:
+        if sum(reaction.count for reaction in message.reactions) > 1:
             await message.clear_reactions()
         for reaction in message.reactions:
             await message.add_reaction(reaction.emoji)

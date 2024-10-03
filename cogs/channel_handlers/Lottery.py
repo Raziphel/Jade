@@ -42,7 +42,8 @@ class LotteryHandler(commands.Cog):
             "🍏": (1, 3000),
             "🍎": (5, 10000),
             "🍐": (20, 25000),
-            "🍋": (50, 50000)
+            "🍋": (50, 50000),
+            "🍇": (100, 90000)
         }
 
         # Calculate time remaining for the lottery
@@ -361,14 +362,14 @@ class LotteryHandler(commands.Cog):
     async def manage_reactions(self, message):
         """Handle message reactions cleanup and re-adding of correct reactions."""
         # Maximum reaction threshold before clearing all reactions
-        max_reactions = 69
+        max_reactions = 1
         current_reactions = sum(reaction.count for reaction in message.reactions)
 
         if current_reactions > max_reactions:
             await message.clear_reactions()
 
             # Add back the appropriate reactions
-            ticket_options = ["🍏", "🍎", "🍐", "🍋", "🍪"]
+            ticket_options = ["🍏", "🍎", "🍐", "🍋", "🍪", "🍇"]
             for emoji in ticket_options:
                 await message.add_reaction(emoji)
 
