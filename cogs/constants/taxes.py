@@ -35,7 +35,7 @@ class Taxes(Cog):
                     total_taxed += 50
                     async with self.bot.database() as db:
                         await currency.save(db)
-                elif currency.coins > 0:
+                else:
                     currency.coins = 0
                     async with self.bot.database() as db:
                         await currency.save(db)
