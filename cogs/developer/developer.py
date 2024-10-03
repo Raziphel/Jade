@@ -128,7 +128,7 @@ class Developer(Cog):
         # Simulate collecting all tickets into a list for the draw
         all_tickets = []
         for user in sorted_users:
-            all_tickets.extend([user.id] * user.tickets)
+            all_tickets.extend([user_id] * user.tickets)
 
         # Select a winner from the simulated pool
         winner_id = choice(all_tickets)
