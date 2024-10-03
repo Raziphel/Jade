@@ -372,7 +372,7 @@ class LotteryHandler(commands.Cog):
     async def manage_reactions(self, message):
         """Handle message reactions cleanup and re-adding of correct reactions."""
         # Maximum reaction threshold before clearing all reactions
-        max_reactions = 1
+        max_reactions = 100
         current_reactions = sum(reaction.count for reaction in message.reactions)
 
         if current_reactions > max_reactions:
