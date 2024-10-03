@@ -119,13 +119,9 @@ class Developer(Cog):
     async def top10coins(self, ctx):
         """Ping the top 10 members with the most coins"""
         # Fetch all users and their coin balances from the database or tracking system
-        all_users = utils.Currency.sort_coins(),()  # Assuming this fetches a list of (user_id, coin_amount)
+        sorted_ranks = utils.Currency.sort_coins() # Assuming this fetches a list of (user_id, coin_amount)
 
-        # Sort users by their coin amount in descending order and exclude the bot itself
-        top_users = sorted([user for user in all_users if user[0] != self.bot.user.id], key=lambda x: x[1],
-                           reverse=True)[:10]
 
-        users = []
         for rank in sorted_ranks:
             user = self.bot.get_user(rank.user_id)
             if user and await self.is_user_in_guild(guild, user.id):
