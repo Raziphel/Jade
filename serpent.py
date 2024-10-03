@@ -1,5 +1,6 @@
 import toml
 import logging
+import openai
 
 from discord.ext import commands
 from discord import AllowedMentions
@@ -16,7 +17,7 @@ class Serpent(commands.AutoShardedBot):
         self.logger = logger or logging.getLogger("Serpent")
         self.config = config
         self.secret = secret
-
+        openai.api_key = self.secret['openai_key']
 
         with open(self.config) as z:
             self.config = toml.load(z)
