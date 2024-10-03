@@ -33,11 +33,11 @@ class Daily(Cog):
             # Check if the user has missed their daily
             if (day.last_daily + timedelta(days=3)) <= dt.utcnow():
                 # Reset their daily streak/counter
-                user.daily = 0
+                day.daily = 0
 
                 # Save the update to the database
                 async with self.bot.database() as db:
-                    await user.save(db)
+                    await day.save(db)
 
     @daily_reset_checker.before_loop
     async def before_reset_checker(self):
