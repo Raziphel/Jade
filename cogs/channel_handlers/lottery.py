@@ -218,6 +218,15 @@ class LotteryHandler(commands.Cog):
                 color=discord.Color.gold()
             ))
 
+            # Give him winner role and remove last winner role
+            winner_role = utils.DiscordGet(guild.roles, id=self.bot.config['lottery_roles']['winner'])
+            await winner.add_roles(winner_role, reason="Won the lottery.")
+            for member in guild.members:
+                if winner_role in member.roles:
+                    await member.send("# You are no longer restricted from participating in the lottery.")
+                    await member.remove_roles(winner_role, reason="Been a week since last win.")
+                    return
+
             # Distribute the prize
             winner_currency = utils.Currency.get(winner.id)
             winner_currency.coins += lottery.coins
