@@ -296,79 +296,47 @@ class LotteryHandler(commands.Cog):
 
         # Process ticket purchase based on emoji reaction
         if emoji in ticket_options:
-            tickets, cost = ticket_options[emoji]
+            item = ticket_options[emoji]
+            tickets, cost = item["tickets"], item["price"]
 
-            # Ensure user has enough coins
-            if currency.coins < cost:
-                await member.send(f"You don't have enough coins to buy {tickets} tickets.")
-                return
-
-            # Send confirmation message
-            confirm_embed = Embed(
+            confirmation_msg = await member.send(embed=Embed(
                 title="Confirm Your Lottery Ticket Purchase",
-                description=(
-                    f"Are you sure you want to purchase {tickets} tickets for {cost:,} {self.bot.config['emojis']['coin']} coins?\n"
-                    f"React with ✅ to confirm or ❌ to cancel."
-                ),
+                description=(f"Are you sure you want to purchase {tickets} tickets for {cost:,} {self.bot.config['emojis']['coin']} coins?\n"
+                             f"React with ✔ to confirm or ❌ to cancel."),
                 color=discord.Color.blue()
-            )
+            ))
 
-            confirmation_msg = await member.send(embed=confirm_embed)
+            # Reuse store's purchasing function for confirmation and payment handling
+            if await self.purchasing(confirmation_msg, payload, {"name": f"{tickets} Lottery Tickets", "price": cost}):
+                # Add the tickets to the user's balance
+                currency.tickets += tickets
+                lottery.coins += cost
 
-            # Add confirmation and cancellation reactions
-            await confirmation_msg.add_reaction("✅")
-            await confirmation_msg.add_reaction("❌")
+                # Send confirmation via DM with details of the purchase
+                embed = Embed(
+                    title="Lottery Ticket Purchase Confirmation",
+                    description=f"You have successfully purchased {tickets} tickets for {cost:,} {self.bot.config['emojis']['coin']} coins!",
+                    color=discord.Color.green()
+                )
+                embed.add_field(name="Current Tickets", value=f"{currency.tickets} tickets", inline=False)
+                embed.add_field(name=f"Remaining {self.bot.config['emojis']['coin']} Coins", value=f"{currency.coins:,} coins", inline=False)
 
-            def check(reaction, user):
-                return user == member and str(reaction.emoji) in ["✅",
-                                                                  "❌"] and reaction.message.id == confirmation_msg.id
+                await member.send(embed=embed)
 
-            try:
-                # Wait for user to confirm or cancel purchase
-                reaction, _ = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+                # Save updates to the database
+                async with self.bot.database() as db:
+                    await currency.save(db)
+                    await lottery.save(db)
 
-                if str(reaction.emoji) == "✅":
-                    # Deduct the coins and add tickets if confirmed
-                    currency.coins -= cost
-                    currency.tickets += tickets
-                    lottery.coins += cost
-
-                    # Confirmation via DM with details of the purchase
-                    embed = Embed(
-                        title="Lottery Ticket Purchase Confirmation",
-                        description=f"You have successfully purchased {tickets} tickets for {cost:,} {self.bot.config['emojis']['coin']} coins!",
-                        color=discord.Color.green()
-                    )
-                    embed.add_field(name="Current Tickets", value=f"{currency.tickets} tickets", inline=False)
-                    embed.add_field(name=f"Remaining {self.bot.config['emojis']['coin']} Coins",
-                                    value=f"{currency.coins:,} coins", inline=False)
-
-                    await member.send(embed=embed)
-
-                    # Save updates to the database
-                    async with self.bot.database() as db:
-                        await currency.save(db)
-                        await lottery.save(db)
-
-                else:
-                    # Send cancellation message if user chose to cancel
-                    await member.send("Your lottery ticket purchase has been canceled.")
-
-            except asyncio.TimeoutError:
-                # Handle timeout, assume purchase is canceled if no response within the time limit
-                await member.send("You took too long to respond. Your lottery ticket purchase has been canceled.")
-
-            finally:
-                # Clean up the confirmation message to remove reactions
-                try:
-                    await confirmation_msg.delete()
-                except discord.NotFound:
-                    pass  # Message was already deleted
+            else:
+                # The purchase was either canceled or failed
+                await self.bot.get_channel(self.bot.config['logs']['lottery']).send(f"{member} tried to buy {tickets} lottery tickets but the purchase was canceled.")
 
         # Call manage reactions to maintain the reactions on the lottery message
         channel = self.bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         await self.manage_reactions(message)
+
 
     async def manage_reactions(self, message):
         """Handle message reactions cleanup and re-adding of correct reactions."""
@@ -383,6 +351,36 @@ class LotteryHandler(commands.Cog):
             ticket_options = ["🍪", "🍏", "🍎", "🍐", "🍋", "🍇"]
             for emoji in ticket_options:
                 await message.add_reaction(emoji)
+
+
+    async def purchasing(self, msg, payload, item):
+        """Handles the purchase confirmation and processing."""
+        user = self.bot.get_guild(payload.guild_id).get_member(payload.user_id)
+
+        await msg.add_reaction("✔")
+        await msg.add_reaction("❌")
+
+        try:
+            check = lambda r, u: u.id == user.id and r.message.id == msg.id and str(r.emoji) in ["✔", "❌"]
+            reaction, _ = await self.bot.wait_for('reaction_add', check=check)
+
+            if str(reaction.emoji) == "✔":
+                # Attempt the transaction
+                if not await utils.CoinFunctions.pay_for(payer=user, amount=item["price"]):
+                    await msg.edit(embed=Embed(color=0xc74822,
+                                               description=f"# You don't have enough coins {self.bot.config['emojis']['coin']}!"))
+                    return False
+                return True
+
+            if str(reaction.emoji) == "❌":
+                await msg.edit(embed=Embed(color=0xc74822, description="Purchase was canceled!"))
+                return False
+
+        except TimeoutError:
+            await msg.edit(content='# Sorry, you took too long to respond. Transaction Canceled.', embed=None)
+            return False
+
+
 
 
 def setup(bot):
