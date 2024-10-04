@@ -332,7 +332,7 @@ class LotteryHandler(commands.Cog):
                             color=discord.Color.green()
                         )
                         embed.add_field(name="Current Tickets", value=f"{currency.tickets} tickets", inline=False)
-                        embed.add_field(name=f"Remaining {self.bot.config['emojis']['coin']} Coins",
+                        embed.add_field(name=f"Remaining Coins",
                                         value=f"{currency.coins:,} coins", inline=False)
 
                         await member.send(embed=embed)
