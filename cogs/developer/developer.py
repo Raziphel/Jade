@@ -160,7 +160,7 @@ class Developer(Cog):
                 f"```\n"
                 f"💰 **Enjoy your simulated prize!** 💰"
             ),
-            color=discord.Color.gold()
+            color=Color.gold()
         )
 
         await ctx.send(embed=embed)
