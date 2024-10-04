@@ -17,6 +17,14 @@ class LotteryHandler(commands.Cog):
         self.lottery_pot_increaser.start()  # Increases the lottery pot every hour
         self.lottery_leaderboard_update.start()  # Updates the leaderboard
         self.previous_winner_message = None
+        # Ticket options with emojis and costs
+        self.ticket_options = {
+            "🍏": (1, 1000),  # 1 ticket for 1000 coins (1000 per ticket)
+            "🍎": (5, 4750),  # 5 tickets for 4750 coins (950 per ticket, 5% discount)
+            "🍐": (20, 18000),  # 20 tickets for 18000 coins (900 per ticket, 5% discount)
+            "🍋": (50, 42750),  # 50 tickets for 42750 coins (855 per ticket, 5% discount)
+            "🍇": (100, 81000)  # 100 tickets for 81000 coins (810 per ticket, 5% discount)
+        }
 
     def cog_unload(self):
         self.lottery_update.cancel()
@@ -37,14 +45,6 @@ class LotteryHandler(commands.Cog):
         # Fetch the message to be updated
         msg = await channel.fetch_message(self.bot.config['lottery_messages']['1'])
 
-        # Ticket options with emojis and costs
-        ticket_options = {
-            "🍏": (1, 3000),
-            "🍎": (5, 10000),
-            "🍐": (20, 25000),
-            "🍋": (50, 50000),
-            "🍇": (100, 90000)
-        }
 
         # Calculate time remaining for the lottery
         if lottery.lot_time is not None:
@@ -78,7 +78,7 @@ class LotteryHandler(commands.Cog):
             name="🎫 **Ticket Options:**",
             value="\n".join(
                 [f"{emoji} - **{tickets} Tickets**\nCost: {cost:,} {self.bot.config['emojis']['coin']} coins"
-                 for emoji, (tickets, cost) in ticket_options.items()]),
+                 for emoji, (tickets, cost) in self.ticket_options.items()]),
             inline=False
         )
 
@@ -205,15 +205,19 @@ class LotteryHandler(commands.Cog):
 
             # Announce the winner with additional details
             winner_message = await channel.send(embed=Embed(
-                title="🎉 Lottery Winner Announcement 🎉",
+                title="🎉 **Lottery Winner Announcement** 🎉",
                 description=(
-                    f"**Congratulations! The winner of this week's lottery is:** **{winner.display_name}**\n\n"
-                    f"**Details:**\n"
-                    f"- **Total Tickets Purchased:** {total_tickets}\n"
-                    f"- **Total Participants:** {len(sorted_users)}\n"
-                    f"- **{winner.display_name}'s Tickets:** {winner_info.tickets:,}\n"
-                    f"- **Winning Chance:** {win_chance:.2f}%\n"
-                    f"- **Prize Amount:** {lottery.coins:,} Coins"
+                    f"**🥳 Congratulations! The winner of this week's lottery is:**\n\n"
+                    f"💎 **{winner.display_name}** 💎\n\n"
+                    f"🎟️ **Lottery Stats:**\n"
+                    f"```yaml\n"
+                    f"- Total Tickets Purchased: {total_tickets}\n"
+                    f"- Total Participants: {len(sorted_users)}\n"
+                    f"- {winner.display_name}'s Tickets: {winner_info.tickets:,}\n"
+                    f"- Winning Chance: {win_chance:.2f}%\n"
+                    f"- Prize Amount: {lottery.coins:,} Coins\n"
+                    f"```\n"
+                    f"💰 **Enjoy your prize!** 💰"
                 ),
                 color=discord.Color.gold()
             ))
@@ -251,6 +255,7 @@ class LotteryHandler(commands.Cog):
                 async with self.bot.database() as db:
                     await c.save(db)
 
+
     @commands.Cog.listener('on_raw_reaction_add')
     async def lot_buy(self, payload):
         """Handles lottery ticket purchases based on reactions."""
@@ -275,15 +280,6 @@ class LotteryHandler(commands.Cog):
 
         emoji = str(payload.emoji)
 
-        # Mapping of ticket options to cost
-        ticket_options = {
-            "🍏": (1, 3000),
-            "🍎": (5, 10000),
-            "🍐": (20, 25000),
-            "🍋": (50, 50000),
-            "🍇": (100, 90000)
-        }
-
         if emoji == "🍪":
             updates_role = utils.DiscordGet(guild.roles, id=self.bot.config['lottery_roles']['ping'])
             if updates_role not in member.roles:
@@ -295,13 +291,8 @@ class LotteryHandler(commands.Cog):
             return
 
         # Process ticket purchase based on emoji reaction
-        if emoji in ticket_options:
-            tickets, cost = ticket_options[emoji]
-
-            # Ensure user has enough coins
-            if currency.coins < cost:
-                await member.send(f"You don't have enough coins to buy {tickets} tickets.")
-                return
+        if emoji in self.ticket_options:
+            tickets, cost = self.ticket_options[emoji]
 
             # Send confirmation message
             confirm_embed = Embed(
@@ -328,27 +319,32 @@ class LotteryHandler(commands.Cog):
                 reaction, _ = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
 
                 if str(reaction.emoji) == "✅":
-                    # Deduct the coins and add tickets if confirmed
-                    currency.coins -= cost
-                    currency.tickets += tickets
-                    lottery.coins += cost
+                    # Use CoinFunctions to handle the purchase
+                    if await utils.CoinFunctions.pay_for(payer=member, amount=cost):
+                        # Add tickets to user and update lottery stats
+                        currency.tickets += tickets
+                        lottery.coins += cost
 
-                    # Confirmation via DM with details of the purchase
-                    embed = Embed(
-                        title="Lottery Ticket Purchase Confirmation",
-                        description=f"You have successfully purchased {tickets} tickets for {cost:,} {self.bot.config['emojis']['coin']} coins!",
-                        color=discord.Color.green()
-                    )
-                    embed.add_field(name="Current Tickets", value=f"{currency.tickets} tickets", inline=False)
-                    embed.add_field(name=f"Remaining {self.bot.config['emojis']['coin']} Coins",
-                                    value=f"{currency.coins:,} coins", inline=False)
+                        # Confirmation via DM with details of the purchase
+                        embed = Embed(
+                            title="Lottery Ticket Purchase Confirmation",
+                            description=f"You have successfully purchased {tickets} tickets for {cost:,} {self.bot.config['emojis']['coin']} coins!",
+                            color=discord.Color.green()
+                        )
+                        embed.add_field(name="Current Tickets", value=f"{currency.tickets} tickets", inline=False)
+                        embed.add_field(name=f"Remaining {self.bot.config['emojis']['coin']} Coins",
+                                        value=f"{currency.coins:,} coins", inline=False)
 
-                    await member.send(embed=embed)
+                        await member.send(embed=embed)
 
-                    # Save updates to the database
-                    async with self.bot.database() as db:
-                        await currency.save(db)
-                        await lottery.save(db)
+                        # Save updates to the database
+                        async with self.bot.database() as db:
+                            await currency.save(db)
+                            await lottery.save(db)
+
+                    else:
+                        # Send message if the user does not have enough coins
+                        await member.send("You do not have enough coins to purchase tickets.")
 
                 else:
                     # Send cancellation message if user chose to cancel
