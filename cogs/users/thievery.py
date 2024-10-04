@@ -92,11 +92,11 @@ class Thievery(Cog):
         thief_coins = utils.Currency.get(ctx.author.id)
         amount = randint(int(target_coins.coins * 0.005), int(target_coins.coins * 0.02)) # .05 - 2% of persons coins!
 
-        if target_coins.amount < amount:
-            amount = target_coins.amount  # You can only steal what's available
+        if target_coins.coins < amount:
+            amount = target_coins.coins  # You can only steal what's available
 
-        target_coins.amount -= amount
-        thief_coins.amount += amount
+        target_coins.coins -= amount
+        thief_coins.coins += amount
 
         skills.larceny_stamp = dt.utcnow()
 
