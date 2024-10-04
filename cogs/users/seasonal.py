@@ -38,7 +38,7 @@ class Seasonal(Cog):
                 (f"**😈 {ctx.author.mention}, you went trick-or-treating and got a trick: {trick}! You lost {coins} "
                  f"coins!**")
             c = utils.Currency.get(ctx.author.id)
-            c.coin -= coins
+            c.coins -= coins
             async with self.bot.database() as db:
                 await c.save(db)
 
