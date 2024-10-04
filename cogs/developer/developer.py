@@ -167,6 +167,57 @@ class Developer(Cog):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    @utils.is_dev()
+    @command()
+    async def refund_lottery(self, ctx):
+        """Refund users who bought lottery tickets. 1000 coins per ticket, up to 250,000 coins."""
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+        total_refunded = 0
+
+        for member in guild.members:
+            try:
+                currency = utils.Currency.get(member.id)
+                tickets = currency.tickets  # Assuming 'tickets' is the field storing how many lottery tickets the user bought
+
+                if tickets > 0:
+                    # Calculate the refund amount, capped at 250,000 coins
+                    refund_amount = min(tickets * 1000, 250000)
+
+                    # Add refund to user's coins
+                    currency.coins += refund_amount
+                    total_refunded += refund_amount
+
+                    # Save updated balance to the database
+                    async with self.bot.database() as db:
+                        await currency.save(db)
+
+                    # Notify the user of their refund
+                    try:
+                        await member.send(f"🎉 You have been refunded {refund_amount:,} coins for your {tickets} lottery tickets!")
+                    except discord.Forbidden:
+                        # If user has DMs disabled
+                        print(f"Could not DM {member.display_name} for refund.")
+
+            except Exception as e:
+                print(f"Error refunding {member.display_name}: {str(e)}")
+
+        await ctx.send(f"✅ The lottery refund process has been completed. A total of {total_refunded:,} coins have been refunded.")
+
+
+
+
+
 def setup(bot):
     x = Developer(bot)
     bot.add_cog(x)
