@@ -11,21 +11,13 @@ class Seasonal(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cooldowns = {}
-        self.treats = ["🍬 Candy (Coins)", "🍫 Chocolate (Coins)", "🍭 Lollipop (Coins)", "🍪 Cookie (Coins)"]
-        self.tricks = ["👻 Spooky Ghost (Lose Coins)", "🕷️ Spider (Lose Coins)", "💀 Skeleton (Lose Coins)", "🎃 Evil Pumpkin (Lose Coins)"]
+        self.treats = ["🍬 Candy", "🍫 Chocolate", "🍭 Lollipop", "🍪 Cookie"]
+        self.tricks = ["👻 Spooky Ghost", "🕷️ Spider", "💀 Skeleton", "🎃 Evil Pumpkin"]
 
 
     @cooldown(1, 7200, BucketType.user)  # 2-hour cooldown per user
     @command(application_command_meta=ApplicationCommandMeta())
     async def trick_or_treat(self, ctx):
-        # Check if user is on cooldown
-        if ctx.author in self.cooldowns and self.cooldowns[ctx.author] > dt.utcnow():
-            remaining_time = self.cooldowns[ctx.author] - dt.utcnow()
-            minutes = remaining_time.seconds // 60
-            await ctx.send \
-                (f"🎃 {ctx.author.mention}, you must wait {minutes} more minutes before trick-or-treating again!")
-            return
-
         # Decide if user gets a treat or a trick
         outcome = choice(["treat", "trick"])
 
@@ -34,7 +26,8 @@ class Seasonal(Cog):
             coins = randint(1000, 5000)  # Random amount of coins
             treat = choice(self.treats)
             await ctx.send \
-                (f"🎉 {ctx.author.mention}, you went trick-or-treating and got a treat: {treat}! You earned {coins} coins!")
+                (f"**🎉 {ctx.author.mention}, you went trick-or-treating and got a treat: {treat}! You earned {coins} "
+                 f"coins!**")
             await utils.CoinFunctions.earn(earner=ctx.author, amount=coins)
 
         else:
@@ -42,7 +35,8 @@ class Seasonal(Cog):
             coins = randint(2000, 5000)  # Random amount of coins lost
             trick = choice(self.tricks)
             await ctx.send \
-                (f"😈 {ctx.author.mention}, you went trick-or-treating and got a trick: {trick}! You lost {coins} coins!")
+                (f"**😈 {ctx.author.mention}, you went trick-or-treating and got a trick: {trick}! You lost {coins} "
+                 f"coins!**")
             c = utils.Currency.get(ctx.author.id)
             c.coin -= coins
             async with self.bot.database() as db:
