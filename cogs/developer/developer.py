@@ -134,6 +134,8 @@ class Developer(Cog):
         for user in sorted_users:
             all_tickets.extend([user.user_id] * user.tickets)
 
+        lottery = utils.Lottery.get(1)
+
         # Select a winner
         winner_id = choice(all_tickets)
         winner = guild.get_member(winner_id)
@@ -156,7 +158,7 @@ class Developer(Cog):
                 f"- Winning Chance: {win_chance:.2f}%\n"
                 f"- Prize Amount: {lottery.coins:,} Coins\n"
                 f"```\n"
-                f"💰 **Enjoy your prize!** 💰"
+                f"💰 **Enjoy your simulated prize!** 💰"
             ),
             color=discord.Color.gold()
         )
