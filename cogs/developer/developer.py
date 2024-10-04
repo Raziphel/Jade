@@ -122,11 +122,14 @@ class Developer(Cog):
         total_tickets = utils.Currency.get_total_tickets()
         sorted_users = [user for user in utils.Currency.sort_tickets() if user.tickets > 0]
 
+        # Get total tickets and participants
+        sorted_users = [user for user in utils.Currency.sort_tickets() if user.tickets > 0]
+
         if total_tickets == 0:
-            await ctx.send(embed=utils.Embed(description="No one entered the lottery. No winner."))
+            await channel.send(embed=Embed(description="No one entered the lottery this week. No winner."))
             return
 
-        # Simulate collecting all tickets into a list for the draw
+        # Collect all tickets into a list for the draw
         all_tickets = []
         for user in sorted_users:
             all_tickets.extend([user.user_id] * user.tickets)
@@ -140,16 +143,22 @@ class Developer(Cog):
         win_chance = (winner_info.tickets / total_tickets) * 100
 
         # Announce the simulated winner with their winning chance
-        embed = utils.Embed(
-            title="🎉 Test Lottery Winner 🎉",
+        embed=utils.Embed(
+            title="🎉 **Simulated Lottery Winner Announcement** 🎉",
             description=(
-                f"**Simulated Winner**: **{winner.display_name}**\n\n"
-                f"**Details**:\n"
-                f"- **Total Tickets**: {total_tickets}\n"
-                f"- **{winner.display_name}'s Tickets**: {winner_info.tickets}\n"
-                f"- **Winning Chance**: {win_chance:.2f}%"
+                f"**🥳 Congratulations! To the simulated winner of this week's lottery is:**\n\n"
+                f"💎 **{winner.display_name}** 💎\n\n"
+                f"🎟️ **Lottery Stats:**\n"
+                f"```yaml\n"
+                f"- Total Tickets Purchased: {total_tickets}\n"
+                f"- Total Participants: {len(sorted_users)}\n"
+                f"- {winner.display_name}'s Tickets: {winner_info.tickets:,}\n"
+                f"- Winning Chance: {win_chance:.2f}%\n"
+                f"- Prize Amount: {lottery.coins:,} Coins\n"
+                f"```\n"
+                f"💰 **Enjoy your prize!** 💰"
             ),
-            color=Color.green()
+            color=discord.Color.gold()
         )
 
         await ctx.send(embed=embed)
