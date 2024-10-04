@@ -53,5 +53,5 @@ class Seasonal(Cog):
 
 
 # The setup function to load the cog
-async def setup(bot):
-    await bot.add_cog(Seasonal(bot))
+def setup(bot):
+    bot.add_cog(Seasonal(bot))
