@@ -54,9 +54,6 @@ class Seasonal(Cog):
             # Update user's coins using CoinFunctions
             await utils.CoinFunctions.earn(earner=ctx.author, amount=coins)
 
-            # Update coins record for earned coins
-            coins_record.earned += coins
-
         else:
             # User loses coins as a trick
             coins = randint(1000, 4000)  # Random amount of coins lost
