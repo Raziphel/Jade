@@ -88,6 +88,8 @@ class UserFunctions(object):
             return 10
         elif level < 4:
             return level * 20
+        elif level > 100:
+            return 500000
         else:
             # Adjust the formula to scale more smoothly to higher levels
             return round(10 + (level ** 2.1) * 30)

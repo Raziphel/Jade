@@ -1,7 +1,7 @@
 
 #* Discord
 from discord import Game
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, CommandOnCooldown
 #* Additions
 from random import randint
 import math
@@ -83,10 +83,16 @@ class log_handler(Cog):
         await self.bot_log.send(embed=utils.Embed(color=self.COLORS['negative'], title=f"The bot has left {guild.name}", desc=f"Bot now manages: {user_count:,} users"))
 
     @Cog.listener()
-    async def on_command_error(self,ctx, error):
-        await self.bot_log.send(f"Command failed - `{error!s}`;")
-        raise error
+    async def on_command_error(self, ctx, error):
+        # Ignore cooldown errors
+        if isinstance(error, CommandOnCooldown):
+            return  # Simply return to ignore the error
 
+        # Log other errors to the bot log
+        await self.bot_log.send(f"Command failed - `{error!s}`;")
+
+        # Re-raise the error so it can be handled by default or other handlers
+        raise error
 
 
     #! Guild Logs
@@ -99,8 +105,14 @@ class log_handler(Cog):
             c.coins = 0
             async with self.bot.database() as db:
                 await c.save(db)
-        except: pass #? Fail Silently
+        except Exception as e:
+            await self.bot_log.send(f"Error during on_member_remove: {str(e)}")
 
+    @Cog.listener()
+    async def on_member_update(self, before, after):
+        if before.nick != after.nick:
+            await self.discord_log.send(embed=utils.Embed(color=self.COLORS['warning'], title=f"Nickname Changed",
+                                                          desc=f"{before.mention} changed their nickname from {before.nick} to {after.nick}."))
 
     @Cog.listener()
     async def on_member_ban(self, member):
