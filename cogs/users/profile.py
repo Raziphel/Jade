@@ -5,7 +5,7 @@ from io import BytesIO
 from math import floor
 
 import discord
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from discord import Member, ApplicationCommandOption, ApplicationCommandOptionType, File, NotFound
 from discord.ext.commands import command, Cog, BucketType, cooldown, ApplicationCommandMeta
 
@@ -13,7 +13,7 @@ import utils
 
 Number = int | float
 
-# base_image_size = (475, 356)
+# base_image_size = (500, 300)  # New size for the improved image
 base_image_size = (375, 281)
 
 resources_directory = "resources"
@@ -126,12 +126,8 @@ class Profile(Cog):
         if not user:
             user = ctx.author
 
-
-        # await self.base_profile(ctx=ctx, user=user, msg=None)
         file = await self.generate_screenshot(user)
-
-        # await ctx.send(file=file)
-        await ctx.interaction.response.send_message(file=file)
+        await ctx.send(file=file)
 
     async def get_user_avatar(self, member: Member) -> BytesIO:
         avatar = member.display_avatar
@@ -140,7 +136,6 @@ class Profile(Cog):
             data = await avatar.read()
 
         except NotFound:
-            # Avatar was changed and our cache wasn't updated for whatever reason
             user = await self.bot.fetch_user(member.id)
             avatar = user.display_avatar
             data = await avatar.read()
@@ -152,9 +147,8 @@ class Profile(Cog):
         member_level = utils.Levels.get(member.id)
         try:
             level_rank = sorted_levels.index(member_level)
-
-            return level_rank + 1  # Add 1 because indexes start from 0
-        except ValueError:  # User is not in the list yet maybe?
+            return level_rank + 1
+        except ValueError:
             return -1
 
     def get_wealth_rank(self, member: discord.Member) -> int:
@@ -162,17 +156,14 @@ class Profile(Cog):
         member_wealth = utils.Currency.get(member.id)
         try:
             wealth_rank = sorted_wealth.index(member_wealth)
-
             return wealth_rank + 1
         except ValueError:
             return -1
 
     async def generate_screenshot(self, member: Member):
-        moderation = utils.Moderation.get(member.id)
         levels = utils.Levels.get(member.id)
         currency = utils.Currency.get(member.id)
         tracking = utils.Tracking.get(member.id)
-        #staff_tracking = utils.Staff_Track.get(member.id)
 
         if levels.level == 0:
             required_exp = 10
@@ -186,251 +177,88 @@ class Profile(Cog):
         title = str(member.top_role)
         current_level = levels.level
         current_experience = floor(levels.exp)
-        badges = []  # TODO: replace with real data
         networth = format_number(currency.coins)
         messages = format_number(tracking.messages)
-
-        voice_activity = floor(tracking.vc_mins / 60)
-        voice_activity = format_number(voice_activity)
-
+        voice_activity = format_number(floor(tracking.vc_mins / 60))
         level_rank = self.get_level_rank(member)
         wealth_rank = self.get_wealth_rank(member)
-
         experience_percentage = current_experience / required_exp
-        relative_inner_progress_bar_width = experience_percentage * parent_progress_bar_h_w[0]
 
-        # Create a new page and set the HTML content of the page
-        progress_bar = Image.new(
-            mode='RGBA',
-            size=parent_progress_bar_h_w,
-            color="white"
-        )
+        # Create a new base image (RGBA mode) with a gradient background
+        canvas = Image.new('RGBA', base_image_size, color=(128, 128, 128, 255))
+        background = Image.new('RGBA', base_image_size, color=(30, 30, 30, 255))
+        gradient = ImageDraw.Draw(background)
 
-        # Prepare to draw text as well as the inner and outer progress bars
-        progress_bar_draw = ImageDraw.Draw(progress_bar)
+        for y in range(base_image_size[1]):
+            r = int(30 + (70 * (y / base_image_size[1])))
+            gradient.line([(0, y), (base_image_size[0], y)], fill=(r, r, r, 255))
 
-        # Draw progress bar outline
-        progress_bar_draw.rectangle(
-            (
-                0, 0,
-                parent_progress_bar_h_w[0] - 0.1,
-                parent_progress_bar_h_w[1] - 0.1
-            ),
-            fill="white",
-            outline="black"
-        )
-
-        # Draw inner progress bar
-        inner_progress_bar_size = calculate_xy_size(
-            inner_progress_bar_padding,
-            inner_progress_bar_padding,
-            relative_inner_progress_bar_width,  # User's progress towards their next level
-            parent_progress_bar_h_w[1] - inner_progress_bar_padding * 2
-        )
-
-        progress_bar_draw.rectangle(
-            inner_progress_bar_size,
-            fill=progress_bar_color
-        )
-
-        # Center alignment for progress bar text
-        progress_bar_text_x_y = (
-            progress_bar.size[0] / 2,
-            progress_bar.size[1] / 2
-        )
-
-        # Add the text to the progress bar
-        progress_bar_draw.text(
-            progress_bar_text_x_y,
-            f'XP: {current_experience:,} / {required_exp:,}',
-            font=progress_bar_fnt,
-            fill="black",
-            anchor="mm",
-            align="center"
-        )
-
-        progress_bar.putalpha(225)
-
-        # Create our base image
-        canvas = Image.new('RGBA', base_image_size, color=128)
-
-        # User's background image
-        background = Image.open(f'{resources_directory}/default-background.jpg')
-        canvas.paste(background)
-
-        # Determine the primary color of the background
-        primary_color = determine_primary_color(background)
-
-        # Calculate a contrasting color for the primary color
-        text_color = calculate_contrasting_color(primary_color)
+        canvas = Image.alpha_composite(canvas, background)
 
         draw = ImageDraw.Draw(canvas)
 
-        # Draw the main border
-        draw.rectangle(
-            xy=calculate_xy_size(
-                4, 4,
-                canvas.size[0] - 8,
-                canvas.size[1] - 8
-            ),
-            outline=text_color,
-            width=3
+        # Avatar handling
+        avatar_size = 120
+        avatar_image = Image.open(avatar).convert('RGBA')
+        mask = Image.new("L", (avatar_size, avatar_size), 0)
+        mask_draw = ImageDraw.Draw(mask)
+        mask_draw.ellipse((0, 0, avatar_size, avatar_size), fill=255)
+        avatar_image = ImageOps.fit(avatar_image, (avatar_size, avatar_size), method=Image.Resampling.LANCZOS)
+        avatar_image.putalpha(mask)
+        canvas.paste(avatar_image, (35, 35), avatar_image)
+
+        # Draw username and title
+        draw.text((180, 40), username, font=username_fnt, fill="white")
+        draw.text((180, 80), title, font=title_fnt, fill="lightgray")
+
+        # Draw stats
+        stats_font = ImageFont.truetype(ttf_font_path, 18)
+        draw.text((180, 120), f'Level: {current_level}', font=stats_font, fill="aqua")
+        draw.text((180, 150), f'Level Rank: #{level_rank}', font=stats_font, fill="white")
+        draw.text((180, 180), f'Coin Rank: #{wealth_rank}', font=stats_font, fill="white")
+        draw.text((180, 210), f'Messages: {messages}', font=stats_font, fill="white")
+        draw.text((180, 240), f'VC Hours: {voice_activity}', font=stats_font, fill="white")
+        draw.text((180, 270), f'Net Worth: {networth} Coins', font=stats_font, fill="gold")
+
+        # Improved progress bar
+        progress_bar_width = 200
+        progress_bar_height = 30
+        progress_bar_x = 35
+        progress_bar_y = 180
+
+        draw.rounded_rectangle(
+            [(progress_bar_x, progress_bar_y), (progress_bar_x + progress_bar_width, progress_bar_y + progress_bar_height)],
+            radius=10, fill=(50, 50, 50, 255), outline="white", width=2
         )
 
-        # Place the user's profile picture on the canvas
-        profile_picture = Image.open(avatar).convert('RGBA')
-
-        # Determine the primary color of the background
-        profile_picture_primary_color = determine_primary_color(profile_picture)
-
-        # Draw the border we'll be putting the avatar in using the avatar's primary color
-        draw.rectangle(
-            xy=calculate_xy_size(18, 18, 110, 110),
-            outline=profile_picture_primary_color,
-            width=1
+        draw.rounded_rectangle(
+            [(progress_bar_x, progress_bar_y), (progress_bar_x + int(experience_percentage * progress_bar_width), progress_bar_y + progress_bar_height)],
+            radius=10, fill="aqua"
         )
 
-        # noinspection PyUnresolvedReferences
-        profile_picture = profile_picture.resize((103, 103), Image.Resampling.LANCZOS)
-        canvas.paste(profile_picture, (22, 22))
+        # Progress bar text
+        progress_text = f"XP: {current_experience:,} / {required_exp:,}"
+        progress_text_bbox = draw.textbbox((0, 0), progress_text, font=stats_font)
+        progress_text_width = progress_text_bbox[2] - progress_text_bbox[0]
+        progress_text_height = progress_text_bbox[3] - progress_text_bbox[1]
+        progress_text_x = progress_bar_x + (progress_bar_width - progress_text_width) // 2
+        progress_text_y = progress_bar_y + (progress_bar_height - progress_text_height) // 2
 
-        draw.text(
-            xy=(38 if current_level > 10 else 40, 132),
-            text=f'Level {current_level}',
-            fill=text_color,
-            font=fnt
-        )
-
-        # Temporary solution for long usernames? In the future, it'd be nice to adjust the text's size dynamically so
-        # that it fits. Although we will have to set a limit either way, so..
-        if len(username) > 16:
-            username = username[:16] + '..'
-
-        draw.text(
-            xy=(140, 20),
-            text=username,
-            fill=text_color,
-            font=username_fnt
-        )
-
-        draw.text(
-            xy=(140, 50),
-            text=title,
-            fill=text_color,
-            font=title_fnt
-        )
-
-        draw.text(
-            xy=(17, 190),
-            text=f'Level rank:  {level_rank}#',  # Extra spacing to line up the ranks
-            fill=text_color,
-            font=fnt
-        )
-
-        draw.text(
-            xy=(17, 215),
-            text=f'Coin rank:   {wealth_rank}#',
-            fill=text_color,
-            font=fnt
-        )
-
-        # Toss in all the basic information
-        speech_balloon = Image.open(f'{resources_directory}/speech-balloon.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(speech_balloon, dest=(140, 90))
-
-        draw.text(
-            xy=(168, 90),
-            text=f': {messages} Messages',
-            fill=text_color,
-            font=fnt
-        )
-
-        microphone = Image.open(f'{resources_directory}/microphone-3.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(microphone, dest=(140, 123))
-
-        draw.text(
-            xy=(168, 123),
-            text=f': {voice_activity} VC hours',
-            fill=text_color,
-            font=fnt
-        )
-
-        coin = Image.open(f'{resources_directory}/gold-coin.png').convert('RGBA').resize((27, 27))
-        canvas.alpha_composite(coin, dest=(140, 156))
-
-        draw.text(
-            xy=(168, 156),
-            text=f': {networth} Coins',
-            fill=text_color,
-            font=fnt
-        )
-
-        # Add progress bar to the base image
-        canvas.alpha_composite(progress_bar, dest=parent_progress_bar_x_y)
-
-        # Badges
-        """
-        This is for testing purposes only.
-        blue_diamond = Image.open('large-blue-diamond.png').convert('RGBA').resize((33, 33))
-        canvas.alpha_composite(blue_diamond, dest=(30, 200))
-
-        cross_mark = Image.open('cross-mark.png').convert('RGBA').resize((33, 33))
-        canvas.alpha_composite(cross_mark, dest=(80, 200))
-        """
-
+        # Save the improved profile image to a buffer
         buffer = BytesIO()
-        canvas.save(buffer, "png")
+        canvas.save(buffer, format="PNG")
         buffer.seek(0)
-        canvas.close()
 
         file = File(buffer, filename='profile.png')
-
         return file
-
-    # async def base_profile(self, ctx, user, msg):
-    #     if msg == None:
-    #         msg = await ctx.send(embed=utils.ProfileEmbed(type="Default", user=user))
-    #     else:
-    #         await msg.edit(embed=utils.ProfileEmbed(type="Default", user=user))
-
-    #     await msg.clear_reactions()
-    #     # ! adds the reactions
-    #     if ctx.channel.id in self.bot.config['fur-channels'].values():
-    #         await msg.add_reaction("✨")
-    #     if ctx.channel.id in self.bot.config['nsfw-fur-channels'].values():
-    #         await msg.add_reaction("🔞")
-    #     # for role in user.roles:
-    #     #     if role.id == self.bot.config['roles']['council']:
-    #     #         await msg.add_reaction("🍃")
-
-    #     # Watches for the reactions
-    #     check = lambda x, y: y.id == ctx.author.id and x.message.id == msg.id and x.emoji in ["✨", "🍃"]
-    #     r, _ = await self.bot.wait_for('reaction_add', check=check)
-    #     if ctx.channel.id in self.bot.config['fur-channels'].values():
-    #         if r.emoji == "✨":
-    #             await msg.edit(embed=utils.ProfileEmbed(type="Sfw_Sona", user=user))
-    #             pass
-    #     if r.emoji == "🍃":
-    #         await msg.edit(embed=utils.ProfileEmbed(type="Staff-Track", user=user))
-    #         pass
-    #     await msg.clear_reactions()
-    #     await msg.add_reaction("🔷")
-    #     check = lambda x, y: y.id == ctx.author.id and x.message.id == msg.id and x.emoji in ["🔷"]
-    #     r, _ = await self.bot.wait_for('reaction_add', check=check)
-    #     if r.emoji == "🔷":
-    #         await self.base_profile(ctx=ctx, user=user, msg=msg)
-    #         return
-
-
 
 
     @command(application_command_meta=ApplicationCommandMeta(), aliases=['i', 'inv', 'items', 'Inv'])
-    async def inventory(self, ctx, user:Member=None):
+    async def inventory(self, ctx, user: Member = None):
         """Quick Check inventory"""
         if not user:
             user = ctx.author
         await ctx.interaction.response.send_message(embed=utils.Embed(type="Items", user=user, quick=True))
-
 
 
     @cooldown(1, 5, BucketType.user)
@@ -470,31 +298,26 @@ class Profile(Cog):
 
         await ctx.interaction.response.send_message(embed=utils.Embed(title="Your color setting has been set!", user=ctx.author))
 
+
     @cooldown(1, 5, BucketType.user)
     @command(application_command_meta=ApplicationCommandMeta(), aliases=["coin_record", "cr"])
     async def coinrecord(self, ctx, user=None):
         """Displays a user's coin record in a stylish embed."""
 
-        # Get the user for whom the record is being requested (default to the message author)
         user = user or ctx.author
-
-        # Retrieve the user's coins record
         coins_record = utils.Coins_Record.get(user.id)
 
-        # Check if a record exists
         if coins_record is None:
             return await ctx.send(embed=utils.Embed(description="No coins record found for this user.", color=0xff0000))
 
-        # Build the aesthetic embed
         embed = utils.Embed(
             title=f"{user.display_name}'s Coins Record",
             description=f"Here is a detailed overview of {user.mention}'s coin activity!",
-            color=0xFFD700,  # Gold color for coins
+            color=0xFFD700,
         )
 
         embed.set_thumbnail(url=user.avatar.url)
 
-        # Add fields for each coin record type
         embed.add_field(name="💰 Earned Coins", value=f"{coins_record.earned:,} coins", inline=False)
         embed.add_field(name="🛍️ Spent Coins", value=f"{coins_record.spent:,} coins", inline=False)
         embed.add_field(name="💸 Taxed Coins", value=f"{coins_record.taxed:,} coins", inline=False)
@@ -504,13 +327,9 @@ class Profile(Cog):
         embed.add_field(name="🎉 Given Coins", value=f"{coins_record.given:,} coins", inline=False)
         embed.add_field(name="🏆 Won Coins", value=f"{coins_record.won:,} coins", inline=False)
 
-        # Add a footer
         embed.set_footer(text="Serpent's Garden Economy", icon_url=self.bot.user.avatar.url)
-
-        # Send the embed
         await ctx.send(embed=embed)
 
 
 def setup(bot):
-    x = Profile(bot)
-    bot.add_cog(x)
+    bot.add_cog(Profile(bot))
