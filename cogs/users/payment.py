@@ -62,7 +62,9 @@ class Payment(Cog):
 
         # Get user's currency and check if they have enough coins (after taxes)
         user_currency = utils.Currency.get(ctx.author.id)
-        if amount > (user_currency.coins - amount * 0.08):
+        total_with_tax = amount + floor(amount * utils.CoinFunctions.tax_rate)
+
+        if total_with_tax > user_currency.coins:
             return await ctx.interaction.response.send_message(
                 embed=Embed(
                     title="Insufficient Coins!",
@@ -72,11 +74,27 @@ class Payment(Cog):
             )
 
         # Process the payment and calculate tax
-        tax = await utils.CoinFunctions.pay_user(payer=ctx.author, receiver=recipient, amount=amount)
+        tax_amount = floor(amount * utils.CoinFunctions.tax_rate)
         net_amount = floor(amount)
-        tax_amount = floor(tax)
 
-        # Create a beautiful embed for success message
+        # Update currency via CoinsFunctions
+        await utils.CoinFunctions.pay_user(payer=ctx.author, receiver=recipient, amount=net_amount)
+
+        # Retrieve the payer's and recipient's coins record
+        payer_record = utils.Coins_Record.get(ctx.author.id)
+        recipient_record = utils.Coins_Record.get(recipient.id)
+
+        # Update payer's and recipient's coin records
+        payer_record.spent += net_amount
+        payer_record.taxed += tax_amount
+        recipient_record.earned += net_amount
+
+        # Save records to the database
+        async with self.bot.database() as db:
+            await payer_record.save(db)
+            await recipient_record.save(db)
+
+        # Create an embed for success message
         embed = Embed(
             title="Payment Successful!",
             description=f"**{ctx.author.display_name}** has sent **{coin_emoji} {net_amount:,} coins** to **{recipient.display_name}**!",

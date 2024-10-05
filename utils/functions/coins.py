@@ -7,6 +7,7 @@ import utils
 
 class CoinFunctions(object):
     bot = None
+    tax_rate = 0.92
 
 
     @classmethod
@@ -52,7 +53,7 @@ class CoinFunctions(object):
         cp_r = utils.Coins_Record.get(payer.id)
 
         #! Determine tax amount
-        new_amount = amount * 0.92  #? 8% Tax
+        new_amount = amount * cls.tax_rate  #? 8% Tax
         taxed = amount - new_amount
 
         cp.coins -= taxed

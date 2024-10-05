@@ -57,6 +57,7 @@ class Daily(Cog):
         day = utils.Daily.get(ctx.author.id)
         lvl = utils.Levels.get(ctx.author.id)
         currency = utils.Currency.get(ctx.author.id)
+        coins_record = utils.Coins_Record.get(ctx.author.id)  # Get the coins record for tracking earned coins
 
         # Initialize daily data if first time
         if not day.daily:
@@ -87,6 +88,9 @@ class Daily(Cog):
         # Reward the user
         await utils.CoinFunctions.earn(earner=ctx.author, amount=coins)
 
+        # Update the coins record
+        coins_record.earned += floor(coins)
+
         # Get the ordinal suffix (st, nd, rd, th)
         def ordinal_suffix(n):
             if 10 <= n % 100 <= 20:
@@ -114,6 +118,7 @@ class Daily(Cog):
             await day.save(db)
             await lvl.save(db)
             await currency.save(db)
+            await coins_record.save(db)  # Save the updated coins record to the database
 
 # Register the cog
 def setup(bot):

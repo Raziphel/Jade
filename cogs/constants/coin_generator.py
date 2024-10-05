@@ -2,7 +2,6 @@ from discord import Message
 from discord.ext.commands import Cog
 from discord.ext.tasks import loop
 from more_itertools import unique_everseen
-
 from random import choice
 from datetime import datetime as dt, timedelta
 from re import compile
@@ -27,6 +26,7 @@ class Coin_Generator(Cog):
         lvl = utils.Levels.get(message.author.id)
         currency = utils.Currency.get(message.author.id)
         tracking = utils.Tracking.get(message.author.id)
+        coins_record = utils.Coins_Record.get(message.author.id)
 
         if lvl.last_xp is None:
             lvl.last_xp = dt.utcnow()
@@ -44,6 +44,7 @@ class Coin_Generator(Cog):
 
             # Earn coins and experience points
             await utils.CoinFunctions.earn(earner=message.author, amount=unique_words)
+            coins_record.earned += unique_words  # Track earned coins
             exp += 5 + unique_words
 
             # Level up user
@@ -59,6 +60,7 @@ class Coin_Generator(Cog):
             await lvl.save(db)
             await currency.save(db)
             await tracking.save(db)
+            await coins_record.save(db)  # Save updated coins record
 
     def cog_unload(self):
         """Cancel the voice generation loop when the cog is unloaded."""
@@ -85,8 +87,13 @@ class Coin_Generator(Cog):
                     # Update coins and experience based on voice activity
                     currency = utils.Currency.get(member.id)
                     lvl = utils.Levels.get(member.id)
+                    coins_record = utils.Coins_Record.get(member.id)  # Get coins record for tracking
+
+                    # Earn coins and XP based on voice channel activity
+                    earned_coins = 10 + (len(vc.members) * 3)
                     lvl.exp += (10 + len(vc.members))
-                    await utils.CoinFunctions.earn(earner=member, amount=10 + (len(vc.members)*3))
+                    await utils.CoinFunctions.earn(earner=member, amount=earned_coins)
+                    coins_record.earned += earned_coins  # Track earned coins
 
                     await utils.UserFunctions.level_up(user=member, channel=None)
 
@@ -95,7 +102,7 @@ class Coin_Generator(Cog):
                         await currency.save(db)
                         await lvl.save(db)
                         await tracking.save(db)
-
+                        await coins_record.save(db)  # Save coins record
 
     @voice_gen_loop.before_loop
     async def before_voice_gen_loop(self):

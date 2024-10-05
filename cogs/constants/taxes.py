@@ -1,7 +1,6 @@
 from discord.ext import tasks
 from discord.ext.commands import Cog
 import utils
-import logging
 
 
 class Taxes(Cog):
@@ -34,16 +33,21 @@ class Taxes(Cog):
 
             for user in all_users:
                 try:
-                    # Tax logic remains the same
-                    if user.coins > 10:
-                        user.coins -= 10
-                        total_taxed += 10
-                    else:
-                        total_taxed += user.coins
-                        user.coins -= user.coins
+                    coins_record = utils.Coins_Record.get(user.user_id)  # Get the user's coins record
 
-                    # Save the updated currency back to the database
+                    # Tax logic
+                    if user.coins > 10:
+                        tax_amount = 10
+                    else:
+                        tax_amount = user.coins
+
+                    user.coins -= tax_amount
+                    coins_record.taxed += tax_amount  # Track the taxed amount for this user
+                    total_taxed += tax_amount
+
+                    # Save the updated currency and coins record to the database
                     await user.save(db)
+                    await coins_record.save(db)
 
                 except Exception as e:
                     print(f"Error taxing user {user.user_id}: {str(e)}")
@@ -54,13 +58,13 @@ class Taxes(Cog):
         async with self.bot.database() as db:
             await server_currency.save(db)
 
-
         print(f"Taxed the server for a total of: {total_taxed:,} coins")
 
     @daily_loop.before_loop
     async def before_daily_loop(self):
         """Wait until the bot is ready before running the loop."""
         await self.bot.wait_until_ready()
+
 
 def setup(bot):
     bot.add_cog(Taxes(bot))

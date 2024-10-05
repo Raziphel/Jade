@@ -1,11 +1,7 @@
-# Discord
-# Additions
 from asyncio import sleep
 from random import choice, randint
-
 from discord import RawReactionActionEvent
 from discord.ext.commands import Cog
-
 import utils
 
 
@@ -17,25 +13,18 @@ class Message_Rewards(Cog):
         self.sparkle_messages = []
         self.bun_msg = 0
 
-
     @Cog.listener('on_message')
     async def reward_gen(self, message):
         """Message Reward Generation"""
 
-        #? BETTER NOT BE A DM
-        if message.guild is None:
-            return
-        #? Disables Bots
-        if message.author.bot:
-            return
-        #? Check if bot is connected!
-        if not self.bot.connected:
+        # Ignore DMs and bot messages, and check if bot is connected
+        if message.guild is None or message.author.bot or not self.bot.connected:
             return
 
-        #! Define some variables
+        # Fetch the recent messages in the channel
         messages = await message.channel.history(limit=10).flatten()
 
-        #! Give them some rewards!
+        # Randomly generate a chance for rewards
         try:
             chance = randint(1, 25000)
             if chance <= 25:
@@ -56,49 +45,45 @@ class Message_Rewards(Cog):
 
         await sleep(10)
 
-
-
-
     @Cog.listener('on_raw_reaction_add')
-    async def item_reaction_handler(self, payload:RawReactionActionEvent):
+    async def item_reaction_handler(self, payload: RawReactionActionEvent):
         """Handles reactions with the items"""
 
-        #? Check if bot is connected!
+        # Check if the bot is connected
         if not self.bot.connected:
             return
 
-
-        #? BETTER NOT BE A DM
+        # Fetch guild and user
         guild = self.bot.get_guild(payload.guild_id)
         user = self.bot.get_user(payload.user_id)
-        if guild is None:
+        if guild is None or user.bot:
             return
 
-        #? Check not a bot
-        if user.bot:
-            return
-
-        #! Define Variables
+        # Fetch the message
         channel = guild.get_channel(payload.channel_id)
         try:
             message = await channel.fetch_message(payload.message_id)
-        except: return
-        msg = None
+        except:
+            return
 
         c = utils.Currency.get(user.id)
+        coins_record = utils.Coins_Record.get(user.id)  # Retrieve the coins record for the user
         coin_logs = self.bot.get_channel(self.bot.config['logs']['coins'])
 
-        #! Define Emojis
+        # Define emojis
         bunny_e = self.bot.config['emojis']['bunny']
         coin_e = self.bot.config['emojis']['coin']
 
-        #! Get the correct item
+        # Process the reward based on reaction
+        msg = None
+
         if str(payload.emoji) == coin_e:
             if message.id in self.coin_messages:
                 self.coin_messages.remove(message.id)
                 await message.clear_reactions()
                 coin = choice([300, 450, 500, 650, 700, 750])
                 await utils.CoinFunctions.earn(earner=user, amount=coin)
+                coins_record.earned += coin  # Track earned coins
                 msg = await channel.send(f"{user.name} found **{coin} {coin_e}x**")
                 await coin_logs.send(f"**{user}** found **{coin} {coin_e}**")
 
@@ -108,6 +93,7 @@ class Message_Rewards(Cog):
                 await message.clear_reactions()
                 coin = choice([500, 750, 1000])
                 await utils.CoinFunctions.earn(earner=user, amount=coin)
+                coins_record.earned += coin  # Track earned coins
                 msg = await channel.send(f"{user.name} got **{coin} {coin_e}x from a bunny!**")
                 await coin_logs.send(f"**{user}** got **{coin} {coin_e} from a bunny!**")
 
@@ -117,25 +103,23 @@ class Message_Rewards(Cog):
                 await message.clear_reactions()
                 coin = choice([2500, 5000, 10000])
                 await utils.CoinFunctions.earn(earner=user, amount=coin)
+                coins_record.earned += coin  # Track earned coins
                 msg = await channel.send(f"{user.name} got **{coin} {coin_e}x from a sparkle!**")
                 await coin_logs.send(f"**{user}** got **{coin} {coin_e} from a sparkle!**")
-
-
 
         else:
             return
 
-        #! Save it to database
+        # Save user data to the database
         async with self.bot.database() as db:
             await c.save(db)
+            await coins_record.save(db)  # Save the updated coins record
 
+        # Delete the notification message after a delay
         if msg is not None:
             await sleep(5)
             await msg.delete()
-        else: 
-            return
 
 
 def setup(bot):
-    x = Message_Rewards(bot)
-    bot.add_cog(x)
+    bot.add_cog(Message_Rewards(bot))
