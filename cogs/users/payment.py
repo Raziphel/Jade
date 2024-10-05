@@ -85,9 +85,9 @@ class Payment(Cog):
         recipient_record = utils.Coins_Record.get(recipient.id)
 
         # Update payer's and recipient's coin records
-        payer_record.spent += net_amount
+        payer_record.gifted += net_amount
         payer_record.taxed += tax_amount
-        recipient_record.earned += net_amount
+        recipient_record.given += net_amount
 
         # Save records to the database
         async with self.bot.database() as db:
