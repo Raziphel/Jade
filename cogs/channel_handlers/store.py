@@ -71,7 +71,7 @@ class StoreHandler(Cog):
                 # Queue the remaining messages with only content
                 await self.bot.message_edit_manager.queue_edit(
                     message=msg,
-                    new_content=".",
+                    new_content="~",
                     new_embed=None  # No embed for these messages
                 )
 
