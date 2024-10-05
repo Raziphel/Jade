@@ -502,6 +502,7 @@ class Profile(Cog):
         embed.add_field(name="🦹 Stolen Coins", value=f"{coins_record.stolen:,} coins", inline=False)
         embed.add_field(name="🎁 Gifted Coins", value=f"{coins_record.gifted:,} coins", inline=False)
         embed.add_field(name="🎉 Given Coins", value=f"{coins_record.given:,} coins", inline=False)
+        embed.add_field(name="🏆 Won Coins", value=f"{coins_record.won:,} coins", inline=False)
 
         # Add a footer
         embed.set_footer(text="Serpent's Garden Economy", icon_url=self.bot.user.avatar.url)

@@ -240,8 +240,10 @@ class LotteryHandler(commands.Cog):
 
             # Distribute the prize
             winner_currency = utils.Currency.get(winner.id)
+            winner_record = utils.Coins_Record.get(winner.id)
             winnings = utils.CoinFunctions.pay_tax(payer=winner, amount=lottery.coins)
             winner_currency.coins += winnings
+            winner_record.won += winnings
 
             # Reset lottery
             lottery.last_winner_id = winner.id
@@ -254,6 +256,7 @@ class LotteryHandler(commands.Cog):
             async with self.bot.database() as db:
                 await lottery.save(db)
                 await winner_currency.save(db)
+                await winner_record.save(db)
 
             # Reset everyone's tickets
             for member in guild.members:
