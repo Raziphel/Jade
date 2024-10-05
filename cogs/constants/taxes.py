@@ -39,7 +39,8 @@ class Taxes(Cog):
                         user.coins -= 10
                         total_taxed += 10
                     else:
-                        user.coins = 0
+                        total_taxed += user.coins
+                        user.coins -= user.coins
 
                     # Save the updated currency back to the database
                     await user.save(db)
