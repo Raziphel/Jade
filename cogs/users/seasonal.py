@@ -28,7 +28,7 @@ class Seasonal(Cog):
             coins = randint(2000, 6000)  # Random amount of coins
             treat = choice(self.treats)
             await ctx.send \
-                (f"**🎉 {ctx.author.mention}, you went trick-or-treating and got a treat: {treat}! You earned {coins} "
+                (f"**🎉 {ctx.author.mention}, you went trick-or-treating and got a treat: {treat}! You earned {coins:,} "
                  f"coins!**")
             await utils.CoinFunctions.earn(earner=ctx.author, amount=coins)
 
@@ -37,7 +37,7 @@ class Seasonal(Cog):
             coins = randint(1000, 4000)  # Random amount of coins lost
             trick = choice(self.tricks)
             await ctx.send \
-                (f"**😈 {ctx.author.mention}, you went trick-or-treating and got a trick: {trick}! You lost {coins} "
+                (f"**😈 {ctx.author.mention}, you went trick-or-treating and got a trick: {trick}! You lost {coins:,} "
                  f"coins!**")
             c = utils.Currency.get(ctx.author.id)
             c.coins -= coins
