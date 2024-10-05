@@ -1,5 +1,5 @@
 # Discord
-from discord import User, ApplicationCommandOption, ApplicationCommandOptionType, Member
+from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed
 from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
 
 # Utils
@@ -11,9 +11,10 @@ class Payment(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @property  # ! The members log
+    @property
     def coin_logs(self):
-        return self.bot.get_channel(self.bot.config['channels']['coin_logs']) 
+        """Returns the coin logs channel."""
+        return self.bot.get_channel(self.bot.config['channels']['coin_logs'])
 
     @cooldown(1, 30, BucketType.user)
     @command(
@@ -37,27 +38,66 @@ class Payment(Cog):
     )
     async def pay(self, ctx, recipient: Member = None, amount: int = 0):
         """Send coins to another member (With a tax)."""
-        coin_e = self.bot.config['emojis']['coin']
+        coin_emoji = self.bot.config['emojis']['coin']
 
-        #? Check if the recipient is the same as the user.
+        # Check if the recipient is valid
         if recipient == ctx.author:
-            return await ctx.interaction.response.send_message(embed=utils.Embed(description=f"{ctx.author.name} You can't pay yourself coins! stupid..."))
+            return await ctx.interaction.response.send_message(
+                embed=Embed(
+                    title="Invalid Action!",
+                    description="You can't send coins to yourself! 🤦‍♂️",
+                    color=0xffcc00
+                )
+            )
 
+        # Ensure the amount is valid
         if amount <= 1000:
-            return await ctx.interaction.response.send_message(embed=utils.Embed(description=f"{ctx.author.name} Has to be more than 1,000!"))
+            return await ctx.interaction.response.send_message(
+                embed=Embed(
+                    title="Invalid Amount!",
+                    description="The amount must be more than 1,000 coins.",
+                    color=0xffcc00
+                )
+            )
 
-        #? Check if the user has enough coins.
-        c = utils.Currency.get(ctx.author.id)
-        if amount > (c.coins - amount*0.08):
-            return await ctx.interaction.response.send_message(embed=utils.Embed(description=f"{recipient.mention} you don't have that many coins.  (Could be due to taxes)"))
+        # Get user's currency and check if they have enough coins (after taxes)
+        user_currency = utils.Currency.get(ctx.author.id)
+        if amount > (user_currency.coins - amount * 0.08):
+            return await ctx.interaction.response.send_message(
+                embed=Embed(
+                    title="Insufficient Coins!",
+                    description=f"You don't have enough coins to send this amount (considering taxes).",
+                    color=0xff0000
+                )
+            )
 
+        # Process the payment and calculate tax
         tax = await utils.CoinFunctions.pay_user(payer=ctx.author, receiver=recipient, amount=amount)
+        net_amount = floor(amount)
+        tax_amount = floor(tax)
 
-        await ctx.interaction.response.send_message(embed=utils.Embed(description=f"**{ctx.author} sent {coin_e} {floor(amount):,}x to {recipient}!**\n*Taxes: {floor(tax):,}*"))
+        # Create a beautiful embed for success message
+        embed = Embed(
+            title="Payment Successful!",
+            description=f"**{ctx.author.display_name}** has sent **{coin_emoji} {net_amount:,} coins** to **{recipient.display_name}**!",
+            color=0x00cc66
+        )
+        embed.add_field(name="Taxes", value=f"{coin_emoji} {tax_amount:,} coins", inline=False)
+        embed.set_thumbnail(url=ctx.author.avatar.url)
+        embed.set_footer(text=f"Transaction completed by {ctx.author.display_name}")
 
-        await self.coin_logs.send(f"**{ctx.author.name}** payed **{coin_e} {amount}x** to **{recipient.name}**!")
+        # Send the response embed
+        await ctx.interaction.response.send_message(embed=embed)
+
+        # Log the transaction in the coin logs channel
+        log_embed = Embed(
+            title="Transaction Logged",
+            description=f"**{ctx.author.display_name}** sent **{coin_emoji} {net_amount:,} coins** to **{recipient.display_name}**.",
+            color=0x00cc66
+        )
+        log_embed.add_field(name="Tax Collected", value=f"{coin_emoji} {tax_amount:,} coins")
+        await self.coin_logs.send(embed=log_embed)
 
 
 def setup(bot):
-    x = Payment(bot)
-    bot.add_cog(x)
+    bot.add_cog(Payment(bot))
