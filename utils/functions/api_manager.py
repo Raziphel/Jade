@@ -1,7 +1,7 @@
 import asyncio
 import discord
 
-class MessageEditManager:
+class API_Manager:
     def __init__(self):
         self.edit_queue = asyncio.Queue()
 
