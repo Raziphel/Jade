@@ -52,8 +52,19 @@ class Leaderboard(commands.Cog):
         # Update embeds
         embed.description = '\n'.join(text)
         embed2.description = '\n'.join(text2)
-        await msg.edit(content=f"# {label} Leaderboard", embed=embed)
-        await msg2.edit(content=" ", embed=embed2)
+        # Queue the first message edit
+        await self.bot.message_edit_manager.queue_edit(
+            message=msg,
+            new_content=f"# {label} Leaderboard",
+            new_embed=embed
+        )
+
+        # Queue the second message edit
+        await self.bot.message_edit_manager.queue_edit(
+            message=msg2,
+            new_content=" ",  # Empty content
+            new_embed=embed2
+        )
 
     @tasks.loop(minutes=5)
     async def five_minute_loop(self):

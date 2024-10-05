@@ -8,7 +8,6 @@ from discord import AllowedMentions
 import utils
 from utils.database import DatabaseConnection
 
-
 #+ ------------------------- Serpent Main Class
 class Serpent(commands.AutoShardedBot):
     def __init__(self, config: str, secret: str, *args, logger: logging.Logger = None, **kwargs):
@@ -28,6 +27,9 @@ class Serpent(commands.AutoShardedBot):
         utils.Embed.bot = self
         utils.CoinFunctions.bot = self
         utils.UserFunctions.bot = self
+
+        # + Initialize the MessageEditManager
+        self.message_edit_manager = utils.API_Manager()
 
         #+ Get OpenAI key setup
         openai.api_key = self.secret['openai_key']
@@ -90,6 +92,9 @@ class Serpent(commands.AutoShardedBot):
         else:
             self.connected = True
             print('Bot database is connected!')
+
+        # + Start the MessageEditManager queue processor
+        self.message_edit_manager.start_processing(self.loop)
 
         #+ Register slash commands
         await self.register_application_commands()
