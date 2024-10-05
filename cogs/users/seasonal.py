@@ -23,7 +23,7 @@ class Seasonal(Cog):
 
         if outcome == "treat":
             # User gets coins as a treat
-            coins = randint(1000, 5000)  # Random amount of coins
+            coins = randint(2000, 6000)  # Random amount of coins
             treat = choice(self.treats)
             await ctx.send \
                 (f"**🎉 {ctx.author.mention}, you went trick-or-treating and got a treat: {treat}! You earned {coins} "
@@ -32,7 +32,7 @@ class Seasonal(Cog):
 
         else:
             # User loses coins as a trick
-            coins = randint(2000, 5000)  # Random amount of coins lost
+            coins = randint(1000, 4000)  # Random amount of coins lost
             trick = choice(self.tricks)
             await ctx.send \
                 (f"**😈 {ctx.author.mention}, you went trick-or-treating and got a trick: {trick}! You lost {coins} "
