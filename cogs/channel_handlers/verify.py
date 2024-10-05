@@ -1,14 +1,12 @@
 
-#* Discord
-from discord import RawReactionActionEvent, Embed, PartialEmoji, Message, Member, DiscordException, guild
-from discord.ext.commands import Cog
-
 # * Additions
-from asyncio import sleep, TimeoutError
-from math import floor
+from asyncio import TimeoutError
 from random import randint
-from typing import Optional
 from re import findall
+from typing import Optional
+
+from discord import RawReactionActionEvent, Embed, DiscordException
+from discord.ext.commands import Cog
 
 import utils
 

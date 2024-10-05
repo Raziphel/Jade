@@ -6,3 +6,4 @@ pillow~=10.4.0
 redis==5.0.0b2
 more-itertools~=10.5.0
 openai==0.28
+zipp>=3.19.1

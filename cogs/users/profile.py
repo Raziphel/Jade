@@ -499,7 +499,7 @@ class Profile(Cog):
         embed.add_field(name="🛍️ Spent Coins", value=f"{coins_record.spent:,} coins", inline=False)
         embed.add_field(name="💸 Taxed Coins", value=f"{coins_record.taxed:,} coins", inline=False)
         embed.add_field(name="💀 Lost Coins", value=f"{coins_record.lost:,} coins", inline=False)
-        embed.add_field(name="🦹 Stolen Coins", value=f"{coins_record.stolen:,} coins", inline=False)
+        embed.add_field(name="🧤 Stolen Coins", value=f"{coins_record.stolen:,} coins", inline=False)
         embed.add_field(name="🎁 Gifted Coins", value=f"{coins_record.gifted:,} coins", inline=False)
         embed.add_field(name="🎉 Given Coins", value=f"{coins_record.given:,} coins", inline=False)
         embed.add_field(name="🏆 Won Coins", value=f"{coins_record.won:,} coins", inline=False)
