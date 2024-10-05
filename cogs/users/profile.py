@@ -472,7 +472,7 @@ class Profile(Cog):
 
     @cooldown(1, 5, BucketType.user)
     @command(application_command_meta=ApplicationCommandMeta(), aliases=["coin_record", "cr"])
-    async def coins_record(self, ctx, user=None):
+    async def coinrecord(self, ctx, user=None):
         """Displays a user's coin record in a stylish embed."""
 
         # Get the user for whom the record is being requested (default to the message author)
