@@ -179,7 +179,6 @@ class LotteryHandler(commands.Cog):
                 f"{lottery_ping_role.mention} ⏳ The lottery draw will take place in 1 hour! Get your tickets now!")
             self.ping_sent = True
 
-
         # Check if it's time to run the lottery
         if time_remaining <= timedelta(0):
             # Remove the previous winner message if it exists
@@ -187,10 +186,10 @@ class LotteryHandler(commands.Cog):
                 try:
                     msg = await channel.fetch_message(lottery.last_msg_id)
                     await msg.delete()
-                except discord.NotFound:
-                    pass  # Message was already deleted or not found
+                except (discord.NotFound, discord.HTTPException):
+                    pass  # Message was already deleted or couldn't be found
 
-            lottery.lot_time = dt.now()
+            lottery.lot_time = dt.utcnow()
 
             # Get total tickets and participants
             total_tickets = utils.Currency.get_total_tickets()
@@ -198,6 +197,7 @@ class LotteryHandler(commands.Cog):
 
             if total_tickets == 0:
                 await channel.send(embed=Embed(description="No one entered the lottery this week. No winner."))
+                self.ping_sent = False  # Reset the ping for the next cycle
                 return
 
             # Collect all tickets into a list for the draw
@@ -208,6 +208,10 @@ class LotteryHandler(commands.Cog):
             # Select a winner
             winner_id = choice(all_tickets)
             winner = guild.get_member(winner_id)
+
+            if winner is None:
+                await channel.send("The selected winner is no longer in the server. No prize will be distributed.")
+                return
 
             # Calculate winner's chance of winning
             winner_info = next(user for user in sorted_users if user.user_id == winner_id)
@@ -232,14 +236,15 @@ class LotteryHandler(commands.Cog):
                 color=discord.Color.gold()
             ))
 
-            # Give him winner role and remove last winner role
-            winner_role = utils.DiscordGet(guild.roles, id=self.bot.config['lottery_roles']['winner'])
+            # Assign the winner role and remove it from the previous winner
+            winner_role = guild.get_role(self.bot.config['lottery_roles']['winner'])
             await winner.add_roles(winner_role, reason="Won the lottery.")
+
+            # Remove the winner role from the previous winner
             for member in guild.members:
-                if winner_role in member.roles:
-                    await member.send("# You are no longer restricted from participating in the lottery.")
-                    await member.remove_roles(winner_role, reason="Been a week since last win.")
-                    return
+                if winner_role in member.roles and member != winner:
+                    await member.send("You are no longer restricted from participating in the lottery.")
+                    await member.remove_roles(winner_role, reason="New winner announced.")
 
             # Distribute the prize
             winner_currency = utils.Currency.get(winner.id)
@@ -254,7 +259,6 @@ class LotteryHandler(commands.Cog):
             lottery.coins = 0
             lottery.last_msg_id = winner_message.id  # Store the winner message for later removal
 
-
             # Save changes to the database
             async with self.bot.database() as db:
                 await lottery.save(db)
@@ -263,11 +267,13 @@ class LotteryHandler(commands.Cog):
 
             # Reset everyone's tickets
             for member in guild.members:
-                c = utils.Currency.get(member.id)
-                c.lot_tickets = 0
+                currency = utils.Currency.get(member.id)
+                currency.lot_tickets = 0
                 async with self.bot.database() as db:
-                    await c.save(db)
+                    await currency.save(db)
 
+            # Reset the ping sent flag for the next lottery cycle
+            self.ping_sent = False
 
     @commands.Cog.listener('on_raw_reaction_add')
     async def lot_buy(self, payload):
