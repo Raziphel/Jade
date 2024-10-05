@@ -17,6 +17,7 @@ class LotteryHandler(commands.Cog):
         self.lottery_pot_increaser.start()  # Increases the lottery pot every hour
         self.lottery_leaderboard_update.start()  # Updates the leaderboard
         self.previous_winner_message = None
+        self.ping_sent = False  # Track whether the ping has been sent for the current draw period
         # Ticket options with emojis and costs
         self.ticket_options = {
             "🍏": (1, 1000),  # 1 ticket for 1000 coins (1000 per ticket)
@@ -169,13 +170,15 @@ class LotteryHandler(commands.Cog):
         time_remaining = (lottery.lot_time + timedelta(days=7)) - dt.now()
 
         # Check if it's 1 hour before the draw and send a ping to the lottery ping role
-        if timedelta(hours=0) < time_remaining <= timedelta(hours=1):
+        if timedelta(hours=0) < time_remaining <= timedelta(hours=1) and not self.ping_sent:
             # Fetch the lottery ping role
             lottery_ping_role = guild.get_role(self.bot.config['lottery_roles']['ping'])
 
             # Send a reminder message and ping the role
             await channel.send(
                 f"{lottery_ping_role.mention} ⏳ The lottery draw will take place in 1 hour! Get your tickets now!")
+            self.ping_sent = True
+
 
         # Check if it's time to run the lottery
         if time_remaining <= timedelta(0):
