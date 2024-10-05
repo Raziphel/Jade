@@ -470,6 +470,46 @@ class Profile(Cog):
 
         await ctx.interaction.response.send_message(embed=utils.Embed(title="Your color setting has been set!", user=ctx.author))
 
+    @cooldown(1, 5, BucketType.user)
+    @command(application_command_meta=ApplicationCommandMeta(), aliases=["coin_record", "cr"])
+    async def coins_record(self, ctx, user=None):
+        """Displays a user's coin record in a stylish embed."""
+
+        # Get the user for whom the record is being requested (default to the message author)
+        user = user or ctx.author
+
+        # Retrieve the user's coins record
+        coins_record = utils.Coins_Record.get(user.id)
+
+        # Check if a record exists
+        if coins_record is None:
+            return await ctx.send(embed=utils.Embed(description="No coins record found for this user.", color=0xff0000))
+
+        # Build the aesthetic embed
+        embed = utils.Embed(
+            title=f"{user.display_name}'s Coins Record",
+            description=f"Here is a detailed overview of {user.mention}'s coin activity!",
+            color=0xFFD700,  # Gold color for coins
+        )
+
+        embed.set_thumbnail(url=user.avatar.url)
+
+        # Add fields for each coin record type
+        embed.add_field(name="💰 Earned Coins", value=f"{coins_record.earned:,} coins", inline=False)
+        embed.add_field(name="🛍️ Spent Coins", value=f"{coins_record.spent:,} coins", inline=False)
+        embed.add_field(name="💸 Taxed Coins", value=f"{coins_record.taxed:,} coins", inline=False)
+        embed.add_field(name="💀 Lost Coins", value=f"{coins_record.lost:,} coins", inline=False)
+        embed.add_field(name="🦹 Stolen Coins", value=f"{coins_record.stolen:,} coins", inline=False)
+        embed.add_field(name="🎁 Gifted Coins", value=f"{coins_record.gifted:,} coins", inline=False)
+        embed.add_field(name="🎉 Given Coins", value=f"{coins_record.given:,} coins", inline=False)
+
+        # Add a footer
+        embed.set_footer(text="Serpent's Garden Economy", icon_url=self.bot.user.avatar.url)
+
+        # Send the embed
+        await ctx.send(embed=embed)
+
+
 def setup(bot):
     x = Profile(bot)
     bot.add_cog(x)
