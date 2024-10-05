@@ -14,7 +14,7 @@ class Payment(Cog):
     @property
     def coin_logs(self):
         """Returns the coin logs channel."""
-        return self.bot.get_channel(self.bot.config['channels']['coin_logs'])
+        return self.bot.get_channel(self.bot.config['logs']['coins'])
 
     @cooldown(1, 30, BucketType.user)
     @command(
