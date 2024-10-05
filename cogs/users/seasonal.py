@@ -18,6 +18,8 @@ class Seasonal(Cog):
     @cooldown(1, 7200, BucketType.user)  # 2-hour cooldown per user
     @command(application_command_meta=ApplicationCommandMeta())
     async def trick_or_treat(self, ctx):
+        """Get a trick or get a treat!"""
+
         # Decide if user gets a treat or a trick
         outcome = choice(["treat", "trick"])
 
