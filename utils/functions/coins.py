@@ -48,7 +48,7 @@ class CoinFunctions(object):
 
         #! Define Variables
         cp = utils.Currency.get(payer.id)
-        cr = utils.Currency.get(cls.bot.config['bot_id'])
+        cr = utils.Currency.get(cls.bot.user.id)
         cp_r = utils.Coins_Record.get(payer.id)
 
         #! Determine tax amount
@@ -74,7 +74,7 @@ class CoinFunctions(object):
 
         #! Define Variables
         cp = utils.Currency.get(payer.id)
-        cr = utils.Currency.get(cls.bot.config['bot_id'])
+        cr = utils.Currency.get(cls.bot.user.id)
         cp_r = utils.Coins_Record.get(payer.id)
 
         if cp.coins < amount:
@@ -100,7 +100,7 @@ class CoinFunctions(object):
 
         #! Define Variables
         cu = utils.Currency.get(earner.id)
-        cb = utils.Currency.get(cls.bot.config['bot_id'])
+        cb = utils.Currency.get(cls.bot.user.id)
         cu_r = utils.Coins_Record.get(earner.id)
 
         #! Check if the bank's got coins!

@@ -37,14 +37,14 @@ class Coin_Generator(Cog):
             exp = 1
             unique_words = len(list(unique_everseen(message.content.split(), str.lower)))
             if message.attachments:
-                unique_words += 6
+                unique_words += 10
 
             # Cap unique words to prevent excessive rewards
-            unique_words = min(unique_words, 8)
+            unique_words = min(unique_words, 15)
 
             # Earn coins and experience points
             await utils.CoinFunctions.earn(earner=message.author, amount=unique_words)
-            exp += 1 + unique_words
+            exp += 5 + unique_words
 
             # Level up user
             await utils.UserFunctions.level_up(user=message.author, channel=message.channel)
@@ -85,8 +85,8 @@ class Coin_Generator(Cog):
                     # Update coins and experience based on voice activity
                     currency = utils.Currency.get(member.id)
                     lvl = utils.Levels.get(member.id)
-                    lvl.exp += (4 + len(vc.members))
-                    await utils.CoinFunctions.earn(earner=member, amount=1 + round(len(vc.members)))
+                    lvl.exp += (10 + len(vc.members))
+                    await utils.CoinFunctions.earn(earner=member, amount=10 + (len(vc.members)*3))
 
                     await utils.UserFunctions.level_up(user=member, channel=None)
 
@@ -95,6 +95,7 @@ class Coin_Generator(Cog):
                         await currency.save(db)
                         await lvl.save(db)
                         await tracking.save(db)
+
 
     @voice_gen_loop.before_loop
     async def before_voice_gen_loop(self):
