@@ -77,3 +77,24 @@ class Currency(object):
         for i in cls.all_currency.values():
             total += i.tickets
         return total
+
+    @classmethod
+    async def get_all_users_from_db(cls, db: DatabaseConnection):
+        """Fetch all users from the database, including those not in the cache"""
+        users = await db('SELECT user_id, coins, tickets FROM currency')
+        all_users = []
+
+        for user_data in users:
+            user_id, coins, tickets = user_data
+            if user_id not in cls.all_currency:
+                # Create a Currency object if not in the cache
+                cls(user_id, coins, tickets)
+            else:
+                # Update the cached user with the database values
+                user = cls.all_currency[user_id]
+                user.coins = coins
+                user.tickets = tickets
+
+            all_users.append(cls.all_currency[user_id])  # Append user from cache
+
+        return all_users
