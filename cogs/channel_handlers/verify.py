@@ -65,13 +65,13 @@ class verify(Cog):
 
         embeds = [embed1, embed2, embed3]
 
+        # Compact loop to handle rule edits
         for i, rule in rules.items():
-            await rule.edit(content="", embed=embeds[i-1])
-
-
-
-
-
+            await self.bot.message_edit_manager.queue_edit(
+                message=rule,
+                new_content="",
+                new_embed=embeds[i - 1]  # Access the corresponding embed by index
+            )
 
 
     @Cog.listener('on_ready') #! ---> Server Rules
@@ -106,11 +106,13 @@ class verify(Cog):
 
         embeds = [embed1, embed2, embed3, embed4]
 
+        # Compact loop to handle rule edits
         for i, rule in rules.items():
-            await rule.edit(content="", embed=embeds[i-1])
-
-
-
+            await self.bot.message_edit_manager.queue_edit(
+                message=rule,
+                new_content="",
+                new_embed=embeds[i - 1]  # Access the corresponding embed by index
+            )
 
 
     @Cog.listener('on_raw_reaction_add') #! --------> verification

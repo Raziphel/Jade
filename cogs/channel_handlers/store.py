@@ -58,11 +58,22 @@ class StoreHandler(Cog):
                        inline=True)
         ]
 
-        for msg, embed in zip(messages[:3], embeds):
-            await msg.edit(content=" ", embed=embed)
-
-        for msg in messages[3:]:
-            await msg.edit(content=".")
+        # Compact loop to handle both cases
+        for i, msg in enumerate(messages):
+            if i < 3:
+                # Queue the first three messages with corresponding embeds
+                await self.bot.message_edit_manager.queue_edit(
+                    message=msg,
+                    new_content=" ",
+                    new_embed=embeds[i]  # Access corresponding embed by index
+                )
+            else:
+                # Queue the remaining messages with only content
+                await self.bot.message_edit_manager.queue_edit(
+                    message=msg,
+                    new_content=".",
+                    new_embed=None  # No embed for these messages
+                )
 
     @Cog.listener('on_raw_reaction_add')
     async def store_buy(self, payload: RawReactionActionEvent):
@@ -126,6 +137,8 @@ class StoreHandler(Cog):
 
         # Manage message reactions
         await self.manage_reactions(payload)
+
+
 
     async def manage_reactions(self, payload):
         """Handle message reactions cleanup."""

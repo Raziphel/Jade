@@ -52,6 +52,7 @@ class Leaderboard(commands.Cog):
         # Update embeds
         embed.description = '\n'.join(text)
         embed2.description = '\n'.join(text2)
+
         # Queue the first message edit
         await self.bot.message_edit_manager.queue_edit(
             message=msg,

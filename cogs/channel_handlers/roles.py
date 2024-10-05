@@ -41,11 +41,18 @@ class RoleHandler(Cog):
 
         for i, embed in enumerate(embeds):
             msg = await ch.fetch_message(role_messages[str(i + 1)])
-            await msg.edit(content=" ", embed=embed)
+            await self.bot.message_edit_manager.queue_edit(
+                message=msg,
+                new_content=f" ",
+                new_embed=embed
+            )
 
         for msg_id in list(role_messages.values())[3:]:  # Fixed by converting to list
             msg = await ch.fetch_message(msg_id)
-            await msg.edit(content="~")
+            await self.bot.message_edit_manager.queue_edit(
+                message=msg,
+                new_content=f"~",
+            )
 
     @Cog.listener()
     async def on_ready(self):

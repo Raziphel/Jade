@@ -30,11 +30,20 @@ class server_info(Cog):
 
         embed3=Embed(description=f"# Server Plugins\n\nA full list of plugins and there functions will be available when Razi isn't a Lazy bitch....", color=0x0000ff)
 
+        # List of messages and corresponding embeds
+        messages_and_embeds = [
+            (msg1, embed1),
+            (msg2, embed2),
+            (msg3, embed3)
+        ]
 
-        await msg1.edit(content=f" ", embed=embed1)
-        await msg2.edit(content=f" ", embed=embed2)
-        await msg3.edit(content=f" ", embed=embed3)
-
+        # Loop through the messages and queue edits
+        for message, embed in messages_and_embeds:
+            await self.bot.message_edit_manager.queue_edit(
+                message=message,
+                new_content=" ",
+                new_embed=embed
+            )
 
 
 def setup(bot):

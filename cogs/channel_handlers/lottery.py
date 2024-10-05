@@ -83,7 +83,11 @@ class LotteryHandler(commands.Cog):
         )
 
         # Edit the message with updated content
-        await msg.edit(content=" ", embed=embed)
+        await self.bot.message_edit_manager.queue_edit(
+            message=msg,
+            new_content=f" ",
+            new_embed=embed
+        )
 
         # Call manage reactions to maintain the reactions on the lottery message
         await self.manage_reactions(msg)
@@ -130,8 +134,11 @@ class LotteryHandler(commands.Cog):
 
             embed.description += f"\n{leaderboard_text}"
 
-        # Update the leaderboard message
-        await msg.edit(content=" ", embed=embed)
+        await self.bot.message_edit_manager.queue_edit(
+            message=msg,
+            new_content=f" ",
+            new_embed=embed
+        )
 
     @tasks.loop(hours=2)
     async def lottery_pot_increaser(self):
