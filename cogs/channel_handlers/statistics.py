@@ -93,8 +93,7 @@ class Statistics(commands.Cog):
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n"
                 f"{self.bot.config['emojis']['scp']} **SCP:SL Players**: {tracked_roles['scpsl']} ({round(tracked_roles['scpsl'] / members * 100)}%)\n{bars['scpsl']}\n"
-                f"🌺 **Degen Girls**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\
-                n{bars['queer']}"
+                f"🌺 **Degen Girls**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}"
             ),
             color=0x1E90FF
         )
