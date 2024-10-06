@@ -2,7 +2,6 @@ from math import floor
 from datetime import datetime as dt, timedelta
 from discord import Embed
 from discord.ext import tasks, commands
-from collections import Counter
 
 import utils
 
@@ -49,43 +48,13 @@ class Statistics(commands.Cog):
 
         inactive_count = len([m for m in guild.members if utils.Tracking.get(m.id).messages < 1])
 
-        # Active members in the last 7 days
-        active_members_count = len([m for m in guild.members if (dt.utcnow() - m.joined_at).days <= 7])
-
-        # Top 3 most active channels by message count
-        channels_activity = Counter({ch.id: utils.Tracking.get_channel_message_count(ch.id) for ch in guild.text_channels})
-        top_channels = channels_activity.most_common(3)
-        top_channels_info = "\n".join([f"<#{ch_id}>: {msg_count:,} messages" for ch_id, msg_count in top_channels])
-
-        # Total number of messages sent in the server
-        total_message_count = sum(utils.Tracking.get_channel_message_count(ch.id) for ch in guild.text_channels)
-
-        # Average user level
-        total_levels = sum([utils.Levels.get(m.id).level for m in guild.members])
-        average_level = round(total_levels / members, 2)
-
-        # NEW: Top 3 roles with the most members
-        role_member_counts = Counter({role.id: len(role.members) for role in guild.roles})
-        top_roles = role_member_counts.most_common(3)
-        top_roles_info = "\n".join([f"<@&{role_id}>: {count:,} members" for role_id, count in top_roles])
-
-        # NEW: Join rates in the last 24 hours, 7 days, and 30 days
-        join_24h = len([m for m in guild.members if (dt.utcnow() - m.joined_at) <= timedelta(hours=24)])
-        join_7d = len([m for m in guild.members if (dt.utcnow() - m.joined_at) <= timedelta(days=7)])
-        join_30d = len([m for m in guild.members if (dt.utcnow() - m.joined_at) <= timedelta(days=30)])
-
-        # NEW: Command usage (track total commands and most-used commands)
-        total_commands = utils.Tracking.get_total_commands()  # Hypothetical function to get the total commands used
-        command_usage = utils.Tracking.get_most_used_commands(last_hours=24)  # Hypothetical function for command usage
-        top_commands_info = "\n".join([f"{cmd}: {count} uses" for cmd, count in command_usage])
-
         # Generate progress bars
         def generate_bar(percent):
             filled = round(percent / 10)
             return '▓' * filled + '▒' * (10 - filled)
 
         # Role statistics bars
-        bars = {role_name: generate_bar((tracked_roles[role_name] / members) * 100) for role_name in roles_to_track}
+        bars = {role_name: generate_bar((tracked_roles[role_name] / members) * 100) for role_name in tracked_roles}
         inactive_bar = generate_bar((inactive_count / members) * 100)
 
         # Generate cool embeds
@@ -124,18 +93,8 @@ class Statistics(commands.Cog):
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n"
                 f"{self.bot.config['emojis']['scp']} **SCP:SL Players**: {tracked_roles['scpsl']} ({round(tracked_roles['scpsl'] / members * 100)}%)\n{bars['scpsl']}\n"
-                f"🌺 **Queer/Toxic Players**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n\n"
-                f"📝 **Top Channels**:\n{top_channels_info}\n"
-                f"📊 **Total Messages**: {total_message_count:,}\n"
-                f"⚖️ **Average User Level**: {average_level}\n"
-                f"🔥 **Active Members (last 7 days)**: {active_members_count:,}\n\n"
-                f"👑 **Top Roles**:\n{top_roles_info}\n\n"
-                f"📈 **Join Rates**:\n"
-                f"⏱️ Last 24h: {join_24h:,}\n"
-                f"⏳ Last 7 days: {join_7d:,}\n"
-                f"📅 Last 30 days: {join_30d:,}\n\n"
-                f"⚔️ **Total Commands Used**: {total_commands:,}\n"
-                f"🛠️ **Top Commands (Last 24h)**:\n{top_commands_info}"
+                f"🌺 **Degen Girls**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\
+                n{bars['queer']}"
             ),
             color=0x1E90FF
         )
