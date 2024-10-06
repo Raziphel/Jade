@@ -1,16 +1,19 @@
 import redis
-import toml
+
 
 class RedisUtils:
-    def __init__(self, config_path='secret.toml'):
-        config = toml.load(config_path)['redis']
-        self.redis = redis.Redis(
-            host=config.get('host', 'localhost'),
-            port=config.get('port', 6379),
-            password=config.get('password', None),
-            db=config.get('db', 0),
-            decode_responses=True
-        )
+    def __init__(self, config=None):
+        # Use the provided config or load it from the secret.toml if not provided
+        if config:
+            self.redis = redis.Redis(
+                host=config.get('host', 'localhost'),
+                port=config.get('port', 6379),
+                password=config.get('password', None),
+                db=config.get('db', 0),
+                decode_responses=True
+            )
+        else:
+            raise ValueError("Redis configuration must be provided")
 
     def is_connected(self):
         try:

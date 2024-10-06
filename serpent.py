@@ -31,8 +31,9 @@ class Serpent(commands.AutoShardedBot):
         # + Initialize the MessageEditManager
         self.message_edit_manager = utils.API_Manager()
 
-        # + Initialize Redis
-        self.redis_utils = utils.RedisUtils()  # Redis connection initialized here
+        # Initialize Redis with the loaded configuration
+        redis_config = self.secret.get('redis')
+        self.redis_utils = utils.RedisUtils(config=redis_config)  # Pass Redis config here
 
         #+ Get OpenAI key setup
         openai.api_key = self.secret['openai_key']
