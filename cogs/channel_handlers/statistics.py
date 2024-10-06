@@ -121,9 +121,9 @@ class Statistics(Cog):
         inactive_bar = await self.generate_bar(percent=inactive / members * 100)
 
         # ? Emojis
-        coin_e = self.bot.config['emotes']['coin']
-        scp_e = "<:SCP:1095154672727248926>"
-        mc_e = "<:minecraft:1095414533041946724>"
+        coin_e = self.bot.config['emojis']['coin']
+        scp_e = self.bot.config['emojis']['scp']
+        #mc_e = "<:minecraft:1095414533041946724>"
 
         embed1 = Embed(title=f"**[- Supporter Statistics! -]**",
                        description=f"**This show's stats about server support!**\n\n💕 Supporters: **{supps:,}**\n<:Ascended:1095161421853098108> Ascended: **{t3s}**\n<:Acolyte:1095161419357499503> Acolyte: **{t2s}**\n<:Initiate:1095161420297011200> Initiate: **{t1s}**\n<:Nitro:1095491689029849189>  Boosters: **{nitros}**",
