@@ -123,10 +123,19 @@ class Statistics(Cog):
         # ? Emojis
         coin_e = self.bot.config['emojis']['coin']
         scp_e = self.bot.config['emojis']['scp']
+        initiate_e = self.bot.config['emojis']['initiate']
+        acolyte_e = self.bot.config['emojis']['acolyte']
+        ascended_e = self.bot.config['emojis']['ascended']
+        nitro_e = self.bot.config['emojis']['nitro']
         #mc_e = "<:minecraft:1095414533041946724>"
 
         embed1 = Embed(title=f"**[- Supporter Statistics! -]**",
-                       description=f"**This show's stats about server support!**\n\n💕 Supporters: **{supps:,}**\n<:Ascended:1095161421853098108> Ascended: **{t3s}**\n<:Acolyte:1095161419357499503> Acolyte: **{t2s}**\n<:Initiate:1095161420297011200> Initiate: **{t1s}**\n<:Nitro:1095491689029849189>  Boosters: **{nitros}**",
+                       description=f"**This show's stats about server support!**\n\n"
+                                   f"💕 Supporters: **{supps:,}**\n"
+                                   f"{ascended_e} Ascended: **{t3s}**\n"
+                                   f"{acolyte_e} Acolyte: **{t2s}**\n"
+                                   f"{initiate_e} Initiate: **{t1s}**\n"
+                                   f"{nitro_e} Boosters: **{nitros}**",
                        color=0xFF0000)
 
         embed2 = Embed(title=f"**[- Economy Statistics! -]**",
@@ -134,7 +143,10 @@ class Statistics(Cog):
                        color=0x00FF00)
 
         embed3 = Embed(title=f"**[- Garden Statistics! -]**",
-                       description=f"**This show's stats about the Discord Server!**\n\n👥 Members: **{members:,}**\n📚 Channels: **{total_channels:,}**\n 🎭 Roles: **{total_roles:,}**\n\n❌ % Inactive: **{round(inactive / members * 100)}%**\n**{inactive_bar}**\n📝 % Gets Changelogs: **{round(changes / members * 100)}%**\n**{changelog_bar}**\n{scp_e} % SCP:SL: **{round(scpsl_ers / members * 100)}%**\n**{scpsl_bar}**🌺 % Degen Girls: **{round(closed_garden_ers / members * 100)}%**\n**{queer_bar}**",
+                       description=f"**This show's stats about the Discord Server!**\n\n👥 Members: **"
+                                   f"{members:,}**\n📚 Channels: **{total_channels:,}**\n 🎭 Roles: **"
+                                   f"{total_roles:,}**\n\n❌ % Inactive: **{round(inactive / members * 100)}%**\n**"
+                                   f"{inactive_bar}**\n📝 % Gets Changelogs: **{round(changes / members * 100)}%**\n**{changelog_bar}**\n{scp_e} % SCP:SL: **{round(scpsl_ers / members * 100)}%**\n**{scpsl_bar}**\n🌺 % Degen Girls: **{round(closed_garden_ers / members * 100)}%**\n**{queer_bar}**",
                        color=0x0000FF)
 
         # List of messages and corresponding embeds
