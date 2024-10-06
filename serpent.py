@@ -31,6 +31,9 @@ class Serpent(commands.AutoShardedBot):
         # + Initialize the MessageEditManager
         self.message_edit_manager = utils.API_Manager()
 
+        # + Initialize Redis
+        self.redis_utils = utils.RedisUtils()  # Redis connection initialized here
+
         #+ Get OpenAI key setup
         openai.api_key = self.secret['openai_key']
 
@@ -92,6 +95,12 @@ class Serpent(commands.AutoShardedBot):
         else:
             self.connected = True
             print('Bot database is connected!')
+
+        # Check Redis connection
+        if not self.redis_utils.is_connected():
+            print("Failed to connect to Redis!")
+            self.connected = False
+        print("Connected to Redis!")
 
         # + Start the MessageEditManager queue processor
         self.message_edit_manager.start_processing(self.loop)

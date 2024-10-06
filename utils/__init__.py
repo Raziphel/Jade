@@ -21,6 +21,9 @@ from utils.functions.coins import CoinFunctions
 from utils.functions.users import UserFunctions
 from utils.functions.api_manager import API_Manager
 
+#? Redis
+from utils.redis import RedisUtils
+
 #? Additions
 from discord.utils import get as DiscordGet
 
