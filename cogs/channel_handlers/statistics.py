@@ -51,7 +51,7 @@ class Statistics(commands.Cog):
         # Generate progress bars
         def generate_bar(percent):
             filled = round(percent / 10)
-            return '▓' * filled + '▒' * (10 - filled)
+            return '▰' * filled + '▱' * (10 - filled)
 
         # Role statistics bars
         bars = {role_name: generate_bar((tracked_roles[role_name] / members) * 100) for role_name in tracked_roles}
@@ -69,7 +69,7 @@ class Statistics(commands.Cog):
                 f"{supporter_emojis['ascended']} **Ascended**: {role_stats['ascended']}\n"
                 f"{supporter_emojis['acolyte']} **Acolyte**: {role_stats['acolyte']}\n"
                 f"{supporter_emojis['initiate']} **Initiate**: {role_stats['initiate']}\n"
-                f"{nitro_emoji} **Boosters**: {role_stats['nitro']}\n"
+                f"{nitro_emoji} **Boosters**: {role_stats['nitro']}\n\n"
                 f"**Total Bills:** 250$\n"
                 f"**Donations:** {profit:,}$\n"
                 f"**Current Profit:** {profit-250:,}$"
