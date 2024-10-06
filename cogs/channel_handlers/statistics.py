@@ -65,14 +65,14 @@ class Statistics(commands.Cog):
         embed1 = Embed(
             title="**[- Supporter Statistics -]**",
             description=(
-                f"💕 **Supporters**: {supporters_count:,}\n"
+                f"💕 **Supporters**: {supporters_count-1:,}\n"
                 f"{supporter_emojis['ascended']} **Ascended**: {role_stats['ascended']}\n"
                 f"{supporter_emojis['acolyte']} **Acolyte**: {role_stats['acolyte']}\n"
                 f"{supporter_emojis['initiate']} **Initiate**: {role_stats['initiate']}\n"
                 f"{nitro_emoji} **Boosters**: {role_stats['nitro']}"
-                f"Total Bills: 250$"
-                f"Donations: {profit}#"
-                f"**Current Profit: {profit-250}$**"
+                f"Total Bills: **250$**\n"
+                f"Donations: **{profit:,}$**\n"
+                f"**Current Profit: {profit-250:,}$**"
             ),
             color=0xFF4500
         )
