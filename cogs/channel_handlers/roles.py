@@ -35,7 +35,7 @@ class RoleHandler(Cog):
                               "`Access SCP:SL section.`\n"
                               f"> 🎀<@&{self.bot.config['access_roles']['queer']}>"
                               "`Access Degen Girls section.`\n"
-                              f"> 🎮<@&{self.bot.config['access_roles']['shitposters']}>"
+                              f"> 🎮<@&{self.bot.config['access_roles']['toxic']}>"
                               "`Access Toxic Gamers section.`", color=0x8f00f8)
         ]
 
@@ -113,7 +113,7 @@ class RoleHandler(Cog):
             "💀": self.bot.config['ping_roles']['scp_ping'],
             "🚧": self.bot.config['access_roles']['scpsl'],
             "🎀": self.bot.config['access_roles']['queer'],
-            "🎮": self.bot.config['access_roles']['shitposters']
+            "🎮": self.bot.config['access_roles']['toxic']
         }
 
         role_id = roles.get(emoji)
