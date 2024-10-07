@@ -41,7 +41,7 @@ class Serpent(commands.AutoShardedBot):
         self.database = DatabaseConnection
         self.database.config = self.secret['database']
         self.startup_method = None
-        self.connected = False
+        self.connected = True
 
     def run(self):
         self.startup_method = self.loop.create_task(self.startup())
@@ -88,14 +88,11 @@ class Serpent(commands.AutoShardedBot):
         except Exception as e:
             print(f"Couldn't connect to the database... :: {e}")
 
-        #! If Razi ain't got levels the DB ain't connected correctly... lmfao
-        lvl = utils.Levels.get(159516156728836097)
-        if lvl.level == 0:
+        c = utils.Currency.get(self.bot.user.id)
+        if c.coins == 0:
+            print('Failed to connect to Postgres!')
             self.connected = False
-            print('Bot database is NOT connected!')
-        else:
-            self.connected = True
-            print('Bot database is connected!')
+        print("Connected to Postgres!")
 
         # Check Redis connection
         if not self.redis_utils.is_connected():
