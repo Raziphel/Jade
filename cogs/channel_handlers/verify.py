@@ -40,6 +40,13 @@ class verify(Cog):
         await self.setup_rules_banners(rules_channel)
 
     async def setup_verification_banners(self, ch):
+        # Define the embed objects here
+        embed1 = Embed(description=f"# __**Welcome to Serpent's Garden**__\nSerpent's Garden has an advanced way of prevent scammers, spammers and beggars from the server!\n\n**All members are required to accept the Serpent's - Terms of Service.**", color=0x269f00)
+
+        embed2 = Embed(description=f"# __**Terms of Service**__\nBy choosing to be apart of Serpent's Garden and completing the verification process.\n\n**__You agree to the following__:** \nYou are okay and willing to be subject to lots of gay, furry, degenerates and crazy people.\n\nYou will fully read, understand and will uphold the rules of Serpent's Garden.\n\nI have fully read, understand and will uphold Discord's Terms of Service.", color=0x0ca994)
+
+        embed3 = Embed(description=f"# __**Verification**__\nIf you agree to the Serpent's Terms of Service and are capable of receiving a private message then please click the ✅ reaction button to being the verification process.\n\n**Please make sure the bot is able to message you!!!**", color=0xde1326)
+
         banners = ['welcome', 'tos', 'verify']
         for banner in banners:
             banner_id = self.bot.config['purgatory_banners'][f'{banner}_id']
@@ -53,6 +60,14 @@ class verify(Cog):
             await self.bot.message_edit_manager.queue_edit(message=rule, new_content="", new_embed=embeds[i - 1])
 
     async def setup_rules_banners(self, ch):
+        embed1 = Embed(description=f"# Etiquette\n🐍 **All text & voice channels are english only.**\n🐍 **No Drama.** No matter how you feel about others you can't bring it up here.\n🐍 **No Politics, No Religion.**  Only allowed in specific chats.\n🐍 **No Spamming.**  Anything that is cluttering up a chat or repetitive in VC.\n🐍 **No Self Promotion.** Unless done so in a channel dedicated to self promotion.\n", color=0xff0000)
+
+        embed2 = Embed(description=f"# Respect\n🩸 **Excessively argumentative, rude, dismissive, or aggressive members will be removed.** \n🩸 We will not tolerate any instances of offensive behaviour towards anyone, nor any occurrences of **racism, homophobia, transphobia or other types of discriminatory language.**\n🩸 **Personal arguments or conversations.** This should be taken to direct messages if both users wish to continue, rather than affecting the atmosphere/mood/feeling of the chat.", color=0x8F00FF)
+
+        embed3 = Embed(description=f"# Secret Society's\n🔮 **You must respect the areas you choose to be in!**\n🔮 **Not all staff members** manage every area of the server.\n🔮 People who choose to be apart of both can not be treated poorly in different area", color=0xff0000)
+
+        embed4 = Embed(description=f"# Knights, Architects, Council and Overlords\n🔱 **Overlords are owners.**\n🔱 **Decisions made by council are final.**\n🔱 **Knights are only helpers to council.**\n🔱 **All roles get in-game perms.**\n🔱 **Architects are developers** and can still moderate.", color=0x8F00FF)
+
         banners = ['etiquette', 'respect', 'society', 'council']
         for banner in banners:
             banner_id = self.bot.config['purgatory_banners'][f'{banner}_id']
@@ -122,12 +137,22 @@ class verify(Cog):
             await self.handle_verification_exception(e, author)
 
     async def get_verified_age(self, author):
-        age_answer = await get_input("How old are you?")
+        age_answer = await self.get_input("How old are you?")
         return get_only_numbers(age_answer.content)
 
     async def get_color_choice(self, author):
-        color_response = await get_input("What's your favorite color? (Say a color name or a hex code)")
+        color_response = await self.get_input("What's your favorite color? (Say a color name or a hex code)")
         return utils.Colors.get(color_response.content.lower()) or int(color_response.content.strip('#'), 16)
+
+    async def get_response(self, author, timeout, max_length):
+        """Waits for user responses"""
+        msg = await self.bot.wait_for('message', check=lambda m: m.author.id == author.id and not m.guild, timeout=timeout)
+        if 'cancel' == msg.content.lower():
+            raise VerificationCancelled
+        if max_length is not None and len(msg.content) > max_length:
+            await author.send(f"Sorry, but the value you've responded with is too long. Please keep it within {max_length} characters.")
+            return await self.get_response(author, timeout, max_length)
+        return msg
 
     async def handle_verification_exception(self, e, author):
         if isinstance(e, DiscordException):
