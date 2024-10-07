@@ -92,13 +92,15 @@ class Serpent(commands.AutoShardedBot):
         if c.coins == 0:
             print('Failed to connect to Postgres!')
             self.connected = False
-        print("Connected to Postgres!")
+        else:
+            print("Connected to Postgres!")
 
         # Check Redis connection
         if not self.redis_utils.is_connected():
             print("Failed to connect to Redis!")
             self.connected = False
-        print("Connected to Redis!")
+        else:
+            print("Connected to Redis!")
 
         # + Start the MessageEditManager queue processor
         self.message_edit_manager.start_processing(self.loop)
