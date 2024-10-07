@@ -141,7 +141,7 @@ class LotteryHandler(commands.Cog):
             new_embed=embed
         )
 
-    @tasks.loop(hours=2)
+    @tasks.loop(hours=1)
     async def lottery_pot_increaser(self):
         """Increases the lottery pot every hour."""
         await self.bot.wait_until_ready()
