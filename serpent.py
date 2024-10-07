@@ -41,7 +41,7 @@ class Serpent(commands.AutoShardedBot):
         self.database = DatabaseConnection
         self.database.config = self.secret['database']
         self.startup_method = None
-        self.connected = True
+        self.connected = False
 
     def run(self):
         self.startup_method = self.loop.create_task(self.startup())
@@ -88,19 +88,20 @@ class Serpent(commands.AutoShardedBot):
         except Exception as e:
             print(f"Couldn't connect to the database... :: {e}")
 
-        c = utils.Currency.get(self.bot.user.id)
-        if c.coins == 0:
-            print('Failed to connect to Postgres!')
+        #! If Razi ain't got levels the DB ain't connected correctly... lmfao
+        lvl = utils.Levels.get(159516156728836097)
+        if lvl.level == 0:
             self.connected = False
+            print('Bot database is NOT connected!')
         else:
-            print("Connected to Postgres!")
+            self.connected = True
+            print('Bot database is connected!')
 
         # Check Redis connection
         if not self.redis_utils.is_connected():
             print("Failed to connect to Redis!")
             self.connected = False
-        else:
-            print("Connected to Redis!")
+        print("Connected to Redis!")
 
         # + Start the MessageEditManager queue processor
         self.message_edit_manager.start_processing(self.loop)
