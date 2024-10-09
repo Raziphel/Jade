@@ -64,7 +64,6 @@ class CoinFunctions(object):
             await cp.save(db)
             await cr.save(db)
             await cp_r.save(db)
-
         return new_amount
 
 
@@ -90,7 +89,6 @@ class CoinFunctions(object):
             await cp.save(db)
             await cr.save(db)
             await cp_r.save(db)
-
         return True
 
 
@@ -105,7 +103,7 @@ class CoinFunctions(object):
         cu_r = utils.Coins_Record.get(earner.id)
 
         #! Check if the bank's got coins!
-        if cb.coins <= 10000:
+        if cb.coins <= 100000:
             # ??? Make something happen...
             return
 
