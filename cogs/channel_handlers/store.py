@@ -33,13 +33,16 @@ class StoreHandler(Cog):
             Embed(description="# Permissions\n`All these listed items give you general permissions on the server!`",
                   color=0x00FF00)
             .add_field(name="⊰ 📚 Library Pass ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Get access to all of the server's logs!```",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get access to all of the "
+                             f"server's logs!```",
                        inline=True)
             .add_field(name="⊰ 🎫 Image Pass ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Get permission for images & embeds in General Chats.```",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get permission for images & "
+                             f"embeds in General Chats.```",
                        inline=True)
             .add_field(name="⊰ 🔊 SoundBoard Pass ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Get access to using the soundboard in VC!```",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get access to using the "
+                             f"soundboard in VC!```",
                        inline=True)
             .add_field(name="⊰ 🎁 Stats Channel ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}75,000x**\n\n```Get permission to the Stats Channels!```",
@@ -55,6 +58,36 @@ class StoreHandler(Cog):
                 color=0x0000FF)
             .add_field(name="⊰ 🧤 Thievery ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
+                       inline=True),
+            Embed(
+                description="# Colors\n`All these listed items let you be the colors you wanna be!`",
+                color=0x0000FF)
+            .add_field(name="⊰ 🍑 Cutie Pinkie ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                       inline=True)
+            .add_field(name="⊰ ❄ Snow White ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                       inline=True)
+            .add_field(name="⊰ 🖤 Black Knight ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                       inline=True)
+            .add_field(name="⊰ 🍏 Nature Green ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       inline=True)
+            .add_field(name="⊰ 🧊 Liquid Blue ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       inline=True)
+            .add_field(name="⊰ ☀ Sunshine Yellow ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       inline=True)
+            .add_field(name="⊰ 🌋 Lava Red ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       inline=True)
+            .add_field(name="⊰ ☮ Magic Purple ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       inline=True)
+            .add_field(name="⊰ ☂ Lush Magenta ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
                        inline=True)
         ]
 
