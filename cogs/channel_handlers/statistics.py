@@ -39,8 +39,31 @@ class Statistics(commands.Cog):
         supporter_roles = ['supporter', 'nitro', 'initiate', 'acolyte', 'ascended']
         roles_to_track = ['changelogs', 'scpsl', 'toxic', 'queer']
 
-        role_stats = {role_name: len([m for m in guild.members if guild.get_role(self.bot.config['supporter_roles'][role_name]) in m.roles]) for role_name in supporter_roles}
-        tracked_roles = {role_name: len([m for m in guild.members if guild.get_role(self.bot.config['ping_roles'].get(role_name, self.bot.config['access_roles'].get(role_name))) in m.roles]) for role_name in roles_to_track}
+        # Calculate stats for supporter roles
+        role_stats = {
+            role_name: len([
+                m for m in guild.members
+                if guild.get_role(self.bot.config['supporter_roles'][role_name]) in m.roles
+            ])
+            for role_name in supporter_roles
+        }
+
+        # Calculate stats for tracked roles, including age_roles
+        tracked_roles = {
+            role_name: len([
+                m for m in guild.members
+                if guild.get_role(
+                    self.bot.config['ping_roles'].get(
+                        role_name,
+                        self.bot.config['access_roles'].get(
+                            role_name,
+                            self.bot.config['age_roles'].get(role_name)  # Adding age_roles here!
+                        )
+                    )
+                ) in m.roles
+            ])
+            for role_name in roles_to_track
+        }
 
         # Economic calculations
         supporters_count = sum(role_stats.values())
@@ -81,7 +104,7 @@ class Statistics(commands.Cog):
             title="**[- Economy Statistics -]**",
             description=(
                 f"{coin_emoji} **Total Coins**: {floor(total_coins):,}\n"
-                f"🐍 **Serpent's Coins**: {floor(sc.coins):,}\n"
+                f"🐍 **Serpent's Coins**: {floor(sc.coins):,}\n\n"
                 f"💰 **Total Earned**: {floor(utils.Coins_Record.get_total_earned()):,}\n"
                 f"🛒 **Total Spent**: {floor(utils.Coins_Record.get_total_spent()):,}\n"
                 f"💸 **Total Taxed**: {floor(utils.Coins_Record.get_total_taxed()):,}\n"
@@ -101,6 +124,8 @@ class Statistics(commands.Cog):
                 f"{self.bot.config['emojis']['scp']} **SCP:SL Players**: {tracked_roles['scpsl']} ({round(tracked_roles['scpsl'] / members * 100)}%)\n{bars['scpsl']}\n"
                 f"🌺 **Degen Girls**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
                 f"🎮 **Toxic Gamers**: {tracked_roles['toxic']} ({round(tracked_roles['toxic'] / members * 100)}%)\n{bars['toxic']}\n"
+                f"🚬 **Adults**: {tracked_roles['adult']} ({round(tracked_roles['adult'] / members * 100)}%)\n{bars['adult']}\n"
+                f"🍼 **Underage**: {tracked_roles['underage']} ({round(tracked_roles['underage'] / members * 100)}%)\n{bars['underage']}\n"
             ),
             color=0x1E90FF
         )
