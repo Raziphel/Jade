@@ -38,12 +38,9 @@ class RoleHandler(Cog):
                               f"> 🎮<@&{self.bot.config['access_roles']['toxic']}>"
                               "`Access Toxic Gamers section.`", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
-                              f"> 🧊<@&{self.bot.config['colors']['eww_blue']}>"
-                              "`Access SCP:SL section.`\n"
-                              f"> 🍏<@&{self.bot.config['colors']['snot_green']}>"
-                              "`Access Degen Girls section.`\n"
-                              f"> 🍌<@&{self.bot.config['colors']['yikes_yellow']}>"
-                              "`Access Toxic Gamers section.`", color=0x8f00f8)
+                              f"> 🧊<@&{self.bot.config['colors']['eww_blue']}>\n"
+                              f"> 🍏<@&{self.bot.config['colors']['snot_green']}>\n"
+                              f"> 🍌<@&{self.bot.config['colors']['yikes_yellow']}>", color=0x8f00f8)
         ]
 
         for i, embed in enumerate(embeds):
@@ -54,7 +51,7 @@ class RoleHandler(Cog):
                 new_embed=embed
             )
 
-        for msg_id in list(role_messages.values())[3:]:  # Fixed by converting to list
+        for msg_id in list(role_messages.values())[4:]:  # Fixed by converting to list
             msg = await ch.fetch_message(msg_id)
             await self.bot.message_edit_manager.queue_edit(
                 message=msg,
