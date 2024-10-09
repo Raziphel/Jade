@@ -65,7 +65,7 @@ class StoreHandler(Cog):
             .add_field(name="⊰ 🍑 Cutie Pinkie ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
-            .add_field(name="⊰ ❄ Snow White ⊱",
+            .add_field(name="⊰ ⛅ Snow White ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
             .add_field(name="⊰ 🖤 Black Knight ⊱",
@@ -77,16 +77,16 @@ class StoreHandler(Cog):
             .add_field(name="⊰ 🧊 Liquid Blue ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
                        inline=True)
-            .add_field(name="⊰ ☀ Sunshine Yellow ⊱",
+            .add_field(name="⊰ 🌞 Sunshine Yellow ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
                        inline=True)
             .add_field(name="⊰ 🌋 Lava Red ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
                        inline=True)
-            .add_field(name="⊰ ☮ Magic Purple ⊱",
+            .add_field(name="⊰ 🧙‍♂️ Magic Purple ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
                        inline=True)
-            .add_field(name="⊰ ☂ Lush Magenta ⊱",
+            .add_field(name="⊰ ☔ Lush Magenta ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
                        inline=True)
         ]
@@ -138,14 +138,14 @@ class StoreHandler(Cog):
             "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"},
             #role Colors
             "🍑": {"name": "Cutie Pinkie", "price": 1000000, "role": 'cutie_pinkie'},
-            "❄": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},
+            "⛅": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},
             "🖤": {"name": "Black Knight", "price": 1000000, "role": 'black_knight'},
             "🍏": {"name": "Nature Green", "price": 250000, "role": 'nature_green'},
             "🧊": {"name": "Liquid Blue", "price": 250000, "role": 'liquid_blue'},
-            "☀": {"name": "Sunshine Yellow", "price": 250000, "role": 'sunshine_yellow'},
+            "🌞": {"name": "Sunshine Yellow", "price": 250000, "role": 'sunshine_yellow'},
             "🌋": {"name": "Lava Red", "price": 250000, "role": 'lava_red'},
-            "☮": {"name": "Magic Purple", "price": 250000, "role": 'magic_purple'},
-            "☂": {"name": "Lush Magenta", "price": 250000, "role": 'lush_magenta'},
+            "🧙‍♂️": {"name": "Magic Purple", "price": 250000, "role": 'magic_purple'},
+            "☔": {"name": "Lush Magenta", "price": 250000, "role": 'lush_magenta'},
         }
 
         emoji = payload.emoji.name if payload.emoji.is_unicode_emoji() else payload.emoji.id
