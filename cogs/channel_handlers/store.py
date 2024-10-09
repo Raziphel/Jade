@@ -93,7 +93,7 @@ class StoreHandler(Cog):
 
         # Compact loop to handle both cases
         for i, msg in enumerate(messages):
-            if i < 3:
+            if i < 4:
                 # Queue the first three messages with corresponding embeds
                 await self.bot.message_edit_manager.queue_edit(
                     message=msg,
