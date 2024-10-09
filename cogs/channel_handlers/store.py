@@ -91,15 +91,28 @@ class StoreHandler(Cog):
 
         # Shop items and their prices
         shop_items = {
+            # Real World
             "✨": {"name": "Discord Nitro", "price": 10000000, "role": None},
             "💸": {"name": "5$USD", "price": 5000000, "role": None},
-            "📚": {"name": "Library Pass", "price": 250000, "role": 'library_pass'},
-            "🎫": {"name": "Image Pass", "price": 250000, "role": 'image_pass'},
-            "🔊": {"name": "Soundboard Pass", "price": 250000, "role": 'soundboard_pass'},
+            # Permissions
+            "📚": {"name": "Library Pass", "price": 150000, "role": 'library_pass'},
+            "🎫": {"name": "Image Pass", "price": 150000, "role": 'image_pass'},
+            "🔊": {"name": "Soundboard Pass", "price": 150000, "role": 'soundboard_pass'},
             "🎁": {"name": "Stats Channel", "price": 75000, "role": 'stats_channel_access'},
             "🧶": {"name": "Thread Permissions", "price": 75000, "role": 'threads_perm'},
             "🔮": {"name": "External Emojis", "price": 75000, "role": 'external_emojis'},
-            "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"}
+            # Abilities
+            "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"},
+            #role Colors
+            "🍑": {"name": "Cutie Pinkie", "price": 1000000, "role": 'cutie_pinkie'},
+            "❄": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},
+            "🖤": {"name": "Black Knight", "price": 1000000, "role": 'black_knight'},
+            "🍏": {"name": "Nature Green", "price": 250000, "role": 'nature_green'},
+            "🧊": {"name": "Liquid Blue", "price": 250000, "role": 'liquid_blue'},
+            "☀": {"name": "Sunshine Yellow", "price": 250000, "role": 'sunshine_yellow'},
+            "🌋": {"name": "Lava Red", "price": 250000, "role": 'lava_red'},
+            "☮": {"name": "Magic Purple", "price": 250000, "role": 'magic_purple'},
+            "☂": {"name": "Lush Magenta", "price": 250000, "role": 'lush_magenta'},
         }
 
         emoji = payload.emoji.name if payload.emoji.is_unicode_emoji() else payload.emoji.id
