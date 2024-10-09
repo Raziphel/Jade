@@ -60,7 +60,7 @@ class StoreHandler(Cog):
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
                        inline=True),
             Embed(
-                description="# Colors\n`All these listed items let you be the colors you wanna be!\ndon't waste your "
+                description="# Colors\n`All these listed items let you be the colors you wanna be!\nDon't waste your "
                             "coins staff, donators and nitro boosters!  These will not work!`",
                 color=0x0000FF)
             .add_field(name="⊰ 🍑 Cutie Pinkie ⊱",
