@@ -81,3 +81,27 @@ class Coins_Record(object):
         for i in cls.all_coins_record.values():
             total += i.won
         return total
+
+    @classmethod
+    def get_total_lost(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_coins_record.values():
+            total += i.lost
+        return total
+
+    @classmethod
+    def get_total_stolen(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_coins_record.values():
+            total += i.stolen
+        return total
+
+    @classmethod
+    def get_total_gifted(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_coins_record.values():
+            total += i.gifted
+        return total

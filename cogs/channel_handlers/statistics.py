@@ -109,7 +109,10 @@ class Statistics(commands.Cog):
                 f"💰 **Total Earned**: {floor(utils.Coins_Record.get_total_earned()):,}\n"
                 f"🛒 **Total Spent**: {floor(utils.Coins_Record.get_total_spent()):,}\n"
                 f"💸 **Total Taxed**: {floor(utils.Coins_Record.get_total_taxed()):,}\n"
-                f"🎰 **Total Won**: {floor(utils.Coins_Record.get_total_won()):,}"
+                f"🎰 **Total Won**: {floor(utils.Coins_Record.get_total_won()):,}\n"
+                f"🧤 **Total stolen**: {floor(utils.Coins_Record.get_total_stolen()):,}\n"
+                f"💣 **Total Lost**: {floor(utils.Coins_Record.get_total_lost()):,}\n"
+                f"🎁 **Total Gifted**: {floor(utils.Coins_Record.get_total_gifted()):,}\n"
             ),
             color=0x32CD32
         )
