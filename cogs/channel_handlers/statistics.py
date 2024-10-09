@@ -37,7 +37,7 @@ class Statistics(commands.Cog):
 
         # Role categories to evaluate
         supporter_roles = ['supporter', 'nitro', 'initiate', 'acolyte', 'ascended']
-        roles_to_track = ['changelogs', 'scpsl', 'toxic', 'queer']
+        roles_to_track = ['changelogs', 'scpsl', 'toxic', 'queer', 'adult', 'underage']
 
         # Calculate stats for supporter roles
         role_stats = {
@@ -48,7 +48,7 @@ class Statistics(commands.Cog):
             for role_name in supporter_roles
         }
 
-        # Calculate stats for tracked roles, including age_roles
+        # Calculate stats for tracked roles, now including age_roles
         tracked_roles = {
             role_name: len([
                 m for m in guild.members
@@ -57,7 +57,7 @@ class Statistics(commands.Cog):
                         role_name,
                         self.bot.config['access_roles'].get(
                             role_name,
-                            self.bot.config['age_roles'].get(role_name)  # Adding age_roles here!
+                            self.bot.config['age_roles'].get(role_name)  # Now age_roles are tracked!
                         )
                     )
                 ) in m.roles
@@ -104,7 +104,8 @@ class Statistics(commands.Cog):
             title="**[- Economy Statistics -]**",
             description=(
                 f"{coin_emoji} **Total Coins**: {floor(total_coins):,}\n"
-                f"🐍 **Serpent's Coins**: {floor(sc.coins):,}\n\n"
+                f"🐍 **Serpent's Coins**: {floor(sc.coins):,}\n"
+                f"🎟 **Total Tickets**: {floor(total_tix):,}\n\n"
                 f"💰 **Total Earned**: {floor(utils.Coins_Record.get_total_earned()):,}\n"
                 f"🛒 **Total Spent**: {floor(utils.Coins_Record.get_total_spent()):,}\n"
                 f"💸 **Total Taxed**: {floor(utils.Coins_Record.get_total_taxed()):,}\n"
