@@ -55,7 +55,7 @@ class StoreHandler(Cog):
                        inline=True),
             Embed(
                 description="# Abilities\n`All these listed items give you the ability to do something here in the garden!`",
-                color=0x0000FF)
+                color=0xFF00FF)
             .add_field(name="⊰ 🧤 Thievery ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
                        inline=True),
