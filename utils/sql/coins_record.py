@@ -50,3 +50,34 @@ class Coins_Record(object):
         return user
 
 
+    @classmethod
+    def get_total_earned(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_coins_record.values():
+            total += i.earned
+        return total
+
+    @classmethod
+    def get_total_spent(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_coins_record.values():
+            total += i.spent
+        return total
+
+    @classmethod
+    def get_total_taxed(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_coins_record.values():
+            total += i.taxed
+        return total
+
+    @classmethod
+    def get_total_won(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_coins_record.values():
+            total += i.won
+        return total

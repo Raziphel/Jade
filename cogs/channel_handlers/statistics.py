@@ -82,7 +82,10 @@ class Statistics(commands.Cog):
             description=(
                 f"{coin_emoji} **Total Coins**: {floor(total_coins):,}\n"
                 f"🐍 **Serpent's Coins**: {floor(sc.coins):,}\n"
-                f"🎟 **Current Tickets**: {floor(total_tix):,}"
+                f"💰 **Total Earned**: {floor(utils.Coins_Record.get_total_earned()):,}\n"
+                f"🛒 **Total Spent**: {floor(utils.Coins_Record.get_total_spent()):,}\n"
+                f"💸 **Total Taxed**: {floor(utils.Coins_Record.get_total_taxed()):,}\n"
+                f"🎰 **Total Won**: {floor(utils.Coins_Record.get_total_won()):,}"
             ),
             color=0x32CD32
         )
