@@ -90,6 +90,18 @@ total_coins = 100000000
     ping = 1290905300710457406
 
 #+
+#+ --- Color Roles
+#+
+[colors]
+    eww_blue = 1293665508821831852
+    snot_green = 1293665509383999518
+    yikes_yellow = 1293665511606980728
+
+
+
+
+
+#+
 #+ --- Emojis
 #+
 [emojis]
