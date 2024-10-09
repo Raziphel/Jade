@@ -1,9 +1,10 @@
 from math import floor
-from datetime import datetime as dt, timedelta
+
 from discord import Embed
 from discord.ext import tasks, commands
 
 import utils
+
 
 class Statistics(commands.Cog):
     def __init__(self, bot):
@@ -110,7 +111,7 @@ class Statistics(commands.Cog):
                 f"🛒 **Total Spent**: {floor(utils.Coins_Record.get_total_spent()):,}\n"
                 f"💸 **Total Taxed**: {floor(utils.Coins_Record.get_total_taxed()):,}\n"
                 f"🎰 **Total Won**: {floor(utils.Coins_Record.get_total_won()):,}\n\n"
-                f"🧤 **Total stolen**: {floor(utils.Coins_Record.get_total_stolen()):,}\n"
+                f"🧤 **Total Stolen**: {floor(utils.Coins_Record.get_total_stolen()):,}\n"
                 f"💣 **Total Lost**: {floor(utils.Coins_Record.get_total_lost()):,}\n"
                 f"🎁 **Total Gifted**: {floor(utils.Coins_Record.get_total_gifted()):,}\n"
             ),
