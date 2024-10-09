@@ -121,10 +121,10 @@ class Statistics(commands.Cog):
                 f"📚 **Channels**: {total_channels:,}\n"
                 f"🎭 **Roles**: {total_roles:,}\n\n"
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
-                f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n"
+                f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
                 f"{self.bot.config['emojis']['scp']} **SCP:SL Players**: {tracked_roles['scpsl']} ({round(tracked_roles['scpsl'] / members * 100)}%)\n{bars['scpsl']}\n"
                 f"🌺 **Degen Girls**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
-                f"🎮 **Toxic Gamers**: {tracked_roles['toxic']} ({round(tracked_roles['toxic'] / members * 100)}%)\n{bars['toxic']}\n"
+                f"🎮 **Toxic Gamers**: {tracked_roles['toxic']} ({round(tracked_roles['toxic'] / members * 100)}%)\n{bars['toxic']}\n\n"
                 f"🚬 **Adults**: {tracked_roles['adult']} ({round(tracked_roles['adult'] / members * 100)}%)\n{bars['adult']}\n"
                 f"🍼 **Underage**: {tracked_roles['underage']} ({round(tracked_roles['underage'] / members * 100)}%)\n{bars['underage']}\n"
             ),
