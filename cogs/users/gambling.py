@@ -1,5 +1,5 @@
 # Discord
-from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed
+from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed, HTTPException
 from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
 
 # Utils
@@ -198,6 +198,12 @@ class Gambling(Cog):
             return  # Invalid column emoji
 
         column = column_emojis.index(reaction.emoji)  # Get the column index (0-based)
+
+        # Remove the player's reaction to keep the board clean
+        try:
+            await reaction.message.remove_reaction(reaction.emoji, user)
+        except HTTPException:
+            pass  # Fail silently if removing the reaction fails
 
         # Drop the piece in the selected column
         for row in range(5, -1, -1):
