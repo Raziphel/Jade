@@ -101,10 +101,6 @@ class Developer(Cog):
             print(f'{member.name} was verified!')
         await ctx.send('All members have been verified!')
 
-
-
-
-
     @utils.is_dev()
     @command()
     async def sm(self, ctx):
@@ -126,7 +122,7 @@ class Developer(Cog):
         sorted_users = [user for user in utils.Currency.sort_tickets() if user.tickets > 0]
 
         if total_tickets == 0:
-            await channel.send(embed=Embed(description="No one entered the lottery this week. No winner."))
+            await ctx.send(embed=utils.Embed(description="No one entered the lottery this week. No winner."))
             return
 
         # Collect all tickets into a list for the draw

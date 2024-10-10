@@ -147,15 +147,27 @@ class Profile(Cog):
 
         return BytesIO(data)
 
-    def get_level_rank(self, member: discord.Member) -> int:
+    async def get_level_rank(self, guild: discord.Guild, member: discord.Member) -> int:
         sorted_levels = utils.Levels.sort_levels()
-        member_level = utils.Levels.get(member.id)
-        try:
-            level_rank = sorted_levels.index(member_level)
+        users = []
 
+        for rank in sorted_levels:
+            user = self.bot.get_user(rank.user_id)
+            if user and await self.is_user_in_guild(guild, user.id):
+                if user.id == self.bot.user.id:
+                    continue  # Skip the bot's own ID
+                users.append((user, rank))
+
+            if len(users) == 10:  # Limit to top 10
+                break
+
+        member_level = utils.Levels.get(member.id)
+
+        try:
+            level_rank = [rank for _, rank in users].index(member_level)
             return level_rank + 1  # Add 1 because indexes start from 0
-        except ValueError:  # User is not in the list yet maybe?
-            return -1
+        except ValueError:
+            return -1  # Member is not in the top ranks or doesn't have a level
 
     def get_wealth_rank(self, member: discord.Member) -> int:
         sorted_wealth = utils.Currency.sort_coins()
