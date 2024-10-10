@@ -67,7 +67,7 @@ class Gambling(Cog):
                     required=True,
                 ),
                 ApplicationCommandOption(
-                    name="bet",
+                    name="bet_amount",
                     description="The amount of coins you want to bet.",
                     type=ApplicationCommandOptionType.integer,
                     required=True,
@@ -83,13 +83,35 @@ class Gambling(Cog):
 
         if bet_amount > coins[challenger.id]:
             await ctx.send(
-                f"You don't have enough coins to bet that amount! You only have {coins[challenger.id]} coins.")
+                f"You don't have enough coins to bet that amount! You only have {coins[challenger.id]} coins."
+            )
             return
         if bet_amount > coins[opponent.id]:
             await ctx.send(f"{opponent.mention} doesn't have enough coins to bet that amount!")
             return
 
-        # Deduct coins temporarily
+        # Ask the opponent to accept the challenge
+        msg = await ctx.send(
+            f"{opponent.mention}, you have been challenged by {challenger.mention} to a Connect 4 game for {bet_amount} coins! "
+            f"React with ✅ to accept or ❌ to decline."
+        )
+        await msg.add_reaction("✅")
+        await msg.add_reaction("❌")
+
+        def check(reaction, user):
+            return user == opponent and str(reaction.emoji) in ["✅", "❌"]
+
+        try:
+            reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+        except TimeoutError:
+            await ctx.send(f"{opponent.mention} did not respond in time! The game has been canceled.")
+            return
+
+        if str(reaction.emoji) == "❌":
+            await ctx.send(f"{opponent.mention} declined the challenge! The game has been canceled.")
+            return
+
+        # Proceed with the game if accepted
         coins[challenger.id] -= bet_amount
         coins[opponent.id] -= bet_amount
 
@@ -103,15 +125,16 @@ class Gambling(Cog):
         }
 
         # Send the initial game state
-        msg = await ctx.send(
-            f"Connect 4 game between {challenger.mention} and {opponent.mention} for {bet_amount} coins!\n\n{self.display_grid(grid)}")
+        game_message = await ctx.send(
+            f"Connect 4 game between {challenger.mention} and {opponent.mention} for {bet_amount} coins!\n\n{self.display_grid(grid)}"
+        )
 
         # Add reactions for each column
         for emoji in column_emojis:
-            await msg.add_reaction(emoji)
+            await game_message.add_reaction(emoji)
 
         # Store the message ID for game reference
-        games[ctx.channel.id]["message_id"] = msg.id
+        games[ctx.channel.id]["message_id"] = game_message.id
 
     # Handle reactions (piece dropping)
     @Cog.listener()
@@ -167,7 +190,6 @@ class Gambling(Cog):
                 return
             except Exception as e:
                 await reaction.message.channel.send(f"Error occurred when paying the winner: {str(e)}")
-
 
         # Change turn to the other player
         game["turn"] = game["players"][1] if user.id == game["players"][0] else game["players"][0]
