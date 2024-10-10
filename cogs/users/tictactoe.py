@@ -215,6 +215,7 @@ class TicTacToe(Cog):
         # Store the message ID for game reference
         games[ctx.channel.id]["message_id"] = game_message.id
 
+    # Handle reactions (piece dropping)
     @Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.bot:
@@ -223,7 +224,6 @@ class TicTacToe(Cog):
         msg_id = reaction.message.id
         channel_id = reaction.message.channel.id
 
-        # Check if the game exists and the message ID is valid
         if channel_id not in games or "message_id" not in games[channel_id] or msg_id != games[channel_id][
             "message_id"]:
             return  # Not an active game or wrong message
@@ -234,6 +234,10 @@ class TicTacToe(Cog):
         # Check if it's the player's turn
         if user.id != game["turn"]:
             return  # Not your turn!
+
+        # Cancel the forfeit timer as the player is taking their turn
+        if 'forfeit_task' in game and game['forfeit_task']:
+            game['forfeit_task'].cancel()
 
         # Determine the space from the reaction
         if reaction.emoji not in column_emojis:
@@ -296,33 +300,7 @@ class TicTacToe(Cog):
                 color=0xffa500
             )
             await reaction.message.channel.send(embed=draw_embed)
-
-            # Ask players if they want to continue
-            challenger = self.bot.get_user(game["players"][0])
-            opponent = self.bot.get_user(game["players"][1])
-            continue_game = await self.ask_continue(reaction.message.channel, challenger, opponent, game['bet_amount'])
-
-            if continue_game:
-                # Reset the grid and restart the game
-                games[channel_id]['grid'] = self.create_grid()
-                games[channel_id]['turn'] = challenger.id  # Challenger starts again
-
-                # Send a new game message and reset the message_id
-                game_embed = Embed(
-                    title="Tic-Tac-Toe Game Restarted!",
-                    description=f"{challenger.mention} vs {opponent.mention}\nBet: {game['bet_amount']:,} coins\n\n{self.display_grid(games[channel_id]['grid'])}",
-                    color=0x3498db
-                )
-                game_message = await reaction.message.channel.send(embed=game_embed)
-
-                # Add reactions for the new game
-                for emoji in column_emojis:
-                    await game_message.add_reaction(emoji)
-
-                # Update the message ID for the new game
-                games[channel_id]['message_id'] = game_message.id  # Update the new message_id
-            else:
-                del games[channel_id]
+            del games[channel_id]
             return
 
         # Change turn to the other player
@@ -337,6 +315,35 @@ class TicTacToe(Cog):
         )
         await reaction.message.edit(embed=grid_embed)
 
+        # Start a 5-minute forfeit timer for the next player
+        game['forfeit_task'] = asyncio.create_task(self.forfeit_timer(reaction.message.channel, next_player.id))
+
+    # Forfeit timer function
+    async def forfeit_timer(self, channel, player_id):
+        try:
+            await asyncio.sleep(300)  # 5 minutes (300 seconds)
+            # If we reach here, it means the player took too long
+            opponent_id = games[channel.id]["players"][0] if games[channel.id]["turn"] != games[channel.id]["players"][
+                0] else games[channel.id]["players"][1]
+            opponent = self.bot.get_user(opponent_id)
+            forfeiting_player = self.bot.get_user(player_id)
+
+            # Send forfeit message and award the win to the opponent
+            await channel.send(
+                f"⚠️ {forfeiting_player.mention} took too long and forfeits the game! {opponent.mention} wins by forfeit.")
+
+            # Handle coins transfer for forfeit
+            await utils.CoinFunctions.pay_user(payer=forfeiting_player, receiver=opponent,
+                                               amount=games[channel.id]["bet_amount"], bet=True)
+            log_message = f"**Tic-Tac-Toe Winner (Forfeit)**: {opponent.name} won **{games[channel.id]['bet_amount']:,}** coins by forfeit."
+            log_channel = self.coin_logs
+            if log_channel:
+                await log_channel.send(log_message)
+
+            del games[channel.id]  # End the game after forfeit
+        except asyncio.CancelledError:
+            # This will occur if the player moves within the time and the task is canceled
+            pass
 
 # Add the cog to the bot
 def setup(bot):

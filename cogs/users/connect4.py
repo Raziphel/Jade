@@ -186,22 +186,29 @@ class Connect4(Cog):
         # Store the message ID for game reference
         games[ctx.channel.id]["message_id"] = game_message.id
 
-    # Handle reactions (piece dropping)
+    # In your on_reaction_add for Connect 4
     @Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.bot:
             return
 
         msg_id = reaction.message.id
-        if reaction.message.channel.id not in games or msg_id != games[reaction.message.channel.id]["message_id"]:
+        channel_id = reaction.message.channel.id
+
+        if channel_id not in games or "message_id" not in games[channel_id] or msg_id != games[channel_id][
+            "message_id"]:
             return  # Not an active game or wrong message
 
-        game = games[reaction.message.channel.id]
+        game = games[channel_id]
         grid = game["grid"]
 
         # Check if it's the player's turn
         if user.id != game["turn"]:
             return  # Not your turn!
+
+        # Cancel the forfeit timer as the player is taking their turn
+        if 'forfeit_task' in game and game['forfeit_task']:
+            game['forfeit_task'].cancel()
 
         # Determine the column from the reaction
         if reaction.emoji not in column_emojis:
@@ -241,13 +248,12 @@ class Connect4(Cog):
                 )
                 await reaction.message.channel.send(embed=win_embed)
 
-                # Log the result to the coin log channel
-                log_message = f"**Connect 4 Winner**: {winner.name} won **{game['bet_amount']:,}** coins and now has a new balance."
+                log_message = f"**Connect 4 Winner**: {winner.name} won **{game['bet_amount']:,}** coins."
                 log_channel = self.coin_logs
                 if log_channel:
                     await log_channel.send(log_message)
 
-                del games[reaction.message.channel.id]
+                del games[channel_id]
                 return
             except Exception as e:
                 await reaction.message.channel.send(
@@ -269,6 +275,11 @@ class Connect4(Cog):
             color=0x3498db
         )
         await reaction.message.edit(embed=grid_embed)
+
+        # Start a 5-minute forfeit timer for the next player
+        game['forfeit_task'] = asyncio.create_task(self.forfeit_timer(reaction.message.channel, next_player.id))
+
+    # Same forfeit_timer method used in TicTacToe
 
 
 # Add the cog to the bot
