@@ -241,7 +241,7 @@ class TicTacToe(Cog):
 
         # Remove the player's reaction to keep the board clean
         try:
-            await reaction.message.remove_reaction(reaction.emoji)
+            await reaction.message.remove_reaction(reaction.emoji, user)
         except HTTPException:
             pass  # Fail silently if removing the reaction fails
 
