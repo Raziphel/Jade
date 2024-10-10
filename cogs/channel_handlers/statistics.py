@@ -125,7 +125,7 @@ class Statistics(commands.Cog):
                 f"📚 **Channels**: {total_channels:,}\n"
                 f"🎭 **Roles**: {total_roles:,}\n"
                 f"📧 **Messages**: {floor(utils.Tracking.get_total_messages()):,}\n"
-                f"🔊 **VC Hours**: {floor(utils.Tracking.get_total_vcmins()/60):,}\n\n"
+                f"🔊 **VC Hours**: {floor(utils.Tracking.get_total_vcmins()/60):,} ({floor(utils.Tracking.get_total_vcmins()/60)/24:,} days)\n\n"
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
                 f"{self.bot.config['emojis']['scp']} **SCP:SL Players**: {tracked_roles['scpsl']} ({round(tracked_roles['scpsl'] / members * 100)}%)\n{bars['scpsl']}\n"
