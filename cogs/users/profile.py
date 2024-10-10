@@ -174,12 +174,7 @@ class Profile(Cog):
         tracking = utils.Tracking.get(member.id)
         #staff_tracking = utils.Staff_Track.get(member.id)
 
-        if levels.level == 0:
-            required_exp = 10
-        elif levels.level < 5:
-            required_exp = levels.level * 25
-        else:
-            required_exp = round(levels.level ** 2.75)
+        required_exp = await utils.UserFunctions.determine_required_exp(levels.level)
 
         avatar = await self.get_user_avatar(member)
         username = str(member.name)
