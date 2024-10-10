@@ -95,7 +95,7 @@ class StoreHandler(Cog):
                              f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🌋 Lava Red ⊱",
-                       value=f"{self.bot.config['purchase_roles']['lava_red']}>\n**╰⊰"
+                       value=f"<@&{self.bot.config['purchase_roles']['lava_red']}>\n**╰⊰"
                              f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🧙‍♂️ Magic Purple ⊱",
