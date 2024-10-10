@@ -108,14 +108,6 @@ class Profile(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def is_user_in_guild(self, guild, user_id):
-        """Check if a user is in the guild."""
-        try:
-            await guild.fetch_member(user_id)
-            return True
-        except:
-            return False
-
     @command(
         aliases=['p', 'P', 'Profile'],
         application_command_meta=ApplicationCommandMeta(
@@ -165,28 +157,15 @@ class Profile(Cog):
         except ValueError:  # User is not in the list yet maybe?
             return -1
 
-    async def get_wealth_rank(self, member: discord.Member) -> int:
+    def get_wealth_rank(self, member: discord.Member) -> int:
         sorted_wealth = utils.Currency.sort_coins()
-        users = []
-        guild = self.bot.get_guild(self.bot.config['guild_id'])
-
-        for wealth in sorted_wealth:
-            user = self.bot.get_user(wealth.user_id)
-            if user and await self.is_user_in_guild(guild, user.id):
-                if user.id == self.bot.user.id:
-                    continue  # Skip the bot's own ID
-                users.append((user, wealth))
-
-            if len(users) == 10:  # Limit to top 10
-                break
-
         member_wealth = utils.Currency.get(member.id)
-
         try:
-            wealth_rank = [wealth for _, wealth in users].index(member_wealth)
-            return wealth_rank + 1  # Add 1 because indexes start from 0
+            wealth_rank = sorted_wealth.index(member_wealth)
+
+            return wealth_rank
         except ValueError:
-            return -1  # Member is not in the top wealth ranks or doesn't have any currency
+            return
 
     async def generate_screenshot(self, member: Member):
         moderation = utils.Moderation.get(member.id)
@@ -215,7 +194,7 @@ class Profile(Cog):
         voice_activity = format_number(voice_activity)
 
         level_rank = self.get_level_rank(member)
-        wealth_rank = await self.get_wealth_rank(member)
+        wealth_rank = self.get_wealth_rank(member)
 
         experience_percentage = current_experience / required_exp
         relative_inner_progress_bar_width = experience_percentage * parent_progress_bar_h_w[0]
