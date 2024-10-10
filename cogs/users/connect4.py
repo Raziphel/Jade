@@ -277,10 +277,35 @@ class Connect4(Cog):
         await reaction.message.edit(embed=grid_embed)
 
         # Start a 5-minute forfeit timer for the next player
-        game['forfeit_task'] = asyncio.create_task(self.forfeit_timer(reaction.message.channel, next_player.id))
+        game['forfeit_task'] = asyncio.create_task(self.forfeit_timer(reaction.message.channel, next_player.id, game))
 
-    # Same forfeit_timer method used in TicTacToe
+    # Forfeit timer function
+    async def forfeit_timer(self, channel, player_id, game):
+        try:
+            await asyncio.sleep(300)  # 5 minutes (300 seconds)
+            # If we reach here, it means the player took too long
+            opponent_id = games[channel.id]["players"][0] if games[channel.id]["turn"] != games[channel.id]["players"][
+                0] else games[channel.id]["players"][1]
+            opponent = self.bot.get_user(opponent_id)
+            forfeiting_player = self.bot.get_user(player_id)
 
+            # Send forfeit message and award the win to the opponent
+            await channel.send(
+                f"⚠️ {forfeiting_player.mention} took too long and forfeits the game! {opponent.mention} wins **{game['bet_amount']:,}** coins. by "
+                f"forfeit.")
+
+            # Handle coins transfer for forfeit
+            await utils.CoinFunctions.pay_user(payer=forfeiting_player, receiver=opponent,
+                                               amount=games[channel.id]["bet_amount"], bet=True)
+            log_message = f"**Tic-Tac-Toe Winner (Forfeit)**: {opponent.name} won **{games[channel.id]['bet_amount']:,}** coins by forfeit."
+            log_channel = self.coin_logs
+            if log_channel:
+                await log_channel.send(log_message)
+
+            del games[channel.id]  # End the game after forfeit
+        except asyncio.CancelledError:
+            # This will occur if the player moves within the time and the task is canceled
+            pass
 
 # Add the cog to the bot
 def setup(bot):

@@ -316,10 +316,10 @@ class TicTacToe(Cog):
         await reaction.message.edit(embed=grid_embed)
 
         # Start a 5-minute forfeit timer for the next player
-        game['forfeit_task'] = asyncio.create_task(self.forfeit_timer(reaction.message.channel, next_player.id))
+        game['forfeit_task'] = asyncio.create_task(self.forfeit_timer(reaction.message.channel, next_player.id, game))
 
     # Forfeit timer function
-    async def forfeit_timer(self, channel, player_id):
+    async def forfeit_timer(self, channel, player_id, game):
         try:
             await asyncio.sleep(300)  # 5 minutes (300 seconds)
             # If we reach here, it means the player took too long
@@ -330,7 +330,8 @@ class TicTacToe(Cog):
 
             # Send forfeit message and award the win to the opponent
             await channel.send(
-                f"⚠️ {forfeiting_player.mention} took too long and forfeits the game! {opponent.mention} wins by forfeit.")
+                f"⚠️ {forfeiting_player.mention} took too long and forfeits the game! {opponent.mention} wins **{game['bet_amount']:,}** coins. by "
+                f"forfeit.")
 
             # Handle coins transfer for forfeit
             await utils.CoinFunctions.pay_user(payer=forfeiting_player, receiver=opponent,
