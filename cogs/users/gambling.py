@@ -74,7 +74,7 @@ class Gambling(Cog):
         challenger = ctx.author
         challenger_coins = utils.Currency.get(challenger.id)
         opponent_coins = utils.Currency.get(opponent.id)
-        challenger_skills = utils.Currency.get(challenger.id)
+        challenger_skills = utils.Skills.get(challenger.id)
 
 
         if challenger_skills.connect4 is False:
