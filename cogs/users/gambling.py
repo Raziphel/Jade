@@ -1,5 +1,9 @@
-import discord
-from discord.ext.commands import command, Cog, ApplicationCommandMeta
+# Discord
+from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed
+from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
+
+# Utils
+import utils
 
 # Set up coin tracking and game states
 coins = {}
@@ -52,8 +56,26 @@ class Gambling(Cog):
                     return True
         return False
 
-    @command(application_command_meta=ApplicationCommandMeta())
-    async def connect4(self, ctx, opponent: discord.Member, bet_amount: int):
+    @cooldown(1, 30, BucketType.user)
+    @command(
+        application_command_meta=ApplicationCommandMeta(
+            options=[
+                ApplicationCommandOption(
+                    name="opponent",
+                    description="The user you want to bet with.",
+                    type=ApplicationCommandOptionType.user,
+                    required=True,
+                ),
+                ApplicationCommandOption(
+                    name="bet",
+                    description="The amount of coins you want to bet.",
+                    type=ApplicationCommandOptionType.integer,
+                    required=True,
+                ),
+            ],
+        ),
+    )
+    async def connect4(self, ctx, opponent: Member, bet_amount: int):
         """Gamble over a game of connect 4!"""
         challenger = ctx.author
         self.init_coins(challenger.id)
@@ -129,17 +151,23 @@ class Gambling(Cog):
             winner = user
             loser_id = game["players"][1] if user.id == game["players"][0] else game["players"][0]
             loser = self.bot.get_user(loser_id)
-            coins[winner.id] += 2 * game["bet_amount"]
 
-            await reaction.message.channel.send(
-                f"{winner.mention} wins the game and takes {2 * game['bet_amount']} coins!\n\n{self.display_grid(grid)}")
+            # Pay the winner using the pay_user function
+            try:
+                await utils.CoinFunctions.pay_user(payer=loser, receiver=winner, amount=game["bet_amount"])
+                await reaction.message.channel.send(f"{winner.mention} wins the game and takes {game['bet_amount']} coins!\n\n{self.display_grid(grid)}")
 
-            # Log the result to the coin log channel
-            log_message = f"**Connect 4 Winner**: {winner.name} won {2 * game['bet_amount']} coins and now has {coins[winner.id]} coins!"
-            await self.coin_logs.send(log_message)
+                # Log the result to the coin log channel
+                log_message = f"**Connect 4 Winner**: {winner.name} won {game['bet_amount']} coins and now has a new balance."
+                log_channel = self.coin_logs
+                if log_channel:
+                    await log_channel.send(log_message)
 
-            del games[reaction.message.channel.id]
-            return
+                del games[reaction.message.channel.id]
+                return
+            except Exception as e:
+                await reaction.message.channel.send(f"Error occurred when paying the winner: {str(e)}")
+
 
         # Change turn to the other player
         game["turn"] = game["players"][1] if user.id == game["players"][0] else game["players"][0]
