@@ -1,14 +1,15 @@
 # Discord
 from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed, HTTPException
 from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
+import asyncio  # Added to handle the TimeoutError
 
 # Utils
 import utils
 
-# Set up coin tracking and game states
-coins = {}
+# Set up game states
 games = {}
 column_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
+
 
 class Connect4(Cog):
     def __init__(self, bot):
@@ -72,14 +73,14 @@ class Connect4(Cog):
         ),
     )
     async def connect4(self, ctx, opponent: Member, bet_amount: int):
-        """Gamble over a game of connect 4!"""
+        """Gamble over a game of Connect 4!"""
         challenger = ctx.author
         challenger_coins = utils.Currency.get(challenger.id)
         opponent_coins = utils.Currency.get(opponent.id)
         challenger_skills = utils.Skills.get(challenger.id)
 
-
-        if challenger_skills.blackjack is False:
+        # Check if the user has the skill for Connect 4
+        if not challenger_skills.connect4:
             await ctx.send(
                 embed=Embed(
                     title="You don't have the skill!",
@@ -88,11 +89,20 @@ class Connect4(Cog):
                 )
             )
             return
+        if challenger == opponent:
+            await ctx.send(
+                embed=Embed(
+                    title="You can't play with yourself!",
+                    description=f"That's gross...",
+                    color=0xff0000,
+                )
+            )
+            return
         if bet_amount < 100:
             await ctx.send(
                 embed=Embed(
                     title="Not betting enough!",
-                    description=f"Oh come on you can bet more than {bet_amount:,} coins!",
+                    description=f"Oh come on, you can bet more than {bet_amount:,} coins!",
                     color=0xff0000,
                 )
             )
@@ -132,7 +142,7 @@ class Connect4(Cog):
 
         try:
             reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
-        except TimeoutError:
+        except asyncio.TimeoutError:  # Fixed TimeoutError import
             await ctx.send(
                 embed=Embed(
                     title="Game Canceled",

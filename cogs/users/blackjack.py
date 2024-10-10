@@ -77,6 +77,15 @@ class Blackjack(Cog):
                 )
             )
             return
+        if challenger is opponent:
+            await ctx.send(
+                embed=Embed(
+                    title="You can't play with yourself!",
+                    description=f"That's gross...",
+                    color=0xff0000,
+                )
+            )
+            return
         if bet_amount < 100:
             await ctx.send(
                 embed=Embed(
