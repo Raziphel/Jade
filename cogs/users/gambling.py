@@ -1,5 +1,5 @@
 # Discord
-from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed
+from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member
 from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
 
 # Utils
