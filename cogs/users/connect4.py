@@ -223,7 +223,7 @@ class Connect4(Cog):
 
             # Pay the winner using the pay_user function
             try:
-                await utils.CoinFunctions.pay_user(payer=loser, receiver=winner, amount=game["bet_amount"])
+                await utils.CoinFunctions.pay_user(payer=loser, receiver=winner, amount=game["bet_amount"], bet=True)
                 win_embed = Embed(
                     title="Game Over!",
                     description=f"🎉 {winner.mention} wins the game and takes **{game['bet_amount']:,}** coins! 🎉\n\n{self.display_grid(grid)}",

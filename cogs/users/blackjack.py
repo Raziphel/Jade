@@ -239,7 +239,7 @@ class Blackjack(Cog):
         loser = self.bot.get_user(loser_id)
 
         # Pay the winner
-        await utils.CoinFunctions.pay_user(payer=loser, receiver=winner, amount=game["bet_amount"])
+        await utils.CoinFunctions.pay_user(payer=loser, receiver=winner, amount=game["bet_amount"], bet=True)
 
         # Send game result
         await channel.send(
