@@ -73,8 +73,8 @@ class StoreHandler(Cog):
             .add_field(name="⊰ 🍑 Cutie Pinkie ⊱",
                        value=f"{self.bot.config['purchase_roles']['cutie_pinkie']}\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
-            .add_field(name="⊰ ⛅ Snow White ⊱",
-                       value=f"{self.bot.config['purchase_roles']['snow_white']}\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+            .add_field(name="⊰ ⛅ Snow Flakes ⊱",
+                       value=f"{self.bot.config['purchase_roles']['snow_flakes']}\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
             .add_field(name="⊰ 🖤 Black Knight ⊱",
                        value=f"{self.bot.config['purchase_roles']['black_knight']}\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
