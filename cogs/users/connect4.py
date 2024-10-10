@@ -10,7 +10,7 @@ coins = {}
 games = {}
 column_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
 
-class Gambling(Cog):
+class Connect4(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -79,11 +79,11 @@ class Gambling(Cog):
         challenger_skills = utils.Skills.get(challenger.id)
 
 
-        if challenger_skills.connect4 is False:
+        if challenger_skills.blackjack is False:
             await ctx.send(
                 embed=Embed(
                     title="You don't have the skill!",
-                    description=f"You must have the connect 4 skill to challenge someone to connect 4!",
+                    description=f"You must have the Connect 4 skill to challenge someone to Connect 4!",
                     color=0xff0000,
                 )
             )
@@ -263,4 +263,4 @@ class Gambling(Cog):
 
 # Add the cog to the bot
 def setup(bot):
-    bot.add_cog(Gambling(bot))
+    bot.add_cog(Connect4(bot))
