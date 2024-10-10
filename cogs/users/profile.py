@@ -62,7 +62,6 @@ def determine_primary_color(image):
     return primary_color
 
 
-
 def calculate_contrasting_color(background_color):
     # Convert the background color to the HSV color space
     h, s, v = colorsys.rgb_to_hsv(*background_color)
@@ -156,37 +155,38 @@ class Profile(Cog):
 
         return BytesIO(data)
 
-    async def get_level_rank(self, guild: discord.Guild, member: discord.Member) -> int:
+    def get_level_rank(self, member: discord.Member) -> int:
         sorted_levels = utils.Levels.sort_levels()
-        users = []
+        member_level = utils.Levels.get(member.id)
+        try:
+            level_rank = sorted_levels.index(member_level)
 
-        for rank in sorted_levels:
-            user = self.bot.get_user(rank.user_id)
+            return level_rank + 1  # Add 1 because indexes start from 0
+        except ValueError:  # User is not in the list yet maybe?
+            return -1
+
+    async def get_wealth_rank(self, member: discord.Member) -> int:
+        sorted_wealth = utils.Currency.sort_coins()
+        users = []
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+
+        for wealth in sorted_wealth:
+            user = self.bot.get_user(wealth.user_id)
             if user and await self.is_user_in_guild(guild, user.id):
                 if user.id == self.bot.user.id:
                     continue  # Skip the bot's own ID
-                users.append((user, rank))
+                users.append((user, wealth))
 
             if len(users) == 10:  # Limit to top 10
                 break
 
-        member_level = utils.Levels.get(member.id)
-
-        try:
-            level_rank = [rank for _, rank in users].index(member_level)
-            return level_rank + 1  # Add 1 because indexes start from 0
-        except ValueError:
-            return -1  # Member is not in the top ranks or doesn't have a level
-
-    def get_wealth_rank(self, member: discord.Member) -> int:
-        sorted_wealth = utils.Currency.sort_coins()
         member_wealth = utils.Currency.get(member.id)
-        try:
-            wealth_rank = sorted_wealth.index(member_wealth)
 
-            return wealth_rank + 1
+        try:
+            wealth_rank = [wealth for _, wealth in users].index(member_wealth)
+            return wealth_rank + 1  # Add 1 because indexes start from 0
         except ValueError:
-            return -1
+            return -1  # Member is not in the top wealth ranks or doesn't have any currency
 
     async def generate_screenshot(self, member: Member):
         moderation = utils.Moderation.get(member.id)
@@ -214,7 +214,7 @@ class Profile(Cog):
         voice_activity = floor(tracking.vc_mins / 60)
         voice_activity = format_number(voice_activity)
 
-        level_rank = await self.get_level_rank(member.guild, member)  # pass both guild and member
+        level_rank = self.get_level_rank(member)
         wealth_rank = self.get_wealth_rank(member)
 
         experience_percentage = current_experience / required_exp
