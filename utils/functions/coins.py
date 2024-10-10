@@ -11,7 +11,7 @@ class CoinFunctions(object):
 
 
     @classmethod
-    async def pay_user(cls, payer:Member, receiver:Member, amount:int):
+    async def pay_user(cls, payer:Member, receiver:Member, amount:int, bet:bool=False):
         """Use for payment between users (Taxed)"""
 
         #! Define Variables
@@ -28,11 +28,15 @@ class CoinFunctions(object):
 
             #+ Give them coins and record
             cp.coins -= amount
-            cp_r.gifted += amount
-
             cr.coins += amount
-            cr_r.given += amount
             cp_r.taxed += taxed
+
+            if bet: #! Add it to their records!  Check if it was a bet!
+                cp_r.lost += amount
+                cr_r.won += amount
+            else:
+                cp_r.gifted += amount
+                cr_r.given += amount
 
         async with cls.bot.database() as db:
             await cp.save(db)

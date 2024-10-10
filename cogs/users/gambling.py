@@ -19,11 +19,6 @@ class Gambling(Cog):
     def coin_logs(self):
         return self.bot.get_channel(self.bot.config['logs']['coins'])
 
-    # Initialize player coins if not already
-    def init_coins(self, user_id):
-        if user_id not in coins:
-            coins[user_id] = 100  # Default starting coins
-
     # Create an empty Connect 4 grid
     def create_grid(self):
         return [["⚪" for _ in range(7)] for _ in range(6)]
@@ -78,15 +73,15 @@ class Gambling(Cog):
     async def connect4(self, ctx, opponent: Member, bet_amount: int):
         """Gamble over a game of connect 4!"""
         challenger = ctx.author
-        self.init_coins(challenger.id)
-        self.init_coins(opponent.id)
+        challenger_coins = utils.Currency.get(challenger.id)
+        opponent_coins = utils.Currency.get(opponent.id)
 
-        if bet_amount > coins[challenger.id]:
+        if bet_amount > challenger_coins.coins:
             await ctx.send(
-                f"You don't have enough coins to bet that amount! You only have {coins[challenger.id]} coins."
+                f"You don't have enough coins to bet that amount! You only have {challenger_coins.coins:,} coins."
             )
             return
-        if bet_amount > coins[opponent.id]:
+        if bet_amount > opponent_coins.coins:
             await ctx.send(f"{opponent.mention} doesn't have enough coins to bet that amount!")
             return
 
@@ -110,10 +105,6 @@ class Gambling(Cog):
         if str(reaction.emoji) == "❌":
             await ctx.send(f"{opponent.mention} declined the challenge! The game has been canceled.")
             return
-
-        # Proceed with the game if accepted
-        coins[challenger.id] -= bet_amount
-        coins[opponent.id] -= bet_amount
 
         # Create a new game
         grid = self.create_grid()
