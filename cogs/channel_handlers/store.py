@@ -57,13 +57,13 @@ class StoreHandler(Cog):
                 description="# Abilities\n`All these listed items give you the ability to do something here in the garden!`",
                 color=0xFF00FF)
             .add_field(name="⊰ 🧤 Thievery ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to steal from others!```",
                        inline=True)
             .add_field(name="⊰ 4️⃣ Connect 4 ⊱",
-                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to Connect 4!```",
+                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to Challenge others to Connect 4!```",
                    inline=True)
             .add_field(name="⊰ 🃏 Black Jack ⊱",
-                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to Black Jack!```",
+                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to Challenge others to Black Jack!```",
                    inline=True),
 
             Embed(
@@ -80,22 +80,22 @@ class StoreHandler(Cog):
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
             .add_field(name="⊰ 🍏 Nature Green ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🧊 Liquid Blue ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🌞 Sunshine Yellow ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🌋 Lava Red ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🧙‍♂️ Magic Purple ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ ☔ Lush Magenta ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
         ]
 
@@ -143,19 +143,19 @@ class StoreHandler(Cog):
             "🧶": {"name": "Thread Permissions", "price": 75000, "role": 'threads_perm'},
             "🔮": {"name": "External Emojis", "price": 75000, "role": 'external_emojis'},
             # Abilities
-            "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"},
-            "4️⃣": {"name": "Connect 4", "price": 100000, "role": None, "ability": "connect4"},
-            "🃏": {"name": "Black Jack", "price": 100000, "role": None, "ability": "blackjack"},
+            "🧤": {"name": "Thievery", "price": 250000, "role": None, "ability": "thievery"},
+            "4️⃣": {"name": "Connect 4", "price": 250000, "role": None, "ability": "connect4"},
+            "🃏": {"name": "Black Jack", "price": 250000, "role": None, "ability": "blackjack"},
             #role Colors
             "🍑": {"name": "Cutie Pinkie", "price": 1000000, "role": 'cutie_pinkie'},
             "⛅": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},
             "🖤": {"name": "Black Knight", "price": 1000000, "role": 'black_knight'},
-            "🍏": {"name": "Nature Green", "price": 250000, "role": 'nature_green'},
-            "🧊": {"name": "Liquid Blue", "price": 250000, "role": 'liquid_blue'},
-            "🌞": {"name": "Sunshine Yellow", "price": 250000, "role": 'sunshine_yellow'},
-            "🌋": {"name": "Lava Red", "price": 250000, "role": 'lava_red'},
-            "🧙‍♂️": {"name": "Magic Purple", "price": 250000, "role": 'magic_purple'},
-            "☔": {"name": "Lush Magenta", "price": 250000, "role": 'lush_magenta'},
+            "🍏": {"name": "Nature Green", "price": 100000, "role": 'nature_green'},
+            "🧊": {"name": "Liquid Blue", "price": 100000, "role": 'liquid_blue'},
+            "🌞": {"name": "Sunshine Yellow", "price": 100000, "role": 'sunshine_yellow'},
+            "🌋": {"name": "Lava Red", "price": 100000, "role": 'lava_red'},
+            "🧙‍♂️": {"name": "Magic Purple", "price": 100000, "role": 'magic_purple'},
+            "☔": {"name": "Lush Magenta", "price": 100000, "role": 'lush_magenta'},
         }
 
         emoji = payload.emoji.name if payload.emoji.is_unicode_emoji() else payload.emoji.id
