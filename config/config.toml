@@ -67,6 +67,7 @@ total_coins = 100000000
     stats_channel_access = 1051035273330442270
     threads_perm = 1186717217501487225
     external_emojis = 1186714489022849034
+    # COLORS
     eww_blue = 1293665508821831852
     snot_green = 1293665509383999518
     yikes_yellow = 1293665511606980728

@@ -56,3 +56,19 @@ class Tracking(object):
         """sorts the user's by balance. getting ranks!"""
         sorted_vc_mins = sorted(cls.all_tracking.values(), key=lambda u: u.vc_mins, reverse=True)
         return sorted_vc_mins
+
+    @classmethod
+    def get_total_messages(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_tracking.values():
+            total += i.messages
+        return total
+
+    @classmethod
+    def get_total_vcmins(cls):
+        """Gets all the user's collected amount of gold"""
+        total = 0
+        for i in cls.all_tracking.values():
+            total += i.vc_mins
+        return total
