@@ -22,9 +22,11 @@ class Gambling(Cog):
     def create_grid(self):
         return [["⚪" for _ in range(7)] for _ in range(6)]
 
-    # Display the current grid as a string
+    # Create an empty Connect 4 grid with column numbers
     def display_grid(self, grid):
-        return "\n".join(" ".join(row) for row in grid)
+        columns = "1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣\n"
+        grid_display = "\n".join(" ".join(row) for row in grid)
+        return columns + grid_display
 
     # Check for a winner (horizontal, vertical, diagonal)
     def check_winner(self, grid, piece):
