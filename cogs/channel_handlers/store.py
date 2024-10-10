@@ -62,8 +62,8 @@ class StoreHandler(Cog):
             .add_field(name="⊰ 4️⃣ Connect 4 ⊱",
                    value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to Challenge others to Connect 4!```",
                    inline=True)
-            .add_field(name="⊰ 🃏 Black Jack ⊱",
-                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to Challenge others to Black Jack!```",
+            .add_field(name="⊰ 📦 TicTacToe ⊱",
+                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to Challenge others to TicTacToe!```",
                    inline=True),
 
             Embed(
@@ -145,7 +145,7 @@ class StoreHandler(Cog):
             # Abilities
             "🧤": {"name": "Thievery", "price": 250000, "role": None, "ability": "thievery"},
             "4️⃣": {"name": "Connect 4", "price": 250000, "role": None, "ability": "connect4"},
-            "🃏": {"name": "Black Jack", "price": 250000, "role": None, "ability": "blackjack"},
+            "📦": {"name": "TicTacToe", "price": 250000, "role": None, "ability": "tictactoe"},
             #role Colors
             "🍑": {"name": "Cutie Pinkie", "price": 1000000, "role": 'cutie_pinkie'},
             "⛅": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},
