@@ -58,7 +58,11 @@ class StoreHandler(Cog):
                 color=0xFF00FF)
             .add_field(name="⊰ 🧤 Thievery ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
-                       inline=True),
+                       inline=True)
+            .add_field(name="⊰ 4️⃣ Connect 4 ⊱",
+                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to connect 4!```",
+                   inline=True),
+
             Embed(
                 description="# Colors\n`All these listed items let you be the colors you wanna be!\nDon't waste your "
                             "coins staff, donators and nitro boosters!  These will not work!`",
@@ -137,6 +141,7 @@ class StoreHandler(Cog):
             "🔮": {"name": "External Emojis", "price": 75000, "role": 'external_emojis'},
             # Abilities
             "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"},
+            "4️⃣": {"name": "Connect 4", "price": 100000, "role": None, "ability": "connect4"},
             #role Colors
             "🍑": {"name": "Cutie Pinkie", "price": 1000000, "role": 'cutie_pinkie'},
             "⛅": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},

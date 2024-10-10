@@ -1,5 +1,5 @@
 # Discord
-from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member
+from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed
 from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
 
 # Utils
@@ -9,7 +9,6 @@ import utils
 coins = {}
 games = {}
 column_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
-
 
 class Gambling(Cog):
     def __init__(self, bot):
@@ -75,21 +74,54 @@ class Gambling(Cog):
         challenger = ctx.author
         challenger_coins = utils.Currency.get(challenger.id)
         opponent_coins = utils.Currency.get(opponent.id)
+        challenger_skills = utils.Currency.get(challenger.id)
 
+
+        if challenger_skills.connect4 is False:
+            await ctx.send(
+                embed=Embed(
+                    title="You don't have the skill!",
+                    description=f"You must have the connect 4 skill to challenge someone to connect 4!",
+                    color=0xff0000,
+                )
+            )
+            return
+        if bet_amount < 100:
+            await ctx.send(
+                embed=Embed(
+                    title="Not betting enough!",
+                    description=f"Oh come on you can bet more than {bet_amount:,} coins!",
+                    color=0xff0000,
+                )
+            )
+            return
         if bet_amount > challenger_coins.coins:
             await ctx.send(
-                f"You don't have enough coins to bet that amount! You only have {challenger_coins.coins:,} coins."
+                embed=Embed(
+                    title="Not enough coins!",
+                    description=f"You only have {challenger_coins.coins:,} coins, but you tried to bet {bet_amount:,} coins!",
+                    color=0xff0000,
+                )
             )
             return
         if bet_amount > opponent_coins.coins:
-            await ctx.send(f"{opponent.mention} doesn't have enough coins to bet that amount!")
+            await ctx.send(
+                embed=Embed(
+                    title="Opponent doesn't have enough coins!",
+                    description=f"{opponent.mention} doesn't have enough coins to bet {bet_amount:,} coins.",
+                    color=0xff0000,
+                )
+            )
             return
 
         # Ask the opponent to accept the challenge
-        msg = await ctx.send(
-            f"{opponent.mention}, you have been challenged by {challenger.mention} to a Connect 4 game for {bet_amount} coins! "
-            f"React with ✅ to accept or ❌ to decline."
+        challenge_embed = Embed(
+            title="Connect 4 Challenge!",
+            description=f"{opponent.mention}, you have been challenged by {challenger.mention} to a Connect 4 game for {bet_amount:,} coins!\n\n"
+                        f"React with ✅ to accept or ❌ to decline.",
+            color=0x00ff00
         )
+        msg = await ctx.send(embed=challenge_embed)
         await msg.add_reaction("✅")
         await msg.add_reaction("❌")
 
@@ -99,11 +131,23 @@ class Gambling(Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
         except TimeoutError:
-            await ctx.send(f"{opponent.mention} did not respond in time! The game has been canceled.")
+            await ctx.send(
+                embed=Embed(
+                    title="Game Canceled",
+                    description=f"{opponent.mention} did not respond in time! The challenge has been canceled.",
+                    color=0xffa500
+                )
+            )
             return
 
         if str(reaction.emoji) == "❌":
-            await ctx.send(f"{opponent.mention} declined the challenge! The game has been canceled.")
+            await ctx.send(
+                embed=Embed(
+                    title="Challenge Declined",
+                    description=f"{opponent.mention} declined the challenge! The game has been canceled.",
+                    color=0xff0000
+                )
+            )
             return
 
         # Create a new game
@@ -116,9 +160,12 @@ class Gambling(Cog):
         }
 
         # Send the initial game state
-        game_message = await ctx.send(
-            f"Connect 4 game between {challenger.mention} and {opponent.mention} for {bet_amount} coins!\n\n{self.display_grid(grid)}"
+        game_embed = Embed(
+            title="Connect 4 Game Started!",
+            description=f"{challenger.mention} vs {opponent.mention}\nBet: {bet_amount:,} coins\n\n{self.display_grid(grid)}",
+            color=0x3498db
         )
+        game_message = await ctx.send(embed=game_embed)
 
         # Add reactions for each column
         for emoji in column_emojis:
@@ -169,10 +216,15 @@ class Gambling(Cog):
             # Pay the winner using the pay_user function
             try:
                 await utils.CoinFunctions.pay_user(payer=loser, receiver=winner, amount=game["bet_amount"])
-                await reaction.message.channel.send(f"{winner.mention} wins the game and takes {game['bet_amount']} coins!\n\n{self.display_grid(grid)}")
+                win_embed = Embed(
+                    title="Game Over!",
+                    description=f"🎉 {winner.mention} wins the game and takes {game['bet_amount']:,} coins! 🎉\n\n{self.display_grid(grid)}",
+                    color=0x00ff00
+                )
+                await reaction.message.channel.send(embed=win_embed)
 
                 # Log the result to the coin log channel
-                log_message = f"**Connect 4 Winner**: {winner.name} won {game['bet_amount']} coins and now has a new balance."
+                log_message = f"**Connect 4 Winner**: {winner.name} won {game['bet_amount']:,} coins and now has a new balance."
                 log_channel = self.coin_logs
                 if log_channel:
                     await log_channel.send(log_message)
@@ -180,14 +232,25 @@ class Gambling(Cog):
                 del games[reaction.message.channel.id]
                 return
             except Exception as e:
-                await reaction.message.channel.send(f"Error occurred when paying the winner: {str(e)}")
+                await reaction.message.channel.send(
+                    embed=Embed(
+                        title="Error",
+                        description=f"Error occurred when paying the winner: {str(e)}",
+                        color=0xff0000
+                    )
+                )
 
         # Change turn to the other player
         game["turn"] = game["players"][1] if user.id == game["players"][0] else game["players"][0]
         next_player = self.bot.get_user(game["turn"])
 
         # Update the grid and prompt the next player
-        await reaction.message.edit(content=f"{self.display_grid(grid)}\n\n{next_player.mention}, it's your turn!")
+        grid_embed = Embed(
+            title="Connect 4 Game",
+            description=f"{self.display_grid(grid)}\n\n{next_player.mention}, it's your turn!",
+            color=0x3498db
+        )
+        await reaction.message.edit(embed=grid_embed)
 
 
 # Add the cog to the bot
