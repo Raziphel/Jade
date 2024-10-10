@@ -215,7 +215,7 @@ class Profile(Cog):
         voice_activity = format_number(voice_activity)
 
         level_rank = self.get_level_rank(member)
-        wealth_rank = self.get_wealth_rank(member)
+        wealth_rank = await self.get_wealth_rank(member)
 
         experience_percentage = current_experience / required_exp
         relative_inner_progress_bar_width = experience_percentage * parent_progress_bar_h_w[0]
