@@ -62,6 +62,7 @@ def determine_primary_color(image):
     return primary_color
 
 
+
 def calculate_contrasting_color(background_color):
     # Convert the background color to the HSV color space
     h, s, v = colorsys.rgb_to_hsv(*background_color)
@@ -107,6 +108,14 @@ def format_number(num):
 class Profile(Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def is_user_in_guild(self, guild, user_id):
+        """Check if a user is in the guild."""
+        try:
+            await guild.fetch_member(user_id)
+            return True
+        except:
+            return False
 
     @command(
         aliases=['p', 'P', 'Profile'],
@@ -205,7 +214,7 @@ class Profile(Cog):
         voice_activity = floor(tracking.vc_mins / 60)
         voice_activity = format_number(voice_activity)
 
-        level_rank = self.get_level_rank(member)
+        level_rank = await self.get_level_rank(member.guild, member)  # pass both guild and member
         wealth_rank = self.get_wealth_rank(member)
 
         experience_percentage = current_experience / required_exp
