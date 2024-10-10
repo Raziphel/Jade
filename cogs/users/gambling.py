@@ -226,13 +226,13 @@ class Gambling(Cog):
                 await utils.CoinFunctions.pay_user(payer=loser, receiver=winner, amount=game["bet_amount"])
                 win_embed = Embed(
                     title="Game Over!",
-                    description=f"🎉 {winner.mention} wins the game and takes {game['bet_amount']:,} coins! 🎉\n\n{self.display_grid(grid)}",
+                    description=f"🎉 {winner.mention} wins the game and takes **{game['bet_amount']:,}** coins! 🎉\n\n{self.display_grid(grid)}",
                     color=0x00ff00
                 )
                 await reaction.message.channel.send(embed=win_embed)
 
                 # Log the result to the coin log channel
-                log_message = f"**Connect 4 Winner**: {winner.name} won {game['bet_amount']:,} coins and now has a new balance."
+                log_message = f"**Connect 4 Winner**: {winner.name} won **{game['bet_amount']:,}** coins and now has a new balance."
                 log_channel = self.coin_logs
                 if log_channel:
                     await log_channel.send(log_message)
