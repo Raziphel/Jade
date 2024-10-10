@@ -215,17 +215,20 @@ class TicTacToe(Cog):
         # Store the message ID for game reference
         games[ctx.channel.id]["message_id"] = game_message.id
 
-    # Handle reactions (piece dropping)
     @Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.bot:
             return
 
         msg_id = reaction.message.id
-        if reaction.message.channel.id not in games or msg_id != games[reaction.message.channel.id]["message_id"]:
+        channel_id = reaction.message.channel.id
+
+        # Check if the game exists and the message ID is valid
+        if channel_id not in games or "message_id" not in games[channel_id] or msg_id != games[channel_id][
+            "message_id"]:
             return  # Not an active game or wrong message
 
-        game = games[reaction.message.channel.id]
+        game = games[channel_id]
         grid = game["grid"]
 
         # Check if it's the player's turn
@@ -275,7 +278,7 @@ class TicTacToe(Cog):
                 if log_channel:
                     await log_channel.send(log_message)
 
-                del games[reaction.message.channel.id]
+                del games[channel_id]
                 return
             except Exception as e:
                 await reaction.message.channel.send(
@@ -301,16 +304,25 @@ class TicTacToe(Cog):
 
             if continue_game:
                 # Reset the grid and restart the game
-                games[reaction.message.channel.id]['grid'] = self.create_grid()
-                games[reaction.message.channel.id]['turn'] = challenger.id  # Challenger starts again
+                games[channel_id]['grid'] = self.create_grid()
+                games[channel_id]['turn'] = challenger.id  # Challenger starts again
+
+                # Send a new game message and reset the message_id
                 game_embed = Embed(
                     title="Tic-Tac-Toe Game Restarted!",
-                    description=f"{challenger.mention} vs {opponent.mention}\nBet: {game['bet_amount']:,} coins\n\n{self.display_grid(games[reaction.message.channel.id]['grid'])}",
+                    description=f"{challenger.mention} vs {opponent.mention}\nBet: {game['bet_amount']:,} coins\n\n{self.display_grid(games[channel_id]['grid'])}",
                     color=0x3498db
                 )
-                await reaction.message.channel.send(embed=game_embed)
+                game_message = await reaction.message.channel.send(embed=game_embed)
+
+                # Add reactions for the new game
+                for emoji in column_emojis:
+                    await game_message.add_reaction(emoji)
+
+                # Update the message ID for the new game
+                games[channel_id]['message_id'] = game_message.id  # Update the new message_id
             else:
-                del games[reaction.message.channel.id]
+                del games[channel_id]
             return
 
         # Change turn to the other player
