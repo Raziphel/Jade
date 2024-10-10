@@ -38,9 +38,9 @@ class RoleHandler(Cog):
                               f"> 🎮<@&{self.bot.config['access_roles']['toxic']}>"
                               "`Access Toxic Gamers section.`", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
-                              f"> 🧊<@&{self.bot.config['colors']['eww_blue']}>\n"
-                              f"> 🍏<@&{self.bot.config['colors']['snot_green']}>\n"
-                              f"> 🍌<@&{self.bot.config['colors']['yikes_yellow']}>", color=0x8f00f8)
+                              f"> 🧊<@&{self.bot.config['purchase_roles']['eww_blue']}>\n"
+                              f"> 🍏<@&{self.bot.config['purchase_roles']['snot_green']}>\n"
+                              f"> 🍌<@&{self.bot.config['purchase_roles']['yikes_yellow']}>", color=0x8f00f8)
         ]
 
         for i, embed in enumerate(embeds):
