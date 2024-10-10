@@ -71,31 +71,40 @@ class StoreHandler(Cog):
                             "coins staff, donators and nitro boosters!  These will not work!`",
                 color=0x0000FF)
             .add_field(name="⊰ 🍑 Cutie Pinkie ⊱",
-                       value=f"{self.bot.config['purchase_roles']['cutie_pinkie']}\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['cutie_pinkie']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
             .add_field(name="⊰ ⛅ Snow Flakes ⊱",
-                       value=f"{self.bot.config['purchase_roles']['snow_flakes']}\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['snow_flakes']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
             .add_field(name="⊰ 🖤 Black Knight ⊱",
-                       value=f"{self.bot.config['purchase_roles']['black_knight']}\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['black_knight']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}1,000,000x**",
                        inline=True)
             .add_field(name="⊰ 🍏 Nature Green ⊱",
-                       value=f"{self.bot.config['purchase_roles']['nature_green']}\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['nature_green']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🧊 Liquid Blue ⊱",
-                       value=f"{self.bot.config['purchase_roles']['liquid_blue']}\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['liquid_blue']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🌞 Sunshine Yellow ⊱",
-                       value=f"{self.bot.config['purchase_roles']['sunshine_yellow']}\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['sunshine_yellow']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🌋 Lava Red ⊱",
-                       value=f"{self.bot.config['purchase_roles']['lava_red']}\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                       value=f"{self.bot.config['purchase_roles']['lava_red']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ 🧙‍♂️ Magic Purple ⊱",
-                       value=f"{self.bot.config['purchase_roles']['magic_purple']}\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['magic_purple']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
             .add_field(name="⊰ ☔ Lush Magenta ⊱",
-                       value=f"{self.bot.config['purchase_roles']['lush_magenta']}\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                       value=f"<@&{self.bot.config['purchase_roles']['lush_magenta']}>\n**╰⊰"
+                             f" {self.bot.config['emojis']['coin']}100,000x**",
                        inline=True)
         ]
 
