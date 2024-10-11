@@ -57,13 +57,13 @@ class StoreHandler(Cog):
                 description="# Abilities\n`All these listed items give you the ability to do something here in the garden!`",
                 color=0xFF00FF)
             .add_field(name="⊰ 🧤 Thievery ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to steal from others!```",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
                        inline=True)
             .add_field(name="⊰ 4️⃣ Connect 4 ⊱",
-                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to Challenge others to Connect 4!```",
+                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to Connect 4!```",
                    inline=True)
             .add_field(name="⊰ 📦 TicTacToe ⊱",
-                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}250,000x**\n\n```Gain the ability to Challenge others to TicTacToe!```",
+                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to TicTacToe!```",
                    inline=True),
 
             Embed(
@@ -152,9 +152,9 @@ class StoreHandler(Cog):
             "🧶": {"name": "Thread Permissions", "price": 75000, "role": 'threads_perm'},
             "🔮": {"name": "External Emojis", "price": 75000, "role": 'external_emojis'},
             # Abilities
-            "🧤": {"name": "Thievery", "price": 250000, "role": None, "ability": "thievery"},
-            "4️⃣": {"name": "Connect 4", "price": 250000, "role": None, "ability": "connect4"},
-            "📦": {"name": "TicTacToe", "price": 250000, "role": None, "ability": "tictactoe"},
+            "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"},
+            "4️⃣": {"name": "Connect 4", "price": 100000, "role": None, "ability": "connect4"},
+            "📦": {"name": "TicTacToe", "price": 100000, "role": None, "ability": "tictactoe"},
             #role Colors
             "🍑": {"name": "Cutie Pinkie", "price": 1000000, "role": 'cutie_pinkie'},
             "⛅": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},
