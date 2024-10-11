@@ -30,7 +30,7 @@ class Developer(Cog):
         """Gives everyone some coins as a payday!"""
         guild = self.bot.get_guild(self.bot.config['guild_id'])
         total = 0
-        coin_e = self.bot.config['emotes']['coin']
+        coin_e = self.bot.config['emojis']['coin']
 
         for user in guild.members:
             try:
