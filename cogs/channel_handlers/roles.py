@@ -118,9 +118,9 @@ class RoleHandler(Cog):
             "🚧": self.bot.config['access_roles']['scpsl'],
             "🎀": self.bot.config['access_roles']['queer'],
             "🎮": self.bot.config['access_roles']['toxic'],
-            "🧊": self.bot.config['colors']['eww_blue'],
-            "🍏": self.bot.config['colors']['snot_green'],
-            "🍌": self.bot.config['colors']['yikes_yellow']
+            "🧊": self.bot.config['purchase_roles']['eww_blue'],
+            "🍏": self.bot.config['purchase_roles']['snot_green'],
+            "🍌": self.bot.config['purchase_roles']['yikes_yellow']
         }
 
         role_id = roles.get(emoji)
