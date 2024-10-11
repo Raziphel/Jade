@@ -26,6 +26,30 @@ class Developer(Cog):
 
     @utils.is_dev()
     @command()
+    async def payday(self, ctx):
+        """Gives everyone some coins as a payday!"""
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+        total = 0
+        coin_e = self.bot.config['emotes']['coin']
+
+        for user in guild.members:
+            try:
+                c = utils.Currency.get(user.id)
+                lvl = utils.Levels.get(user.id)
+                if c.coins == 0:
+                    continue
+                if lvl.level > 9:
+                    c.coins += 75000
+                    total += 25000
+                async with self.bot.database() as db:
+                    await c.save(db)
+            except Exception as e:
+                print(e)
+
+        await ctx.send(f"Handed out over **{total:,}x** {coin_e}!  To everyone level 10 or higher on the server!")
+
+    @utils.is_dev()
+    @command()
     async def ev(self, ctx, *, content:str):
         """
         Runs code through Python
