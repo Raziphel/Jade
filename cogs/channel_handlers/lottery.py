@@ -249,7 +249,7 @@ class LotteryHandler(commands.Cog):
             # Distribute the prize
             winner_currency = utils.Currency.get(winner.id)
             winner_record = utils.Coins_Record.get(winner.id)
-            winnings = utils.CoinFunctions.pay_tax(payer=winner, amount=lottery.coins)
+            winnings = await utils.CoinFunctions.pay_tax(payer=winner, amount=lottery.coins)
             winner_currency.coins += winnings
             winner_record.won += winnings
 
