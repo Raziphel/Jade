@@ -268,7 +268,7 @@ class LotteryHandler(commands.Cog):
             # Reset everyone's tickets
             for member in guild.members:
                 currency = utils.Currency.get(member.id)
-                currency.lot_tickets = 0
+                currency.tickets = 0
                 async with self.bot.database() as db:
                     await currency.save(db)
 
