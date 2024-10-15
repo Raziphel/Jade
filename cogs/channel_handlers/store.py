@@ -184,6 +184,10 @@ class StoreHandler(Cog):
             if item.get("ability"):
                 setattr(utils.Skills.get(user.id), item["ability"], True)
 
+            skills = utils.Skills.get(user.id)
+            async with self.bot.database() as db:
+                await skills.save(db)
+
             # Send confirmation with remaining coins
             user_currency = utils.Currency.get(user.id)
             embed = Embed(
