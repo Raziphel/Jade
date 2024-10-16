@@ -52,7 +52,7 @@ class Coin_Generator(Cog):
             # Update user data
             lvl.exp += exp + 5
             lvl.last_xp = dt.utcnow()
-        tracking.messages += 1
+            tracking.messages += 1
 
         # Save user data in a single database transaction
         async with self.bot.database() as db:
