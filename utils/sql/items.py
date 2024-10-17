@@ -24,7 +24,7 @@ class Items(object):
         except asyncpg.exceptions.UniqueViolationError: 
             await db('''
                 UPDATE items SET
-                thievery=$2
+                daily_saver=$2
                 WHERE
                 user_id=$1
                 ''',
