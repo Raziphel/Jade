@@ -60,7 +60,8 @@ class Daily(Cog):
         day = utils.Daily.get(ctx.author.id)
         lvl = utils.Levels.get(ctx.author.id)
         currency = utils.Currency.get(ctx.author.id)
-        item = utils.Items.get(ctx.author.id)  # Load item data to check for streak saver
+        item = utils.Items.get(ctx.author.id)
+        track = utils.Tracking.get(ctx.author.id)
 
         # Initialize daily data if first time
         if not day.daily:
@@ -119,7 +120,7 @@ class Daily(Cog):
         embed = Embed(
             title="🎁 Daily Reward Claimed!",
             description=f"# **This is your {day.daily}{ordinal} daily in a row!**",
-            color=Colour.from_rgb(255, 223, 186)  # Pretty color!
+            color=track.color  # Pretty color!
         )
         embed.add_field(
             name="💰 Coins Earned",
