@@ -110,7 +110,7 @@ class StoreHandler(Cog):
 
             Embed(
                 description="# Items\n`All these listed items that you can use at your own digression here in the garden!`",
-                color=0xFF00FF)
+                color=0xF0F0F0)
             .add_field(name="⊰ 🎈 Daily Saver ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}50,000x**\n\n```Make sure you never miss your daily streak again!```",
                        inline=True)
