@@ -5,6 +5,7 @@ from random import choice
 from datetime import datetime as dt, timedelta
 from calendar import day_name
 from math import floor
+from random import randint
 import utils
 
 
