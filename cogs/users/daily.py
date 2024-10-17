@@ -1,10 +1,12 @@
-from discord import Embed, Colour
-from discord.ext import tasks, commands
-from discord.ext.commands import Cog, command
-from random import randint
+from discord import Embed
+from discord.ext import tasks
+from discord.ext.commands import command, Cog, cooldown, BucketType, ApplicationCommandMeta
+from random import choice
 from datetime import datetime as dt, timedelta
+from calendar import day_name
 from math import floor
 import utils
+
 
 class Daily(Cog):
     def __init__(self, bot):
