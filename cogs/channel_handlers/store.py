@@ -53,6 +53,7 @@ class StoreHandler(Cog):
             .add_field(name="⊰ 🔮 External Emotes ⊱",
                        value=f"**╰⊰ {self.bot.config['emojis']['coin']}75,000x**\n\n```Get access to using your external emotes and stickers!```",
                        inline=True),
+
             Embed(
                 description="# Abilities\n`All these listed items give you the ability to do something here in the garden!`",
                 color=0xFF00FF)
@@ -105,12 +106,20 @@ class StoreHandler(Cog):
             .add_field(name="⊰ ☔ Lush Magenta ⊱",
                        value=f"<@&{self.bot.config['purchase_roles']['lush_magenta']}>\n**╰⊰"
                              f" {self.bot.config['emojis']['coin']}100,000x**",
+                       inline=True),
+
+            Embed(
+                description="# Items\n`All these listed items that you can use at your own digression here in the garden!`",
+                color=0xFF00FF)
+            .add_field(name="⊰ 🎈 Daily Saver ⊱",
+                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}50,000x**\n\n```Make sure you never miss your daily streak again!```",
                        inline=True)
+
         ]
 
         # Compact loop to handle both cases
         for i, msg in enumerate(messages):
-            if i < 4:
+            if i < 5:
                 # Queue the first three messages with corresponding embeds
                 await self.bot.message_edit_manager.queue_edit(
                     message=msg,
@@ -155,7 +164,7 @@ class StoreHandler(Cog):
             "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"},
             "4️⃣": {"name": "Connect 4", "price": 100000, "role": None, "ability": "connect4"},
             "📦": {"name": "TicTacToe", "price": 100000, "role": None, "ability": "tictactoe"},
-            #role Colors
+            # Role Colors
             "🍑": {"name": "Cutie Pinkie", "price": 1000000, "role": 'cutie_pinkie'},
             "⛅": {"name": "Snow Flakes", "price": 1000000, "role": 'snow_flakes'},
             "🖤": {"name": "Black Knight", "price": 1000000, "role": 'black_knight'},
@@ -165,6 +174,8 @@ class StoreHandler(Cog):
             "🌋": {"name": "Lava Red", "price": 100000, "role": 'lava_red'},
             "🧙‍♂️": {"name": "Magic Purple", "price": 100000, "role": 'magic_purple'},
             "☔": {"name": "Lush Magenta", "price": 100000, "role": 'lush_magenta'},
+            # Items
+            "🎈": {"name": "Daily Saver", "price": 50000, "role": None, "item": 'daily_saver'},
         }
 
         emoji = payload.emoji.name if payload.emoji.is_unicode_emoji() else payload.emoji.id
@@ -183,6 +194,10 @@ class StoreHandler(Cog):
 
             if item.get("ability"):
                 setattr(utils.Skills.get(user.id), item["ability"], True)
+
+            if item.get("item"):
+                current_value = getattr(utils.Items.get(user.id), item["item"], 0)
+                setattr(utils.Items.get(user.id), item["item"], current_value + 1)
 
             # Send confirmation with remaining coins
             user_currency = utils.Currency.get(user.id)

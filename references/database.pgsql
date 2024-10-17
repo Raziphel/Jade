@@ -54,6 +54,13 @@ CREATE TABLE daily (
     PRIMARY KEY (user_id)
 );
 
+CREATE TABLE items (
+    user_id bigint NOT NULL,
+    daily_saver integer NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id)
+);
+
+
 #############################################################################
 ########################## USER TRACK / RECORDS #############################
 #############################################################################

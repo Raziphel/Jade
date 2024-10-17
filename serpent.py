@@ -60,7 +60,8 @@ class Serpent(commands.AutoShardedBot):
                 'daily': utils.Daily,
                 'skills': utils.Skills,
                 'user_link': utils.UserLink,
-                'lottery': utils.Lottery
+                'lottery': utils.Lottery,
+                'items': utils.Items
             }
 
             # Step 1: Clear all caches dynamically
