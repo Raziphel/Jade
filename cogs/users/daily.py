@@ -170,3 +170,6 @@ class Daily(Cog):
 
         return milestone_bonus
 
+# Register the cog
+def setup(bot):
+    bot.add_cog(Daily(bot))
