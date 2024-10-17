@@ -49,7 +49,7 @@ class Daily(Cog):
         """Logs for coin transactions."""
         return self.bot.get_channel(self.bot.config['logs']['coins'])
 
-    @command()
+    @command(application_command_meta=ApplicationCommandMeta())
     async def daily(self, ctx):
         """Claim your daily rewards!"""
         # Load user data
@@ -131,7 +131,7 @@ class Daily(Cog):
                 inline=False
             )
 
-        embed.set_footer(text=f"Claimed by {ctx.author.name}", icon_url=ctx.author.avatar_url)
+        embed.set_footer(text=f"Claimed by {ctx.author.name}", icon_url=ctx.author.avatar.url)
 
         # Send the embed message
         await ctx.send(embed=embed)
