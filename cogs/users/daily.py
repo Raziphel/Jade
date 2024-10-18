@@ -91,7 +91,9 @@ class Daily(Cog):
         day.last_daily = dt.utcnow()
 
         # Calculate base reward
-        base_reward = 25 + ((day.daily-1) * 2.15)  # Starts at 10 coins and increases by 2 for each streak day
+        base_reward = 25 + ((day.daily-1) * 2.15)
+        if base_reward > 2500:
+            base_reward = randint(2500, 3000)
         total_reward = base_reward  # Initial reward
 
         # Automatic milestone detection
