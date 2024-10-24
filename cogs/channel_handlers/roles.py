@@ -119,7 +119,7 @@ class RoleHandler(Cog):
             "💀": self.bot.config['ping_roles']['scp_ping'],
             "🚧": self.bot.config['access_roles']['scpsl'],
             "🎀": self.bot.config['access_roles']['queer'],
-            "🐾": self.bot.config['access_roles']['furry'] if mod.adult else None,
+            "🐾": self.bot.config['access_roles']['furry'] if not mod.child else None,
             "🎮": self.bot.config['access_roles']['toxic'],
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],
