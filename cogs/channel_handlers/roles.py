@@ -34,7 +34,9 @@ class RoleHandler(Cog):
                               f"> 🚧<@&{self.bot.config['access_roles']['scpsl']}>"
                               "`Access SCP:SL section.`\n"
                               f"> 🎀<@&{self.bot.config['access_roles']['queer']}>"
-                              "`Access Degen Girls section.`\n"
+                              "`Access Degen Girls section. (General Chat)`\n"
+                              f"> 🐾<@&{self.bot.config['access_roles']['furry']}>"
+                              "`Access Furry section. (Adult Only)`\n"
                               f"> 🎮<@&{self.bot.config['access_roles']['toxic']}>"
                               "`Access Toxic Gamers section.`", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
@@ -117,6 +119,7 @@ class RoleHandler(Cog):
             "💀": self.bot.config['ping_roles']['scp_ping'],
             "🚧": self.bot.config['access_roles']['scpsl'],
             "🎀": self.bot.config['access_roles']['queer'],
+            "🐾": self.bot.config['access_roles']['furry'] if mod.adult else None,
             "🎮": self.bot.config['access_roles']['toxic'],
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],
@@ -131,7 +134,7 @@ class RoleHandler(Cog):
 
         # Log if user fails to get role
         if not role:
-            await member.send(f"Failed to get the role, please contact staff.")
+            await member.send(f"Failed to get the role (probably due to age), please contact staff if this a mistake.")
             await self.discord_log.send(f"<@{member.id}> failed to get the role for emoji: {emoji}.")
 
 
