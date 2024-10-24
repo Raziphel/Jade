@@ -189,7 +189,21 @@ class Developer(Cog):
 
 
 
+    @utils.is_dev()
+    @command()
+    async def checkage(self, ctx):
+        mod = utils.Moderation.get(ctx.author.id)
+        adult = utils.DiscordGet(ctx.guild.roles, id=self.bot.config['age_roles']['adult'])
+        for member in ctx.guild.members:
+            for i in member.roles:
+                if i.id == self.bot.config['age_roles']['adult']:
+                    mod.adult = True
+                    mod.child = False
+                if i.id == self.bot.config['age_roles']['underage']:
+                    mod.adult = False
+                    mod.child = True
 
+        await ctx.send('All members age moderation parameters have been set.')
 
 
 
