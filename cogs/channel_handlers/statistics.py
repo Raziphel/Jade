@@ -38,7 +38,7 @@ class Statistics(commands.Cog):
 
         # Role categories to evaluate
         supporter_roles = ['supporter', 'nitro', 'initiate', 'acolyte', 'ascended']
-        roles_to_track = ['changelogs', 'scpsl', 'toxic', 'queer', 'adult', 'underage']
+        roles_to_track = ['changelogs', 'scpsl', 'toxic', 'queer', 'adult', 'underage', 'furry']
 
         # Calculate stats for supporter roles
         role_stats = {
@@ -131,7 +131,7 @@ class Statistics(commands.Cog):
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
                 f"{self.bot.config['emojis']['scp']} **SCP:SL Players**: {tracked_roles['scpsl']} ({round(tracked_roles['scpsl'] / members * 100)}%)\n{bars['scpsl']}\n"
                 f"🌺 **Degen Girls**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
-                f"🐾 **Degen Girls**: {tracked_roles['furry']} ({round(tracked_roles['furry'] / members * 100)}%)\n{bars['furry']}\n"
+                f"🐾 **Furrys**: {tracked_roles['furry']} ({round(tracked_roles['furry'] / members * 100)}%)\n{bars['furry']}\n"
                 f"🎮 **Toxic Gamers**: {tracked_roles['toxic']} ({round(tracked_roles['toxic'] / members * 100)}%)\n{bars['toxic']}\n\n"
                 f"🚬 **Adults**: {tracked_roles['adult']} ({round(tracked_roles['adult'] / members * 100)}%)\n{bars['adult']}\n"
                 f"🍼 **Underage**: {tracked_roles['underage']} ({round(tracked_roles['underage'] / members * 100)}%)\n{bars['underage']}\n"
