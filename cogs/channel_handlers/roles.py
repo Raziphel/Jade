@@ -31,12 +31,12 @@ class RoleHandler(Cog):
                               f"> 📊<@&{self.bot.config['ping_roles']['server_status']}> `Ping for server status!`\n"
                               f"> 💀<@&{self.bot.config['ping_roles']['scp_ping']}> `Ping for SCP servers!`", color=0x8f00f8),
             Embed(description=f"# Access\n```\nControl what you see!\n```\n"
-                              f"> 🚧<@&{self.bot.config['access_roles']['scpsl']}>"
-                              "`Access SCP:SL section.`\n"
+                              f"> 🐍<@&{self.bot.config['access_roles']['servers']}>"
+                              "`Access Serpent's Servers section.`\n"
                               f"> 🎀<@&{self.bot.config['access_roles']['queer']}>"
-                              "`Access Degen Girls section. (General Chat)`\n"
-                              f"> 🐾<@&{self.bot.config['access_roles']['furry']}>"
-                              "`Access Furry section. (Adult Only)`\n"
+                              "`Access Degen section. (General Chat)`\n"
+                              f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
+                              "`Access NSFW Furry section. (Adult Only)`\n"
                               f"> 🎮<@&{self.bot.config['access_roles']['toxic']}>"
                               "`Access Toxic Gamers section.`", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
@@ -117,9 +117,9 @@ class RoleHandler(Cog):
             "🤝": self.bot.config['ping_roles']['welcomer'],
             "📊": self.bot.config['ping_roles']['server_status'],
             "💀": self.bot.config['ping_roles']['scp_ping'],
-            "🚧": self.bot.config['access_roles']['scpsl'],
+            "🚧": self.bot.config['access_roles']['servers'],
             "🎀": self.bot.config['access_roles']['queer'],
-            "🐾": self.bot.config['access_roles']['furry'] if not mod.child else None,
+            "🐾": self.bot.config['access_roles']['nsfw'] if not mod.child else None,
             "🎮": self.bot.config['access_roles']['toxic'],
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],

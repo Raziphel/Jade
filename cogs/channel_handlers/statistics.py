@@ -38,7 +38,7 @@ class Statistics(commands.Cog):
 
         # Role categories to evaluate
         supporter_roles = ['supporter', 'nitro', 'initiate', 'acolyte', 'ascended']
-        roles_to_track = ['changelogs', 'scpsl', 'toxic', 'queer', 'adult', 'underage', 'furry']
+        roles_to_track = ['changelogs', 'servers', 'toxic', 'queer', 'adult', 'underage', 'nsfw']
 
         # Calculate stats for supporter roles
         role_stats = {
@@ -129,10 +129,9 @@ class Statistics(commands.Cog):
                 f"{floor((utils.Tracking.get_total_vcmins()/60)/24):,} days)\n\n"
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
-                f"{self.bot.config['emojis']['scp']} **SCP:SL Players**: {tracked_roles['scpsl']} ({round(tracked_roles['scpsl'] / members * 100)}%)\n{bars['scpsl']}\n"
-                f"🌺 **Degen Girls**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
-                f"🐾 **Furrys**: {tracked_roles['furry']} ({round(tracked_roles['furry'] / members * 100)}%)\n{bars['furry']}\n"
-                f"🎮 **Toxic Gamers**: {tracked_roles['toxic']} ({round(tracked_roles['toxic'] / members * 100)}%)\n{bars['toxic']}\n\n"
+                f"🐍 **Serpent Servers**: {tracked_roles['servers']} ({round(tracked_roles['servers'] / members * 100)}%)\n{bars['servers']}\n"
+                f"🌺 **Degenerates**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
+                f"🐾 **NSFW Furrys**: {tracked_roles['furry']} ({round(tracked_roles['furry'] / members * 100)}%)\n{bars['furry']}\n"
                 f"🚬 **Adults**: {tracked_roles['adult']} ({round(tracked_roles['adult'] / members * 100)}%)\n{bars['adult']}\n"
                 f"🍼 **Underage**: {tracked_roles['underage']} ({round(tracked_roles['underage'] / members * 100)}%)\n{bars['underage']}\n"
             ),
