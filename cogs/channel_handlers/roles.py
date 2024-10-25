@@ -36,9 +36,7 @@ class RoleHandler(Cog):
                               f"> 🎀<@&{self.bot.config['access_roles']['queer']}>"
                               "`Access Degen section. (General Chat)`\n"
                               f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
-                              "`Access NSFW Furry section. (Adult Only)`\n"
-                              f"> 🎮<@&{self.bot.config['access_roles']['toxic']}>"
-                              "`Access Toxic Gamers section.`", color=0x8f00f8),
+                              "`Access NSFW Furry section. (Adult Only)`\n", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
                               f"> 🧊<@&{self.bot.config['purchase_roles']['eww_blue']}>\n"
                               f"> 🍏<@&{self.bot.config['purchase_roles']['snot_green']}>\n"
@@ -120,7 +118,6 @@ class RoleHandler(Cog):
             "🚧": self.bot.config['access_roles']['servers'],
             "🎀": self.bot.config['access_roles']['queer'],
             "🐾": self.bot.config['access_roles']['nsfw'] if not mod.child else None,
-            "🎮": self.bot.config['access_roles']['toxic'],
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],
             "🍌": self.bot.config['purchase_roles']['yikes_yellow']
