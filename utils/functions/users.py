@@ -70,11 +70,6 @@ class UserFunctions(object):
         log = cls.bot.get_channel(cls.bot.config['logs']['coins'])
         await log.send(f"**<@{user.id}>** leveled up and is now level **{lvl.level:,}**\nGranting them: **{coin_e} {floor(coins):,}x**")
 
-        await sleep(6)
-        try:
-            await msg.delete()
-        except:
-            pass
 
     @classmethod
     async def determine_required_exp(cls, level: int):
