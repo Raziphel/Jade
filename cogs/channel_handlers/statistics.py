@@ -130,8 +130,8 @@ class Statistics(commands.Cog):
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
                 f"🐍 **Serpent Servers**: {tracked_roles['servers']} ({round(tracked_roles['servers'] / members * 100)}%)\n{bars['servers']}\n"
-                f"🌺 **Degenerates**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
-                f"🐾 **NSFW Furrys**: {tracked_roles['nsfw']} ({round(tracked_roles['nsfw'] / members * 100)}%)\n{bars['nsfw']}\n"
+                f"🐾 **Degenerates**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
+                f"🔞 **NSFW Access**: {tracked_roles['nsfw']} ({round(tracked_roles['nsfw'] / members * 100)}%)\n{bars['nsfw']}\n"
                 f"🚬 **Adults**: {tracked_roles['adult']} ({round(tracked_roles['adult'] / members * 100)}%)\n{bars['adult']}\n"
                 f"🍼 **Underage**: {tracked_roles['underage']} ({round(tracked_roles['underage'] / members * 100)}%)\n{bars['underage']}\n"
             ),
