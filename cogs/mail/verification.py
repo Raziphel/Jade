@@ -31,7 +31,7 @@ class Verification(Cog):
 
         async def get_input(prompt: str, timeout: float = 120.0, max_length: Optional[int] = 50):
             """Prompts the user for input, validates, and handles cancellations."""
-            await user.send(embed=utils.SpecialEmbed(desc=prompt))
+            await user.send(embed=utils.Embed(desc=prompt, color=randint(1, 0xffffff)))
 
             def check(msg):
                 return msg.author.id == user.id and not msg.guild
