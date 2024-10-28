@@ -2,6 +2,7 @@ from discord.ext.commands import command, Cog
 from discord import Embed, PartialEmoji, Message, RawReactionActionEvent, Guild
 from datetime import datetime as dt
 from asyncio import TimeoutError
+from random import randint
 
 import utils
 
