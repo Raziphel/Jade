@@ -75,7 +75,8 @@ class Artist(Cog):
                 desc=embed_message,
                 color=0x1abc9c,
                 user=user,
-                image=user.avatar.url
+                image=user.avatar.url,
+                mail=True,
             )
             verification_message = await self.mailbox.send(embed=mailbox_embed)
             await verification_message.add_reaction('✅')
