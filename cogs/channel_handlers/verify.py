@@ -158,7 +158,7 @@ class Verify(Cog):
             verified = utils.DiscordGet(guild.roles, id=self.bot.config['access_roles']['verified'])
             if verified not in member.roles:
                 try:
-                    await self.verification(author=member)
+                    await self.bot.get_cog('Verification').verification(user=member)
                 except DiscordException:
                     pass
 
@@ -170,72 +170,7 @@ class Verify(Cog):
             for reaction in message.reactions:
                 await message.add_reaction(reaction.emoji)
 
-    async def verification(self, author):
-        async def get_input(prompt: str, timeout: float = 300.0, max_length: Optional[int] = 50):
-            await author.send(embed=utils.Embed(color=randint(1, 0xffffff), description=prompt))
 
-            def check(msg):
-                return msg.author.id == author.id and not msg.guild
-
-            try:
-                msg = await self.bot.wait_for('message', check=check, timeout=timeout)
-            except TimeoutError:
-                await author.send('Sorry, but you took too long to respond.\nPlease re-click the check emoji and verify.')
-                return None
-
-            if 'cancel' == msg.content.lower():
-                raise VerificationCancelled
-
-            while max_length and len(msg.content) > max_length:
-                await author.send(f"Sorry, but the value you've responded with is too long. Please keep it within {max_length} characters.")
-                msg = await self.bot.wait_for('message', check=check, timeout=timeout)
-
-            return msg
-
-        try:
-            invited_answer = await get_input("Where did you receive an invitation to Serpent's Garden from?")
-            age_answer = await get_input("How old are you?")
-            age_answer = get_only_numbers(age_answer.content)
-
-            mod = utils.Moderation.get(author.id)
-            if age_answer and age_answer < 18:
-                mod.child = True
-
-            color = await get_input("What's your favourite color? (Say a color name or a hex code)")
-            colour_value = utils.Colors.get(color.content.lower())
-            if colour_value is None:
-                try:
-                    colour_value = int(color.content.strip('#'), 16)
-                except ValueError:
-                    colour_value = None
-
-            t = utils.Tracking.get(author.id)
-            t.color = colour_value or randint(1, 0xffffff)
-            async with self.bot.database() as db:
-                await t.save(db)
-                await mod.save(db)
-
-            verify_answer = await get_input("Do you agree to the server's TOS and plan to read the rules once verified? (Only answer is 'yes')")
-
-            msg = f"How they were invited: {invited_answer.content}\nAge given: {age_answer}\nAgreed?: {verify_answer.content}"
-            await self.discord_log.send(embed=utils.Embed(footer="Verification", description=msg, color=t.color, author=author, image=author.avatar.url))
-
-            if verify_answer.content.lower() == "yes" and age_answer and age_answer > 12:
-                embed = Embed(description="**You have been accepted!**")
-                await author.send(embed=embed)
-                await utils.UserFunctions.verify_user(author)
-            else:
-                embed = Embed(description="**Your verification has been denied!**")
-                await author.send(embed=embed)
-
-        except DiscordException:
-            await author.send('I\'m unable to DM you?')
-
-        except VerificationCancelled:
-            await author.send('Aborting Verification!')
-
-        except TimeoutError:
-            await author.send('Sorry, but you took too long to respond.\nPlease re-click the check emoji and verify.')
 
 
 def setup(bot):
