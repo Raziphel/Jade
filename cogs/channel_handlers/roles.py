@@ -36,7 +36,7 @@ class RoleHandler(Cog):
                               f"> 🎀<@&{self.bot.config['access_roles']['queer']}>"
                               "`Access Degen section. (General Chat)`\n"
                               f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
-                              "`Access NSFW Furry section. (Adult Only)`\n", color=0x8f00f8),
+                              "`Access NSFW sections. (Adult Only)`\n", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
                               f"> 🧊<@&{self.bot.config['purchase_roles']['eww_blue']}>\n"
                               f"> 🍏<@&{self.bot.config['purchase_roles']['snot_green']}>\n"
