@@ -17,6 +17,7 @@ class Embed(Embed):
         image = kwargs.pop('image', None)
         desc = kwargs.pop('desc', None)
         footer = kwargs.pop('footer', None)
+        mail = kwargs.pop('mail', False)
 
         #+ Make the Embed
         super().__init__(*args, **kwargs)
@@ -34,6 +35,10 @@ class Embed(Embed):
         #* Add Author
         if title:
             self.set_author(name=title)
+
+        #* Check if mail
+        if mail:
+            self.set_author(name=author.display_name, icon_url=author.avatar_url)
 
         #* Add Thumbnail
         if thumbnail:

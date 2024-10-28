@@ -110,12 +110,13 @@ class Verification(Cog):
                 f"**Age:** {table_data['age']}\n"
                 f"**Agreed to TOS:** Yes"
             )
-            mailbox_embed = utils.MailEmbed(
+            mailbox_embed = utils.Embed(
                 footer="Verification",
-                message=embed_message,
+                desc=embed_message,
                 color=t.color,
                 user=user,
-                image=user.avatar_url
+                image=user.avatar_url,
+                mail=True,
             )
             msg = await self.mailbox.send(embed=mailbox_embed)
             await msg.add_reaction('✅')
