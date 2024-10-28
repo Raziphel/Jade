@@ -17,9 +17,9 @@ class Artist(Cog):
         """Begin verification as an artist to get your own channel."""
         try:
             await self.artist_verification(ctx.author)
-            await ctx.send("I have DM'd you to start the artist verification process!")
         except DiscordException:
-            await ctx.send("I couldn't DM you! Please make sure your DMs are enabled.")
+            await ctx.interaction.response.send_message("I couldn't DM you! Please make sure your DMs are enabled.")
+        await ctx.interaction.response.send_message("I have DM'd you to start the artist verification process!")
 
     @property
     def mailbox(self):
