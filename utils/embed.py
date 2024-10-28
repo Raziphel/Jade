@@ -38,7 +38,7 @@ class Embed(Embed):
 
         #* Check if mail
         if mail:
-            self.set_author(name=author.display_name, icon_url=author.avatar.url)
+            self.set_author(name=user.display_name, icon_url=user.avatar.url)
 
         #* Add Thumbnail
         if thumbnail:
