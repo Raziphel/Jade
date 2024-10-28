@@ -15,10 +15,7 @@ class Artist(Cog):
     @command(application_command_meta=ApplicationCommandMeta())
     async def verify_artist(self, ctx):
         """Begin verification as an artist to get your own channel."""
-        try:
-            await self.artist_verification(ctx.author)
-        except DiscordException:
-            await ctx.interaction.response.send_message("I couldn't DM you! Please make sure your DMs are enabled.")
+        await self.artist_verification(ctx.author)
         await ctx.interaction.response.send_message("I have DM'd you to start the artist verification process!")
 
     @property
