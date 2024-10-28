@@ -57,8 +57,7 @@ class MailBox(Cog):
 
         embed = message.embeds[0]
         if 'Verification' in embed.footer.text:
-            if payload.user_id in self.bot.helpers:
-                await self.handle_verification(message, payload.emoji, embed, payload)
+            await self.handle_verification(message, payload.emoji, embed, payload)
 
     async def handle_verification(self, message: Message, emoji: PartialEmoji, embed: Embed,
                                   payload: RawReactionActionEvent):
