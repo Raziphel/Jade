@@ -115,7 +115,7 @@ class Verification(Cog):
                 desc=embed_message,
                 color=t.color,
                 user=user,
-                image=user.avatar_url,
+                image=user.avatar.url,
                 mail=True,
             )
             msg = await self.mailbox.send(embed=mailbox_embed)
