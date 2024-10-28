@@ -85,7 +85,7 @@ class MailBox(Cog):
         await self.send_to_author(author, f"**You have been verified! Welcome to {guild.name}!**")
 
         # Verify the user
-        await utils.UserFunction.verify_user(author)
+        await utils.UserFunctions.verify_user(user=author)
         await message.delete()
 
     async def decline_verification(self, author, message: Message, embed: Embed, payload: RawReactionActionEvent):
