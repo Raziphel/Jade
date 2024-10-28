@@ -1,4 +1,4 @@
-from discord.ext.commands import command, Cog, cooldown, BucketType
+from discord.ext.commands import command, Cog, cooldown, BucketType, ApplicationCommandMeta
 from discord import Embed, Message, Member, DiscordException
 from asyncio import TimeoutError
 from typing import Optional
@@ -12,7 +12,7 @@ class Artist(Cog):
         self.bot = bot
 
     @cooldown(1, 30, BucketType.user)
-    @command()
+    @command(application_command_meta=ApplicationCommandMeta())
     async def verify_artist(self, ctx):
         """Begin verification as an artist to get your own channel."""
         try:
