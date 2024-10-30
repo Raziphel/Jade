@@ -21,10 +21,11 @@ class MailBox(Cog):
 
     async def fetch_author(self, embed: Embed):
         """Fetch the author from the embed using their ID from the icon URL."""
+        guild = cls.bot.get_guild(cls.bot.config['guild_id'])
         try:
             author_url = embed.author.icon_url
             author_id = int(author_url.split('/')[4])
-            return self.bot.get_user(author_id)
+            return guild.get_member(author_id)
         except (ValueError, IndexError) as e:
             print(f"Error fetching author from embed: {e}")
             return None
