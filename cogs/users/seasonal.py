@@ -44,6 +44,13 @@ class Seasonal(Cog):
         # Decide if the user gets a treat or a trick
         outcome = choice(["treat", "trick"])
 
+        # Check if it's October (October is month 10)
+        current_month = dt.now().month
+        if current_month != 10:
+            await ctx.send(
+                f"**🎉 {ctx.author.mention}, you can only trick or treat in October!**"
+            )
+
         if outcome == "treat":
             # User gets coins as a treat
             coins = randint(2000, 6000)  # Random amount of coins
