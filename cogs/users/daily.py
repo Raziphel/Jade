@@ -91,9 +91,9 @@ class Daily(Cog):
         day.last_daily = dt.utcnow()
 
         # Calculate base reward
-        base_reward = 25 + ((day.daily-1) * 2.15)
-        if base_reward > 2500:
-            base_reward = randint(2500, 3000)
+        base_reward = 100 + ((day.daily-1) * 3.15)
+        if base_reward > 3000:
+            base_reward = randint(2000, 3000)
         total_reward = base_reward  # Initial reward
 
         # Automatic milestone detection
@@ -102,7 +102,7 @@ class Daily(Cog):
 
         # Random chance to get a bonus item (10% chance)
         if randint(1, 10) == 1:
-            bonus_coins = 2000
+            bonus_coins = 3000
             total_reward += bonus_coins
             await ctx.send(f"🎉 **Lucky!** You got an extra **{bonus_coins} coins** as a bonus today!")
 
