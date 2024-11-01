@@ -50,6 +50,7 @@ class Seasonal(Cog):
             await ctx.send(
                 f"**🎉 {ctx.author.mention}, you can only trick or treat in October!**"
             )
+            return
 
         if outcome == "treat":
             # User gets coins as a treat
