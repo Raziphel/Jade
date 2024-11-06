@@ -205,9 +205,43 @@ class Developer(Cog):
 
         await ctx.send('All members age moderation parameters have been set.')
 
+    @utils.is_dev()
+    @command()
+    async def purgetheserver(self, ctx):
+        guild = self.bot.get_guild(self.bot.config['guild_id'])
+        kicked_members = 0  # Track number of members kicked
+        failed_kicks = 0  # Track number of failed kick attempts
 
+        # Confirm action with the user to avoid accidental mass kicks
+        confirm_msg = await ctx.send(
+            "⚠️ **This will kick all members with less than 1 message. Are you sure? (yes/no)**")
+        try:
+            confirmation = await self.bot.wait_for(
+                "message",
+                check=lambda m: m.author == ctx.author and m.channel == ctx.channel,
+                timeout=30
+            )
+            if confirmation.content.lower() != "yes":
+                await ctx.send("❌ **Purge cancelled.**")
+                return
+        except asyncio.TimeoutError:
+            await ctx.send("⏰ **No confirmation received. Purge cancelled.**")
+            return
 
+        for member in guild.members:
+            if utils.Tracking.get(member.id).messages < 1:
+                try:
+                    await member.kick(reason="Kicked by purge command: Less than 1 message sent.")
+                    kicked_members += 1
+                except Exception as e:
+                    failed_kicks += 1
+                    print(f"Failed to kick {member.display_name}: {e}")
 
+        # Send final report
+        await ctx.send(
+            f"✅ **Purge completed:** {kicked_members} members with <1 message were kicked.\n"
+            f"⚠️ Failed to kick {failed_kicks} members (likely due to permissions)."
+        )
 
 
 

@@ -40,9 +40,7 @@ class RoleHandler(Cog):
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
                               f"> 🧊<@&{self.bot.config['purchase_roles']['eww_blue']}>\n"
                               f"> 🍏<@&{self.bot.config['purchase_roles']['snot_green']}>\n"
-                              f"> 🍌<@&{self.bot.config['purchase_roles']['yikes_yellow']}>", color=0x8f00f8),
-            Embed(description=f"# Do you want to stay on the server?\n```\n"
-                              f"> 💙<@&{self.bot.config['access_roles']['staying']}>", color=0x8f00f8)
+                              f"> 🍌<@&{self.bot.config['purchase_roles']['yikes_yellow']}>", color=0x8f00f8)
         ]
 
         for i, embed in enumerate(embeds):
@@ -122,8 +120,7 @@ class RoleHandler(Cog):
             "🐾": self.bot.config['access_roles']['nsfw'] if not mod.child else None,
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],
-            "🍌": self.bot.config['purchase_roles']['yikes_yellow'],
-            "💙": self.bot.config['access_roles']['staying'],
+            "🍌": self.bot.config['purchase_roles']['yikes_yellow']
         }
 
         role_id = roles.get(emoji)
