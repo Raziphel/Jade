@@ -1,4 +1,5 @@
 from math import floor
+from datetime import datetime as dt, timedelta
 
 from discord import Embed
 from discord.ext import tasks, commands
@@ -73,7 +74,7 @@ class Statistics(commands.Cog):
         inactive_count = len([
             m for m in guild.members
             if (lvl := utils.Levels.get(m.id))  # Get the tracking info for each member
-               and (lvl.last_xp + timedelta(days=30)) <= datetime.utcnow()
+               and (lvl.last_xp + timedelta(days=30)) <= dt.utcnow()
             # Check if last activity was more than 30 days ago
         ])
         zero_balance_count = len([m for m in guild.members if utils.Currency.get(m.id).coins < 1])
