@@ -72,7 +72,7 @@ class Statistics(commands.Cog):
 
         inactive_count = len([
             m for m in guild.members
-            if (lvl := utils.Tracking.get(m.id))  # Get the tracking info for each member
+            if (lvl := utils.Levels.get(m.id))  # Get the tracking info for each member
                and (lvl.last_xp + timedelta(days=30)) <= datetime.utcnow()
             # Check if last activity was more than 30 days ago
         ])
