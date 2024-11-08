@@ -70,7 +70,12 @@ class Statistics(commands.Cog):
         supporters_count = sum(role_stats.values())
         profit = role_stats['initiate'] * 9 + role_stats['acolyte'] * 18 + role_stats['ascended'] * 27
 
-        inactive_count = len([m for m in guild.members if utils.Tracking.get(m.id).messages < 1])
+        inactive_count = len([
+            m for m in guild.members
+            if (lvl := utils.Tracking.get(m.id))  # Get the tracking info for each member
+               and (lvl.last_xp + timedelta(days=30)) <= datetime.utcnow()
+            # Check if last activity was more than 30 days ago
+        ])
         zero_balance_count = len([m for m in guild.members if utils.Currency.get(m.id).coins < 1])
 
         # Generate progress bars
