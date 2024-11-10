@@ -1,4 +1,5 @@
 from math import floor
+from datetime import datetime as dt, timedelta
 
 from discord import Embed
 from discord.ext import tasks, commands
@@ -70,7 +71,13 @@ class Statistics(commands.Cog):
         supporters_count = sum(role_stats.values())
         profit = role_stats['initiate'] * 9 + role_stats['acolyte'] * 18 + role_stats['ascended'] * 27
 
-        inactive_count = len([m for m in guild.members if utils.Tracking.get(m.id).messages < 1])
+        inactive_count = len([
+            m for m in guild.members
+            if (lvl := utils.Levels.get(m.id))  # Get the tracking info for each member
+               and (lvl.last_xp + timedelta(days=30)) <= dt.utcnow()
+            # Check if last activity was more than 30 days ago
+        ])
+        zero_balance_count = len([m for m in guild.members if utils.Currency.get(m.id).coins < 1])
 
         # Generate progress bars
         def generate_bar(percent):
@@ -80,6 +87,7 @@ class Statistics(commands.Cog):
         # Role statistics bars
         bars = {role_name: generate_bar((tracked_roles[role_name] / members) * 100) for role_name in tracked_roles}
         inactive_bar = generate_bar((inactive_count / members) * 100)
+        zero_balance_bar = generate_bar((zero_balance_count / members) * 100)
 
         # Generate cool embeds
         coin_emoji = self.bot.config['emojis']['coin']
@@ -128,6 +136,7 @@ class Statistics(commands.Cog):
                 f"🔊 **VC Hours**: {floor(utils.Tracking.get_total_vcmins()/60):,} ("
                 f"{floor((utils.Tracking.get_total_vcmins()/60)/24):,} days)\n\n"
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
+                f"📉 **Zero Balances**: {zero_balance_count:,} ({round(zero_balance_count / members * 100)}%)\n{zero_balance_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
                 f"🐍 **Serpent Servers**: {tracked_roles['servers']} ({round(tracked_roles['servers'] / members * 100)}%)\n{bars['servers']}\n"
                 f"🐾 **Degenerates**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
