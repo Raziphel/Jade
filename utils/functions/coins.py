@@ -98,7 +98,7 @@ class CoinFunctions(object):
 
 
     @classmethod 
-    async def earn(cls, earner:Member, amount:int):
+    async def earn(cls, earner:Member, amount:int, gift:bool=False):
         """Use this method for letting users earn coins"""
 
         #! Define Variables
@@ -113,8 +113,12 @@ class CoinFunctions(object):
 
         #+ Just take it away from the bot!
         cu.coins += amount
-        cu_r.earned += amount
         cb.coins -= amount
+
+        if gift is False:
+            cu_r.earned += amount
+        else:
+            cu_r.gifted += amount
 
         async with cls.bot.database() as db:
             await cu.save(db)
