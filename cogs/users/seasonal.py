@@ -1,4 +1,4 @@
-from discord import Embed
+from discord import Embed, Member
 from discord.ext.commands import command, Cog, cooldown, BucketType, ApplicationCommandMeta
 from random import choice, randint
 from datetime import datetime as dt, timedelta
@@ -116,7 +116,7 @@ class Seasonal(Cog):
 
     @cooldown(1, 7200, BucketType.user)  # 2-hour cooldown per user
     @command(application_command_meta=ApplicationCommandMeta())
-    async def give_present(self, ctx, member: discord.Member):
+    async def give_present(self, ctx, member: Member):
         """Give a random holiday present to your friends!"""
 
         # Ensure the command can only be used in November and December
