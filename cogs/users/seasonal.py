@@ -157,7 +157,7 @@ class Seasonal(Cog):
 
         # Message to show who gave what to whom!
         await ctx.send(
-            f"**🎁 {ctx.author.mention} gave {member.mention} a present: {present}! \n{recipient.display_name} received {coins:,} coins!**"
+            f"**🎁 {ctx.author.mention} gave {recipient.mention} a present: {present}! \n{recipient.display_name} received {coins:,} coins!**"
         )
 
         # Update recipient's coins using CoinFunctions
