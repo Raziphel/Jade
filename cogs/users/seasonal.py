@@ -1,5 +1,6 @@
-from discord import Embed, Member
-from discord.ext.commands import command, Cog, cooldown, BucketType, ApplicationCommandMeta
+from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed
+from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
+
 from random import choice, randint
 from datetime import datetime as dt, timedelta
 import utils
