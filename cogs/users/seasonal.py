@@ -154,7 +154,7 @@ class Seasonal(Cog):
         coins_record = utils.Coins_Record.get(ctx.author.id)
 
         # Update coins record for given coins
-        coins_record.given += coins
+        coins_record.presents_given += coins
 
         # Save the coins record to the database
         async with self.bot.database() as db:
