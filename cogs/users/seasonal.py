@@ -151,7 +151,14 @@ class Seasonal(Cog):
         # Update recipient's coins using CoinFunctions
         await utils.CoinFunctions.earn(earner=member, amount=coins, gift=True)
 
+        coins_record = utils.Coins_Record.get(ctx.author.id)
 
+        # Update coins record for given coins
+        coins_record.given += coins
+
+        # Save the coins record to the database
+        async with self.bot.database() as db:
+            await coins_record.save(db)
 
 
 
