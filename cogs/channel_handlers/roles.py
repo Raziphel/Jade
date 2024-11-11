@@ -33,8 +33,8 @@ class RoleHandler(Cog):
             Embed(description=f"# Access\n```\nControl what you see!\n```\n"
                               f"> 🐍<@&{self.bot.config['access_roles']['servers']}>"
                               "`Access Serpent's Servers section.`\n"
-                              f"> 🎀<@&{self.bot.config['access_roles']['queer']}>"
-                              "`Access Degen section. (General Chat)`\n"
+                              f"> nee🎀<@&{self.bot.config['access_roles']['trans']}>"
+                              "`Access Trans/HRT section. `\n"
                               f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
                               "`Access NSFW sections. (Adult Only)`\n", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
@@ -116,7 +116,7 @@ class RoleHandler(Cog):
             "📊": self.bot.config['ping_roles']['server_status'],
             "💀": self.bot.config['ping_roles']['scp_ping'],
             "🚧": self.bot.config['access_roles']['servers'],
-            "🎀": self.bot.config['access_roles']['queer'],
+            "🎀": self.bot.config['access_roles']['trans'],
             "🐾": self.bot.config['access_roles']['nsfw'] if not mod.child else None,
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],

@@ -39,7 +39,7 @@ class Statistics(commands.Cog):
 
         # Role categories to evaluate
         supporter_roles = ['supporter', 'nitro', 'initiate', 'acolyte', 'ascended']
-        roles_to_track = ['changelogs', 'servers', 'toxic', 'queer', 'adult', 'underage', 'nsfw']
+        roles_to_track = ['changelogs', 'servers', 'toxic', 'trans', 'adult', 'underage', 'nsfw']
 
         # Calculate stats for supporter roles
         role_stats = {
@@ -139,7 +139,7 @@ class Statistics(commands.Cog):
                 f"📉 **Zero Balances**: {zero_balance_count:,} ({round(zero_balance_count / members * 100)}%)\n{zero_balance_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
                 f"🐍 **Serpent Servers**: {tracked_roles['servers']} ({round(tracked_roles['servers'] / members * 100)}%)\n{bars['servers']}\n"
-                f"🐾 **Degenerates**: {tracked_roles['queer']} ({round(tracked_roles['queer'] / members * 100)}%)\n{bars['queer']}\n"
+                f"💉 **Trans**: {tracked_roles['trans']} ({round(tracked_roles['trans'] / members * 100)}%)\n{bars['trans']}\n"
                 f"🔞 **NSFW Access**: {tracked_roles['nsfw']} ({round(tracked_roles['nsfw'] / members * 100)}%)\n{bars['nsfw']}\n"
                 f"🚬 **Adults**: {tracked_roles['adult']} ({round(tracked_roles['adult'] / members * 100)}%)\n{bars['adult']}\n"
                 f"🍼 **Underage**: {tracked_roles['underage']} ({round(tracked_roles['underage'] / members * 100)}%)\n{bars['underage']}\n"
