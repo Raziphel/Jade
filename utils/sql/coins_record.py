@@ -28,7 +28,7 @@ class Coins_Record(object):
                 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                 ''',
                 self.user_id, self.earned, self.spent, self.taxed, self.lost, self.stolen, self.gifted, self.given,
-                     self.won, presents_given
+                     self.won, self.presents_given
             )
         except asyncpg.exceptions.UniqueViolationError: 
             await db('''
@@ -38,7 +38,7 @@ class Coins_Record(object):
                 user_id=$1
                 ''',
                 self.user_id, self.earned, self.spent, self.taxed, self.lost, self.stolen, self.gifted, self.given,
-                     self.won, presents_given
+                     self.won, self.presents_given
             )
 
 
