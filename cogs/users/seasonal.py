@@ -128,7 +128,7 @@ class Seasonal(Cog):
             ],
         ),
     )
-    async def give_present(self, ctx, member: Member):
+    async def give_present(self, ctx, recipient: Member):
         """Give a random holiday present to your friends!"""
 
         # Ensure the command can only be used in November and December
@@ -140,12 +140,12 @@ class Seasonal(Cog):
             return
 
         # Check if the member is the author or a bot
-        if member == ctx.author:
+        if recipient == ctx.author:
             await ctx.send(
                 f"**🚫 {ctx.author.mention}, you can't give a present to yourself!**"
             )
             return
-        if member.bot:
+        if recipient.bot:
             await ctx.send(
                 f"**🤖 {ctx.author.mention}, you can't give a present to a bot!**"
             )
@@ -157,11 +157,11 @@ class Seasonal(Cog):
 
         # Message to show who gave what to whom!
         await ctx.send(
-            f"**🎁 {ctx.author.mention} gave {member.mention} a present: {present}! \n{member.display_name} received {coins:,} coins!**"
+            f"**🎁 {ctx.author.mention} gave {member.mention} a present: {present}! \n{recipient.display_name} received {coins:,} coins!**"
         )
 
         # Update recipient's coins using CoinFunctions
-        await utils.CoinFunctions.earn(earner=member, amount=coins, gift=True)
+        await utils.CoinFunctions.earn(earner=recipient, amount=coins, gift=True)
 
         coins_record = utils.Coins_Record.get(ctx.author.id)
 
