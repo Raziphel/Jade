@@ -8,6 +8,18 @@ class Seasonal(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cooldowns = {}
+        self.presents = [
+            "🎁 Box of Chocolates",
+            "🎄 Holiday Ornament",
+            "🍪 Christmas Cookies",
+            "☕ Warm Hot Cocoa",
+            "🍫 Chocolate Coins",
+            "✨ Sparkling Tinsel",
+            "🧦 Cozy Socks",
+            "🧸 Teddy Bear",
+            "🎅 Santa Hat",
+            "🕯️ Festive Candle"
+        ]
         self.treats = [
             "🍬 Candy",
             "🍫 Chocolate",
@@ -32,6 +44,8 @@ class Seasonal(Cog):
             "👹 Demon",
             "🌕 Full Moon Werewolf"
         ]
+
+
 
     @cooldown(1, 7200, BucketType.user)  # 2-hour cooldown per user
     @command(application_command_meta=ApplicationCommandMeta())
@@ -83,6 +97,66 @@ class Seasonal(Cog):
         # Save the coins record to the database
         async with self.bot.database() as db:
             await coins_record.save(db)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @cooldown(1, 7200, BucketType.user)  # 2-hour cooldown per user
+    @command(application_command_meta=ApplicationCommandMeta())
+    async def give_present(self, ctx, member: discord.Member):
+        """Give a random holiday present to your friends!"""
+
+        # Ensure the command can only be used in November and December
+        current_month = dt.now().month
+        if current_month not in [11, 12]:
+            await ctx.send(
+                f"**🎄 {ctx.author.mention}, you can only give holiday presents in November and December!**"
+            )
+            return
+
+        # Check if the member is the author or a bot
+        if member == ctx.author:
+            await ctx.send(
+                f"**🚫 {ctx.author.mention}, you can't give a present to yourself!**"
+            )
+            return
+        if member.bot:
+            await ctx.send(
+                f"**🤖 {ctx.author.mention}, you can't give a present to a bot!**"
+            )
+            return
+
+        # Randomly determine coin amount and present
+        coins = randint(1000, 5000)  # Random amount of coins to give
+        present = choice(self.presents)
+
+        # Message to show who gave what to whom!
+        await ctx.send(
+            f"**🎁 {ctx.author.mention} gave {member.mention} a present: {present}! {member.display_name} received {coins:,} coins!**"
+        )
+
+        # Update recipient's coins using CoinFunctions
+        await utils.CoinFunctions.earn(earner=member, amount=coins)
+
+
+
+
+
+
+
 
 # The setup function to load the cog
 def setup(bot):
