@@ -115,7 +115,18 @@ class Seasonal(Cog):
 
 
     @cooldown(1, 7200, BucketType.user)  # 2-hour cooldown per user
-    @command(application_command_meta=ApplicationCommandMeta())
+    @command(
+        application_command_meta=ApplicationCommandMeta(
+            options=[
+                ApplicationCommandOption(
+                    name="recipient",
+                    description="The user you want to give a gift to.",
+                    type=ApplicationCommandOptionType.user,
+                    required=True,
+                ),
+            ],
+        ),
+    )
     async def give_present(self, ctx, member: Member):
         """Give a random holiday present to your friends!"""
 
