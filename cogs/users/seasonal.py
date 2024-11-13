@@ -183,7 +183,7 @@ class Seasonal(Cog):
         sorted_leaderboard = utils.Seasonal.sort_presents_given()
 
         # Create embed for the leaderboard
-        embed = discord.Embed(
+        embed = Embed(
             title="🎉 Holiday Gift Givers Leaderboard 🎉",
             description="Sorted by presents given, with coins gifted also displayed!",
             color=discord.Color.green()
