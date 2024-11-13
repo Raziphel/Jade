@@ -86,8 +86,11 @@ CREATE TABLE coins_record (
     PRIMARY KEY (user_id)
 );
 
-#############################################################################
-############################# SCP SL TABLES #################################
-#############################################################################
+CREATE TABLE seasonal (
+    user_id bigint NOT NULL,
+    presents_given integer DEFAULT 0,
+    presents_coins_given integer DEFAULT 0,
+    PRIMARY KEY (user_id)
+);
 
 

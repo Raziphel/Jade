@@ -163,15 +163,45 @@ class Seasonal(Cog):
         # Update recipient's coins using CoinFunctions
         await utils.CoinFunctions.earn(earner=recipient, amount=coins, gift=True)
 
-        coins_record = utils.Coins_Record.get(ctx.author.id)
 
-        # Update coins record for given coins
-        coins_record.presents_given += coins
+        # Update the seasonal record
+        seasonal_record = utils.Seasonal.get(ctx.author.id)
+        seasonal_record.presents_coins_given += coins
+        seasonal_record.presents_given += 1
 
         # Save the coins record to the database
         async with self.bot.database() as db:
-            await coins_record.save(db)
+            await seasonal_record.save(db)
 
+
+    @command(application_command_meta=ApplicationCommandMeta())
+    async def present_leaderboard(self, ctx):
+        """
+        Show the leaderboard for the holiday gift givers!
+        """
+        # Get sorted leaderboard by presents
+        sorted_leaderboard = utils.Seasonal.sort_presents_given()
+
+        # Create embed for the leaderboard
+        embed = discord.Embed(
+            title="🎉 Holiday Gift Givers Leaderboard 🎉",
+            description="Sorted by presents given, with coins gifted also displayed!",
+            color=discord.Color.green()
+        )
+
+        # Add top 10 users to the leaderboard
+        embed.add_field(name="🎁 Top Gift Givers", value="\u200b", inline=False)
+        for idx, user in enumerate(sorted_leaderboard[:10], start=1):
+            # Fetch user object using bot's cache or fallback to user_id
+            member = ctx.guild.get_member(user.user_id) or f"User {user.user_id}"
+            embed.add_field(
+                name=f"#{idx} {member}",
+                value=f"Presents Given: {user.presents_given:,} | Coins Gifted: {user.presents_coins_given:,}",
+                inline=False
+            )
+
+        # Send the embed
+        await ctx.send(embed=embed)
 
 
 

@@ -61,7 +61,8 @@ class Serpent(commands.AutoShardedBot):
                 'skills': utils.Skills,
                 'user_link': utils.UserLink,
                 'lottery': utils.Lottery,
-                'items': utils.Items
+                'items': utils.Items,
+                'seasonal': utils.Seasonal
             }
 
             # Step 1: Clear all caches dynamically

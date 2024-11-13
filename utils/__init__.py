@@ -16,6 +16,7 @@ from utils.sql.skills import Skills
 from utils.sql.user_link import UserLink
 from utils.sql.lottery import Lottery
 from utils.sql.items import Items
+from utils.sql.seasonal import Seasonal
 
 #? Functions
 from utils.functions.coins import CoinFunctions

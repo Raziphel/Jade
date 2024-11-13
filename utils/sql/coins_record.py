@@ -5,7 +5,7 @@ class Coins_Record(object):
     all_coins_record = {}
 
     def __init__(self, user_id:int, earned:int=0, spent:int=0, taxed:int=0, lost:int=0, stolen:int=0, gifted:int=0,
-                 given:int=0, won:int=0, presents_given:int=0):
+                 given:int=0, won:int=0):
         self.user_id = user_id
         self.earned = earned
         self.spent = spent
@@ -15,7 +15,6 @@ class Coins_Record(object):
         self.gifted = gifted
         self.given = given
         self.won = won
-        self.presents_given = presents_given
 
         self.all_coins_record[self.user_id] = self
 
@@ -25,20 +24,20 @@ class Coins_Record(object):
             await db('''
                 INSERT INTO coins_record
                 VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 ''',
                 self.user_id, self.earned, self.spent, self.taxed, self.lost, self.stolen, self.gifted, self.given,
-                     self.won, self.presents_given
+                     self.won
             )
         except asyncpg.exceptions.UniqueViolationError: 
             await db('''
                 UPDATE coins_record SET
-                earned=$2, spent=$3, taxed=$4, lost=$5, stolen=$6, gifted=$7, given=$8, won=$9, presents_given=$10
+                earned=$2, spent=$3, taxed=$4, lost=$5, stolen=$6, gifted=$7, given=$8, won=$9
                 WHERE
                 user_id=$1
                 ''',
                 self.user_id, self.earned, self.spent, self.taxed, self.lost, self.stolen, self.gifted, self.given,
-                     self.won, self.presents_given
+                     self.won
             )
 
 
