@@ -198,8 +198,7 @@ class Seasonal(Cog):
             member = ctx.guild.get_member(user.user_id) or f"User {user.user_id}"
             embed.add_field(
                 name=f"#{idx} {member}",
-                value=f"🎁 Presents Given: {user.presents_given:,} | {coin_e} Coins Gifted:"
-                      f" {user.presents_coins_given:,}",
+                value=f"🎁 Presents Given: {user.presents_given:,} | {coin_e} Coins Gifted: {user.presents_coins_given:,}",
                 inline=False
             )
 
