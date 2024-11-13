@@ -197,8 +197,8 @@ class Seasonal(Cog):
             # Fetch user object using bot's cache or fallback to user_id
             member = ctx.guild.get_member(user.user_id) or f"User {user.user_id}"
             embed.add_field(
-                name=f"#{idx} {member}",
-                value=f"🎁 Presents Given: {user.presents_given:,} | {coin_e} Coins Gifted: {user.presents_coins_given:,}",
+                name=f"#{idx} {member.name}",
+                value=f"🎁 Given: **{user.presents_given:,}**\n{coin_e} Gifted: **{user.presents_coins_given:,}**",
                 inline=False
             )
 
