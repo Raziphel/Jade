@@ -1,4 +1,4 @@
-from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed
+from discord import ApplicationCommandOption, ApplicationCommandOptionType, Member, Embed, Color
 from discord.ext.commands import command, cooldown, BucketType, Cog, ApplicationCommandMeta
 
 from random import choice, randint
@@ -186,7 +186,7 @@ class Seasonal(Cog):
         embed = Embed(
             title="🎉 Holiday Gift Givers Leaderboard 🎉",
             description="Sorted by presents given, with coins gifted also displayed!",
-            color=discord.Color.green()
+            color=Color.green()
         )
 
         # Add top 10 users to the leaderboard
