@@ -184,29 +184,26 @@ class Seasonal(Cog):
 
         coin_e = self.bot.config['emojis']['coin']
 
-        # Create embed for the leaderboard
-        embed = Embed(
-            title="🎉 Holiday Gift Givers Leaderboard 🎉",
-            description="Sorted by presents given, with coins gifted also displayed!",
-            color=Color.green()
-        )
-
-        # Add top 10 users to the leaderboard
-        embed.add_field(name="🎁 Top Gift Givers", value="\u200b", inline=False)
+        # Build the leaderboard description
+        leaderboard_description = "🎁 **Top Gift Givers**\n\n"
         for idx, user in enumerate(sorted_leaderboard[:10], start=1):
             # Fetch user object using bot's cache or fallback to user_id
             member = ctx.guild.get_member(user.user_id) or f"User {user.user_id}"
-            embed.add_field(
-                name=f"#{idx} {member.name}",
-                value=f"🎁 Given: **{user.presents_given:,}**\n{coin_e} Gifted: **{user.presents_coins_given:,}**",
-                inline=False
+            leaderboard_description += (
+                f"**#{idx} {member}** - "
+                f"🎁 Given: **{user.presents_given:,}** | "
+                f"{coin_e} Gifted: **{user.presents_coins_given:,}**\n"
             )
+
+        # Create embed for the leaderboard
+        embed = Embed(
+            title="🎉 Holiday Gift Givers Leaderboard 🎉",
+            description=leaderboard_description,
+            color=Color.green()
+        )
 
         # Send the embed
         await ctx.send(embed=embed)
-
-
-
 
 
 # The setup function to load the cog
