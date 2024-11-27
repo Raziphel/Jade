@@ -102,9 +102,9 @@ class Statistics(commands.Cog):
                 f"{supporter_emojis['acolyte']} **Acolyte**: {role_stats['acolyte']}\n"
                 f"{supporter_emojis['initiate']} **Initiate**: {role_stats['initiate']}\n"
                 f"{nitro_emoji} **Boosters**: {role_stats['nitro']}\n\n"
-                f"**Total Bills:** 250$\n"
+                f"**Total Bills:** 130$\n"
                 f"**Donations:** {profit:,}$\n"
-                f"**Current Profit:** {profit-250:,}$"
+                f"**Current Profit:** {profit-130:,}$"
             ),
             color=0xFF4500
         )
