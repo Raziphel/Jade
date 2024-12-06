@@ -33,10 +33,10 @@ class RoleHandler(Cog):
             Embed(description=f"# Access\n```\nControl what you see!\n```\n"
                               f"> 🐍<@&{self.bot.config['access_roles']['servers']}>"
                               "`Access Serpent's Servers section.`\n"
-                              f"> nee🎀<@&{self.bot.config['access_roles']['trans']}>"
-                              "`Access Trans/HRT section. `\n"
+                              f"> 🎀<@&{self.bot.config['access_roles']['trans']}>"
+                              "`Access Trans/HRT section. `\n\n"
                               f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
-                              "`Access NSFW requires staff to give you this role after some kind of proof is provided.`\n", color=0x8f00f8),
+                              "`Access requires staff to give you this role after some kind of proof is provided.`\n", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
                               f"> 🧊<@&{self.bot.config['purchase_roles']['eww_blue']}>\n"
                               f"> 🍏<@&{self.bot.config['purchase_roles']['snot_green']}>\n"
@@ -107,8 +107,8 @@ class RoleHandler(Cog):
         """Fetch the correct role based on the emoji reaction."""
         mod = utils.Moderation.get(member.id)
         roles = {
-            "🚬": self.bot.config['age_roles']['adult'] if not mod.child else None,
-            "🍼": self.bot.config['age_roles']['underage'] if not mod.adult else None,
+            "🚬": self.bot.config['age_roles']['adult'],
+            "🍼": self.bot.config['age_roles']['underage'],
             "📔": self.bot.config['ping_roles']['changelogs'],
             "✅": self.bot.config['ping_roles']['voters'],
             "📆": self.bot.config['ping_roles']['events'],
@@ -117,7 +117,7 @@ class RoleHandler(Cog):
             "💀": self.bot.config['ping_roles']['scp_ping'],
             "🚧": self.bot.config['access_roles']['servers'],
             "🎀": self.bot.config['access_roles']['trans'],
-            "🐾": self.bot.config['access_roles']['nsfw'] if not mod.child else None,
+            #"🐾": self.bot.config['access_roles']['nsfw'] if not mod.child else None,
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],
             "🍌": self.bot.config['purchase_roles']['yikes_yellow']
