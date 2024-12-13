@@ -39,7 +39,7 @@ class Statistics(commands.Cog):
 
         # Role categories to evaluate
         supporter_roles = ['supporter', 'nitro', 'initiate', 'acolyte', 'ascended']
-        roles_to_track = ['changelogs', 'servers', 'toxic', 'trans', 'adult', 'underage', 'nsfw']
+        roles_to_track = ['changelogs', 'servers', 'toxic', 'trans', 'autistic', 'adult', 'underage', 'nsfw']
 
         # Calculate stats for supporter roles
         role_stats = {
@@ -59,7 +59,9 @@ class Statistics(commands.Cog):
                         role_name,
                         self.bot.config['access_roles'].get(
                             role_name,
-                            self.bot.config['age_roles'].get(role_name)  # Now age_roles are tracked!
+                            self.bot.config['age_roles'].get(
+                                role_name,
+                                self.bot.config['identity_roles'].get(role_name))
                         )
                     )
                 ) in m.roles
@@ -138,7 +140,7 @@ class Statistics(commands.Cog):
                 f"❌ **Inactive**: {inactive_count:,} ({round(inactive_count / members * 100)}%)\n{inactive_bar}\n"
                 f"📉 **Zero Balances**: {zero_balance_count:,} ({round(zero_balance_count / members * 100)}%)\n{zero_balance_bar}\n"
                 f"📝 **Changelog Subscribers**: {tracked_roles['changelogs']} ({round(tracked_roles['changelogs'] / members * 100)}%)\n{bars['changelogs']}\n\n"
-                f"🐍 **Serpent Servers**: {tracked_roles['servers']} ({round(tracked_roles['servers'] / members * 100)}%)\n{bars['servers']}\n"
+                f"♋ **Autistic**: {tracked_roles['autistic']} ({round(tracked_roles['autistic'] / members * 100)}%)\n{bars['autistic']}\n"
                 f"💉 **Trans**: {tracked_roles['trans']} ({round(tracked_roles['trans'] / members * 100)}%)\n{bars['trans']}\n"
                 f"🔞 **NSFW Access**: {tracked_roles['nsfw']} ({round(tracked_roles['nsfw'] / members * 100)}%)\n{bars['nsfw']}\n"
                 f"🚬 **Adults**: {tracked_roles['adult']} ({round(tracked_roles['adult'] / members * 100)}%)\n{bars['adult']}\n"
