@@ -22,21 +22,20 @@ class RoleHandler(Cog):
                               f"> 🚬<@&{self.bot.config['age_roles']['adult']}>"
                               "`Doesn't give NSFW access, just says you're an adult!`\n"
                               f"> 🍼<@&{self.bot.config['age_roles']['underage']}>"
-                              "`Given automatically if no age role selected.`", color=0x8f00f8),
+                              "`Given automatically if no age role selected.`\n"
+                              f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
+                              "`Access requires staff to give you this role after some kind of proof is provided.`", color=0x8f00f8),
             Embed(description=f"# Pings\n```\nGet notifications for things!\n```\n"
                               f"> 📔<@&{self.bot.config['ping_roles']['changelogs']}> `Recommended!`\n"
                               f"> ✅<@&{self.bot.config['ping_roles']['voters']}> `Get pinged for votes!`\n"
                               f"> 📆<@&{self.bot.config['ping_roles']['events']}> `Get pinged for events!`\n"
-                              f"> 🤝<@&{self.bot.config['ping_roles']['welcomer']}> `Greet new members!`\n"
-                              f"> 📊<@&{self.bot.config['ping_roles']['server_status']}> `Ping for server status!`\n"
                               f"> 💀<@&{self.bot.config['ping_roles']['scp_ping']}> `Ping for SCP servers!`", color=0x8f00f8),
-            Embed(description=f"# Access\n```\nControl what you see!\n```\n"
-                              f"> 🐍<@&{self.bot.config['access_roles']['servers']}>"
-                              "`Access Serpent's Servers section.`\n"
-                              f"> 🎀<@&{self.bot.config['access_roles']['trans']}>"
-                              "`Access Trans/HRT section. `\n\n"
-                              f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
-                              "`Access requires staff to give you this role after some kind of proof is provided.`\n", color=0x8f00f8),
+            Embed(description=f"# Identity\n```\nRoles that tell about you!\n```\n"
+                              f"> 🎀<@&{self.bot.config['identity_roles']['trans']}>\n"
+                              f"> 🪀<@&{self.bot.config['identity_roles']['non-binary']}>\n"
+                              f"> 1️⃣<@&{self.bot.config['identity_roles']['monogamous']}>\n"
+                              f"> 2️⃣<@&{self.bot.config['identity_roles']['polyamorous']}>\n"
+                              f"> ♋<@&{self.bot.config['identity_roles']['autistic']}>\n", color=0x8f00f8),
             Embed(description=f"# Free Colors\n```\nThey are the worse colors though...\n```\n"
                               f"> 🧊<@&{self.bot.config['purchase_roles']['eww_blue']}>\n"
                               f"> 🍏<@&{self.bot.config['purchase_roles']['snot_green']}>\n"
@@ -112,11 +111,12 @@ class RoleHandler(Cog):
             "📔": self.bot.config['ping_roles']['changelogs'],
             "✅": self.bot.config['ping_roles']['voters'],
             "📆": self.bot.config['ping_roles']['events'],
-            "🤝": self.bot.config['ping_roles']['welcomer'],
-            "📊": self.bot.config['ping_roles']['server_status'],
             "💀": self.bot.config['ping_roles']['scp_ping'],
-            "🚧": self.bot.config['access_roles']['servers'],
-            "🎀": self.bot.config['access_roles']['trans'],
+            "🎀": self.bot.config['identity_roles']['trans'],
+            "🪀": self.bot.config['identity_roles']['non-binary'],
+            "1️⃣": self.bot.config['identity_roles']['monogamous'],
+            "2️⃣": self.bot.config['identity_roles']['polyamorous'],
+            "♋": self.bot.config['identity_roles']['autistic'],
             #"🐾": self.bot.config['access_roles']['nsfw'] if not mod.child else None,
             "🧊": self.bot.config['purchase_roles']['eww_blue'],
             "🍏": self.bot.config['purchase_roles']['snot_green'],
