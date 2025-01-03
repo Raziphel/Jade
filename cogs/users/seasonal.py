@@ -211,8 +211,8 @@ class Seasonal(Cog):
         """
         Give everyone 5x the coins they gifted during the holiday season!
         """
-        # Fetch all seasonal records
-        all_records = utils.Seasonal.all_seasonal()
+        # Access all seasonal records
+        all_records = utils.Seasonal.all_seasonal.values()
 
         # Track total coins distributed
         total_distributed = 0
