@@ -205,6 +205,55 @@ class Seasonal(Cog):
         # Send the embed
         await ctx.send(embed=embed)
 
+    @utils.is_dev()
+    @command(application_command_meta=ApplicationCommandMeta())
+    async def holiday_rewards(self, ctx):
+        """
+        Give everyone 5x the coins they gifted during the holiday season!
+        """
+        # Fetch all seasonal records
+        all_records = utils.Seasonal.get_all()
+
+        # Track total coins distributed
+        total_distributed = 0
+
+        # Iterate through all records to calculate and distribute rewards
+        for record in all_records:
+            if record.presents_coins_given > 0:
+                reward = record.presents_coins_given * 5
+                total_distributed += reward
+
+                # Update the user's coin balance
+                user = ctx.guild.get_member(record.user_id)
+                if user:
+                    await utils.CoinFunctions.earn(earner=user, amount=reward, gift=True)
+
+                    # DM the user their reward
+                    try:
+                        await user.send(
+                            f"🎉 **Holiday Rewards!** You've received {reward:,} coins as a reward for your generosity this season! 🎁"
+                        )
+                    except:
+                        pass  # Handle cases where DMs are closed or fail to send
+
+        # Send a summary message in the channel
+        await ctx.send(
+            f"**🎄 The Holiday Rewards is complete! A total of {total_distributed:,} coins have been distributed to all participants. Thank you for your holiday generosity! 🎉**"
+        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # The setup function to load the cog
 def setup(bot):
