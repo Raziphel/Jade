@@ -29,8 +29,9 @@ class RoleHandler(Cog):
                               f"> 📔<@&{self.bot.config['ping_roles']['changelogs']}> `Recommended!`\n"
                               f"> ✅<@&{self.bot.config['ping_roles']['voters']}> `Get pinged for votes!`\n"
                               f"> 📆<@&{self.bot.config['ping_roles']['events']}> `Get pinged for events!`\n"
-                              f"> 💀<@&{self.bot.config['ping_roles']['scp_ping']}> `Ping for SCP servers!`", color=0x8f00f8),
-            Embed(description=f"# Identity\n```\nRoles that tell about you!\n```\n"
+                              f"> 💀<@&{self.bot.config['ping_roles']['scp_ping']}> `Ping for SCP servers!`\n"
+                              f"> ✨<@&{self.bot.config['ping_roles']['ping2play']}> `Pinged 2 come play with Razi!`", color = 0x8f00f8),
+        Embed(description=f"# Identity\n```\nRoles that tell about you!\n```\n"
                               f"> 🎀<@&{self.bot.config['identity_roles']['trans']}>\n"
                               f"> 🪀<@&{self.bot.config['identity_roles']['non-binary']}>\n"
                               f"> 1️⃣<@&{self.bot.config['identity_roles']['monogamous']}>\n"
