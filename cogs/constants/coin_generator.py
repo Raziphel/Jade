@@ -43,7 +43,7 @@ class Coin_Generator(Cog):
             unique_words = min(unique_words, 15)
 
             # Earn coins and experience points
-            await utils.CoinFunctions.earn(earner=message.author, amount=unique_words)
+            await utils.CoinFunctions.earn(earner=message.author, amount=2+unique_words)
             exp += 5 + unique_words
 
             # Level up user
@@ -86,7 +86,7 @@ class Coin_Generator(Cog):
                     currency = utils.Currency.get(member.id)
                     lvl = utils.Levels.get(member.id)
                     lvl.exp += (10 + len(vc.members))
-                    await utils.CoinFunctions.earn(earner=member, amount=10 + (len(vc.members)*3))
+                    await utils.CoinFunctions.earn(earner=member, amount=20 + (len(vc.members)*3))
 
                     await utils.UserFunctions.level_up(user=member, channel=None)
 
