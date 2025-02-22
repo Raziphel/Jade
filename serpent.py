@@ -1,6 +1,7 @@
 import toml
 import logging
 import openai
+import asyncio
 
 from discord.ext import commands
 from discord import AllowedMentions
@@ -44,8 +45,12 @@ class Serpent(commands.AutoShardedBot):
         self.connected = False
 
     def run(self):
-        self.startup_method = self.loop.create_task(self.startup())
-        super().run(self.secret['token'])
+        asyncio.run(self.start_bot())
+
+    async def start_bot(self):
+        """Starts the bot properly with asyncio.run()"""
+        await self.startup()
+        await super().start(self.secret['token'])
 
     async def startup(self):
         """Load database"""
