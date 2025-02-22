@@ -1,15 +1,12 @@
-from discord import Embed
-from discord.ext import tasks
-from discord.ext.commands import command, Cog, cooldown, BucketType, ApplicationCommandMeta
-from random import choice
+from discord import Embed, app_commands
+from discord.ext import tasks, commands
+from discord import Interaction
+from random import choice, randint
 from datetime import datetime as dt, timedelta
-from calendar import day_name
-from math import floor
-from random import randint
 import utils
 
 
-class Daily(Cog):
+class Daily(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.daily_reset_checker.start()  # Start the task when the cog is loaded
@@ -21,7 +18,6 @@ class Daily(Cog):
     async def daily_reset_checker(self):
         """Checks for users who have missed their daily reward and resets their daily streak."""
         await self.bot.wait_until_ready()
-
         guild = self.bot.get_guild(self.bot.config['guild_id'])
         now = dt.utcnow()
 
@@ -52,16 +48,18 @@ class Daily(Cog):
         """Logs for coin transactions."""
         return self.bot.get_channel(self.bot.config['logs']['coins'])
 
-    @cooldown(1, 30, BucketType.user)
-    @command(application_command_meta=ApplicationCommandMeta())
-    async def daily(self, ctx):
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    @app_commands.command(name="daily", description="Claim your daily rewards!")
+    async def daily(self, interaction: Interaction):
         """Claim your daily rewards!"""
+        user = interaction.user  # `interaction.user` replaces `ctx.author`
+
         # Load user data
-        day = utils.Daily.get(ctx.author.id)
-        lvl = utils.Levels.get(ctx.author.id)
-        currency = utils.Currency.get(ctx.author.id)
-        item = utils.Items.get(ctx.author.id)
-        track = utils.Tracking.get(ctx.author.id)
+        day = utils.Daily.get(user.id)
+        lvl = utils.Levels.get(user.id)
+        currency = utils.Currency.get(user.id)
+        item = utils.Items.get(user.id)
+        track = utils.Tracking.get(user.id)
 
         # Initialize daily data if first time
         if not day.daily:
@@ -73,16 +71,16 @@ class Daily(Cog):
             remaining_time = day.last_daily + timedelta(hours=23) - dt.utcnow()
             hours, minutes = divmod(remaining_time.seconds, 3600)
             minutes //= 60
-            return await ctx.send(embed=utils.Embed(
+            return await interaction.response.send_message(embed=utils.Embed(
                 desc=f"⏰ You've already claimed your daily rewards!\n"
                      f"**You can claim again in {hours} hours and {minutes} minutes.**",
-                user=ctx.author))
+                user=user), ephemeral=True)
 
         # Handle missed dailies or resetting the streak
         if (day.last_daily + timedelta(hours=48)) <= dt.utcnow():
             if item.daily_saver > 0:
                 item.daily_saver -= 1
-                await ctx.send(embed=utils.Embed(title="You have lost a daily saver for missing your daily!"))
+                await interaction.response.send_message(embed=utils.Embed(title="You have lost a daily saver for missing your daily!"))
                 day.last_daily = dt.utcnow()  # Update last claim to now, without adjusting 22 hours
             else:
                 day.daily = 1  # Reset streak
@@ -104,10 +102,10 @@ class Daily(Cog):
         if randint(1, 10) == 1:
             bonus_coins = 3000
             total_reward += bonus_coins
-            await ctx.send(f"🎉 **Lucky!** You got an extra **{bonus_coins} coins** as a bonus today!")
+            await interaction.response.send_message(f"🎉 **Lucky!** You got an extra **{bonus_coins} coins** as a bonus today!")
 
         # Reward the user
-        await utils.CoinFunctions.earn(earner=ctx.author, amount=total_reward)
+        await utils.CoinFunctions.earn(earner=user, amount=total_reward)
 
         # Get ordinal suffix (st, nd, rd, th)
         def ordinal_suffix(n):
@@ -126,7 +124,7 @@ class Daily(Cog):
         )
         embed.add_field(
             name="💰 Coins Earned",
-            value=f"**{self.bot.config['emojis']['coin']}{floor(total_reward):,} coins**",
+            value=f"**{self.bot.config['emojis']['coin']}{total_reward:,} coins**",
             inline=False
         )
 
@@ -138,15 +136,15 @@ class Daily(Cog):
                 inline=False
             )
 
-        embed.set_footer(text=f"Claimed by {ctx.author.name}", icon_url=ctx.author.avatar.url)
+        embed.set_footer(text=f"Claimed by {user.name}", icon_url=user.avatar.url)
 
         # Send the embed message
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
         # Log the transaction
         await self.coin_logs.send(
-            f"**{ctx.author.name} claimed their {day.daily}{ordinal} daily reward!**\n"
-            f"Reward: {self.bot.config['emojis']['coin']}{floor(total_reward):,} coins"
+            f"**{user.name} claimed their {day.daily}{ordinal} daily reward!**\n"
+            f"Reward: {self.bot.config['emojis']['coin']}{total_reward:,} coins"
         )
 
         # Save the data
@@ -173,10 +171,11 @@ class Daily(Cog):
             # For every additional 365 days, increase reward by 10,000
             if streak > 365 and (streak % 365 == 0):
                 years_passed = streak // 365
-                milestone_bonus = 10000 + (10000 * (years_passed - 1))  # +10,000 for every extra year after the first
+                milestone_bonus = 10000 + (10000 * (years_passed - 1))
 
         return milestone_bonus
 
-# Register the cog
-def setup(bot):
-    bot.add_cog(Daily(bot))
+
+# Register the cog (Updated for discord.py)
+async def setup(bot):
+    await bot.add_cog(Daily(bot))
