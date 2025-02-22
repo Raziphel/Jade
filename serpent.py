@@ -1,6 +1,7 @@
 import toml
 import logging
 import openai
+import asyncio  # Added this for async task management
 
 from discord.ext import commands
 from discord import AllowedMentions
@@ -11,7 +12,11 @@ from utils.database import DatabaseConnection
 #+ ------------------------- Serpent Main Class
 class Serpent(commands.AutoShardedBot):
     def __init__(self, config: str, secret: str, *args, logger: logging.Logger = None, **kwargs):
-        super().__init__(*args, fetch_offline_members=True, guild_subscriptions=True, allowed_mentions = AllowedMentions(roles=True, users=True, everyone=True), **kwargs)
+        super().__init__(
+            *args,
+            allowed_mentions=AllowedMentions(roles=True, users=True, everyone=True),  # Removed deprecated args
+            **kwargs
+        )
 
         self.logger = logger or logging.getLogger("Serpent")
         self.config = config
@@ -32,60 +37,60 @@ class Serpent(commands.AutoShardedBot):
         self.message_edit_manager = utils.API_Manager()
 
         # Initialize Redis with the loaded configuration
-        redis_config = self.secret.get('redis')
-        self.redis_utils = utils.RedisUtils(config=redis_config)  # Pass Redis config here
+        redis_config = self.secret.get("redis")
+        self.redis_utils = utils.RedisUtils(config=redis_config)
 
         #+ Get OpenAI key setup
-        openai.api_key = self.secret['openai_key']
+        openai.api_key = self.secret["openai_key"]
 
         self.database = DatabaseConnection
-        self.database.config = self.secret['database']
+        self.database.config = self.secret["database"]
         self.startup_method = None
         self.connected = False
 
     def run(self):
-        self.startup_method = self.loop.create_task(self.startup())
-        super().run(self.secret['token'])
+        asyncio.run(self.startup())  # Properly run startup async function
+        try:
+            super().run(self.secret["token"], reconnect=True)
+        except KeyboardInterrupt:
+            print("Bot is shutting down...")
 
     async def startup(self):
         """Load database"""
-        try:  #? Try this to prevent resetting the database on accident!
+        try:
             # Define a mapping of table names to their corresponding utility classes
             table_mapping = {
-                'moderation': utils.Moderation,
-                'levels': utils.Levels,
-                'currency': utils.Currency,
-                'coins_record': utils.Coins_Record,
-                'tracking': utils.Tracking,
-                'daily': utils.Daily,
-                'skills': utils.Skills,
-                'user_link': utils.UserLink,
-                'lottery': utils.Lottery,
-                'items': utils.Items,
-                'seasonal': utils.Seasonal
+                "moderation": utils.Moderation,
+                "levels": utils.Levels,
+                "currency": utils.Currency,
+                "coins_record": utils.Coins_Record,
+                "tracking": utils.Tracking,
+                "daily": utils.Daily,
+                "skills": utils.Skills,
+                "user_link": utils.UserLink,
+                "lottery": utils.Lottery,
+                "items": utils.Items,
+                "seasonal": utils.Seasonal,
             }
 
             # Step 1: Clear all caches dynamically
             for utility_class in table_mapping.values():
-                if hasattr(utility_class, 'clear_all'):
-                    utility_class.clear_all()  # Assuming each class has a 'clear_all' method to clear the cache
+                if hasattr(utility_class, "clear_all"):
+                    utility_class.clear_all()
                 else:
-                    cache_attr = [attr for attr in dir(utility_class) if attr.startswith('all_')]
+                    cache_attr = [attr for attr in dir(utility_class) if attr.startswith("all_")]
                     if cache_attr:
-                        getattr(utility_class, cache_attr[0]).clear()  # Clear the first 'all_*' attribute found
+                        getattr(utility_class, cache_attr[0]).clear()
 
             # Step 2: Collect data from the database dynamically
             async with self.database() as db:
-                data_collections = {}
-                for table in table_mapping.keys():
-                    data_collections[table] = await db(f'SELECT * FROM {table}')  # Fetch data for each table
+                data_collections = {table: await db(f"SELECT * FROM {table}") for table in table_mapping.keys()}
 
             # Step 3: Cache all data into local objects dynamically
             for table, rows in data_collections.items():
                 utility_class = table_mapping[table]
                 for row in rows:
-                    utility_class(**row)  # Instantiate and cache the utility objects dynamically
-
+                    utility_class(**row)
 
         except Exception as e:
             print(f"Couldn't connect to the database... :: {e}")
@@ -94,10 +99,10 @@ class Serpent(commands.AutoShardedBot):
         lvl = utils.Levels.get(159516156728836097)
         if lvl.level == 0:
             self.connected = False
-            print('Bot database is NOT connected!')
+            print("Bot database is NOT connected!")
         else:
             self.connected = True
-            print('Bot database is connected!')
+            print("Bot database is connected!")
 
         # Check Redis connection
         if not self.redis_utils.is_connected():
@@ -106,7 +111,7 @@ class Serpent(commands.AutoShardedBot):
         print("Connected to Redis!")
 
         # + Start the MessageEditManager queue processor
-        self.message_edit_manager.start_processing(self.loop)
+        self.message_edit_manager.start_processing(asyncio.get_event_loop())
 
         #+ Register slash commands
         await self.register_application_commands()
