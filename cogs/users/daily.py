@@ -48,11 +48,6 @@ class Daily(commands.Cog):
         """Logs for coin transactions."""
         return self.bot.get_channel(self.bot.config['logs']['coins'])
 
-    @bot.tree.command(name="sync", description="Manually syncs all slash commands.")
-    async def sync(self, interaction: discord.Interaction):
-        await bot.tree.sync()
-        await interaction.response.send_message("✅ Slash commands have been synced!", ephemeral=True)
-
     @commands.cooldown(1, 30, commands.BucketType.user)
     @app_commands.command(name="daily", description="Claim your daily rewards!")
     async def daily(self, interaction: Interaction):

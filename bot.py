@@ -16,6 +16,12 @@ bot = Serpent(
     intents=intents
 )
 
+@bot.tree.command(name="sync", description="Manually syncs all slash commands.")
+async def sync(interaction: discord.Interaction):
+    await bot.tree.sync()
+    await interaction.response.send_message("✅ Slash commands have been synced!", ephemeral=True)
+
+
 logger = bot.logger
 
 # Load all cogs from the "cogs" folder
