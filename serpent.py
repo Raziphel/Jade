@@ -114,4 +114,6 @@ class Serpent(commands.AutoShardedBot):
         self.message_edit_manager.start_processing(asyncio.get_running_loop())
 
         #+ Register slash commands
-        await self.register_application_commands()
+        #await self.sync_application_commands()
+
+        #await self.register_application_commands()
