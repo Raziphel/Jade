@@ -111,7 +111,7 @@ class Serpent(commands.AutoShardedBot):
         print("Connected to Redis!")
 
         # + Start the MessageEditManager queue processor
-        self.message_edit_manager.start_processing(self.loop)
+        self.message_edit_manager.start_processing(asyncio.get_running_loop())
 
         #+ Register slash commands
         await self.register_application_commands()
