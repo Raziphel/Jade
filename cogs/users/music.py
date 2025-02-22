@@ -12,7 +12,7 @@ class Music(Cog):
         self.node = await wavelink.NodePool.create_node(
             bot=self.bot,
             host="localhost",  # Change if your Lavalink server is remote
-            port=2333,  # Default Lavalink port
+            port=7779,  # Default Lavalink port
             password="youshallnotpass",  # Change this if your server has a different password
             secure=False  # Set to True if using SSL
         )
