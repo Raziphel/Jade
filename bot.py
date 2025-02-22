@@ -16,18 +16,13 @@ bot = Serpent(
     intents=intents
 )
 
-async def sync_commands():
-    """Force-sync slash commands when the bot starts."""
-    await bot.wait_until_ready()
-    bot.tree.copy_global_to(guild=discord.Object(id=bot.config['guild_id']))  # Sync to your main guild
-    await bot.tree.sync()
-    print("✅ Slash commands have been synced!")
 
-@bot.event
-async def on_ready():
-    """Sync commands once bot is ready"""
-    await sync_commands()
-    print(f"✅ Logged in as {bot.user}")
+async def on_ready(self):
+    """Sync slash commands and register them with Discord"""
+    await self.wait_until_ready()
+    await self.tree.sync()  # Sync global commands
+    print(f"✅ Bot is ready! Logged in as {self.user}")
+
 
 logger = bot.logger
 
