@@ -35,7 +35,7 @@ class Daily(Cog):
                     item.daily_saver -= 1
                     await user.send(embed=utils.Embed(title="You have lost a daily saver for missing your daily!",
                                                       desc="Be sure to go claim it now!  As you only have 24 hours."))
-                    day.last_daily = dt.utcnow() - timedelta(hours=22)
+                    day.last_daily = dt.utcnow() - timedelta(hours=23)
                 else:
                     day.daily = 0  # Reset streak
                 async with self.bot.database() as db:
