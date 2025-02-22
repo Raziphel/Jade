@@ -1,7 +1,6 @@
 import toml
 import logging
 import openai
-import asyncio
 
 from discord.ext import commands
 from discord import AllowedMentions
@@ -45,12 +44,8 @@ class Serpent(commands.AutoShardedBot):
         self.connected = False
 
     def run(self):
-        asyncio.run(self.start_bot())
-
-    async def start_bot(self):
-        """Starts the bot properly with asyncio.run()"""
-        await self.startup()
-        await super().start(self.secret['token'])
+        self.startup_method = self.loop.create_task(self.startup())
+        super().run(self.secret['token'])
 
     async def startup(self):
         """Load database"""
@@ -111,9 +106,7 @@ class Serpent(commands.AutoShardedBot):
         print("Connected to Redis!")
 
         # + Start the MessageEditManager queue processor
-        self.message_edit_manager.start_processing(asyncio.get_running_loop())
+        self.message_edit_manager.start_processing(self.loop)
 
         #+ Register slash commands
-        #await self.sync_application_commands()
-
-        #await self.register_application_commands()
+        await self.register_application_commands()
