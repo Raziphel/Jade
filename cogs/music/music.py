@@ -101,5 +101,6 @@ class Music(Cog):
         await ctx.send("⏩ Skipped the song!")
 
 
-async def setup(bot):
-    await bot.add_cog(Music(bot))
+def setup(bot):
+    x = Music(bot)
+    bot.add_cog(x)
