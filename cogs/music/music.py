@@ -1,28 +1,42 @@
 from discord.ext.commands import Cog, command
 import aiohttp
-import json
+import asyncio
 
 
 class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.session = aiohttp.ClientSession()
+        self.session = None
         self.lavalink_ws = None
         self.node = {
             "host": "127.0.0.1",
-            "port": 7779,
+            "port": 7779,  # Lavalink port (make sure this matches your server config)
             "password": "youshallnotpass",
         }
         self.players = {}
 
-        self.bot.loop.create_task(self.connect_lavalink())
+        self.bot.loop.create_task(self.initialize())
+
+    async def initialize(self):
+        """Ensures session is created and connects to Lavalink."""
+        await self.bot.wait_until_ready()
+        if self.session is None:  # Ensure session is only created once
+            self.session = aiohttp.ClientSession()
+        await self.connect_lavalink()
 
     async def connect_lavalink(self):
-        """Connects to the Lavalink WebSocket."""
-        await self.bot.wait_until_ready()
-        self.lavalink_ws = await self.session.ws_connect(f"ws://{self.node['host']}:{self.node['port']}",
-                                                         headers={"Authorization": self.node["password"]})
-        print("🎶 Connected to Lavalink!")
+        """Connects to the Lavalink WebSocket with auto-reconnect."""
+        while True:
+            try:
+                self.lavalink_ws = await self.session.ws_connect(
+                    f"ws://{self.node['host']}:{self.node['port']}",
+                    headers={"Authorization": self.node["password"]}
+                )
+                print("🎶 Connected to Lavalink!")
+                return  # Exit loop when successfully connected
+            except aiohttp.ClientError:
+                print("⚠️ Failed to connect to Lavalink. Retrying in 5 seconds...")
+                await asyncio.sleep(5)
 
     async def send_ws(self, data: dict):
         """Sends a JSON payload to Lavalink."""
@@ -32,16 +46,16 @@ class Music(Cog):
     async def search_track(self, query: str):
         """Searches for a track on Lavalink."""
         async with self.session.get(
-                f"http://{self.node['host']}:{self.node['port']}/loadtracks",
-                params={"identifier": f"ytsearch:{query}"},
-                headers={"Authorization": self.node["password"]}
+            f"http://{self.node['host']}:{self.node['port']}/loadtracks",
+            params={"identifier": f"ytsearch:{query}"},
+            headers={"Authorization": self.node["password"]}
         ) as response:
             data = await response.json()
             return data["tracks"][0] if data["tracks"] else None
 
     @command()
     async def join(self, ctx):
-        """Join the user's voice channel."""
+        """Make the bot join the user's voice channel."""
         if not ctx.author.voice:
             return await ctx.send("You must be in a voice channel! 🎤")
 
@@ -58,7 +72,7 @@ class Music(Cog):
 
     @command()
     async def play(self, ctx, *, query: str):
-        """Play a song."""
+        """Search and play a song."""
         if ctx.guild.id not in self.players:
             return await ctx.send("I'm not in a voice channel! ❌")
 
@@ -76,7 +90,7 @@ class Music(Cog):
 
     @command()
     async def stop(self, ctx):
-        """Stop the music."""
+        """Stop playback."""
         if ctx.guild.id not in self.players:
             return await ctx.send("I'm not playing anything! ❌")
 
@@ -100,7 +114,14 @@ class Music(Cog):
 
         await ctx.send("⏩ Skipped the song!")
 
+    async def cog_unload(self):
+        """Cleanup when the cog is unloaded."""
+        if self.session:
+            await self.session.close()
+        if self.lavalink_ws:
+            await self.lavalink_ws.close()
+
 
 def setup(bot):
-    x = Music(bot)
-    bot.add_cog(x)
+    """Loads the cog into the bot."""
+    bot.add_cog(Music(bot))
