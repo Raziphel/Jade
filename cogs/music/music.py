@@ -1,4 +1,4 @@
-
+from discord.ext.commands import Cog
 import aiohttp
 import json
 
