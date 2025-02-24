@@ -30,7 +30,10 @@ class Music(Cog):
             try:
                 self.lavalink_ws = await self.session.ws_connect(
                     f"ws://{self.node['host']}:{self.node['port']}/v4/websocket",
-                    headers={"Authorization": self.node["password"]}
+                    headers={
+                        "Authorization": self.node["password"],
+                        "User-Id": str(self.bot.user.id)  # Required for Lavalink v4
+                    }
                 )
 
                 print("🎶 Connected to Lavalink!")
