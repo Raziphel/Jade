@@ -44,13 +44,13 @@ class Coin_Generator(Cog):
 
             # Earn coins and experience points
             await utils.CoinFunctions.earn(earner=message.author, amount=2+unique_words)
-            exp += 5 + unique_words
+            exp += (lvl.level/2) + unique_words
 
             # Level up user
             await utils.UserFunctions.level_up(user=message.author, channel=message.channel)
 
             # Update user data
-            lvl.exp += exp + 5
+            lvl.exp += exp
             lvl.last_xp = dt.utcnow()
             tracking.messages += 1
 
@@ -79,13 +79,13 @@ class Coin_Generator(Cog):
                     # Skip certain conditions like deafened or bots
                     if any([member.voice.deaf, member.voice.mute, member.voice.self_deaf, member.voice.afk, member.bot]):
                         continue
-                    if len(vc.members) < 2:
+                    if len(vc.members) > 2:
                         continue
 
                     # Update coins and experience based on voice activity
                     currency = utils.Currency.get(member.id)
                     lvl = utils.Levels.get(member.id)
-                    lvl.exp += (10 + len(vc.members))
+                    lvl.exp += (lvl.level + len(vc.members))
                     await utils.CoinFunctions.earn(earner=member, amount=20 + (len(vc.members)*3))
 
                     await utils.UserFunctions.level_up(user=member, channel=None)
