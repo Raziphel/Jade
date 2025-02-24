@@ -10,7 +10,7 @@ class Music(Cog):
         self.lavalink_ws = None
         self.node = {
             "host": "172.18.0.1",
-            "port": 7779,  # Lavalink port (make sure this matches your server config)
+            "port": 8197,  # Lavalink port (make sure this matches your server config)
             "password": "youshallnotpass",
         }
         self.players = {}
