@@ -29,9 +29,10 @@ class Music(Cog):
         while True:
             try:
                 self.lavalink_ws = await self.session.ws_connect(
-                    f"ws://{self.node['host']}:{self.node['port']}",
+                    f"ws://{self.node['host']}:{self.node['port']}/v4/websocket",
                     headers={"Authorization": self.node["password"]}
                 )
+
                 print("🎶 Connected to Lavalink!")
                 return  # Exit loop when successfully connected
             except aiohttp.ClientError:
