@@ -4,7 +4,7 @@ import json
 
 
 class Music(Cog):
-    def __init__(self, bot: Bot):
+    def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
         self.lavalink_ws = None
