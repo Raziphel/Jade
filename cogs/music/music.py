@@ -20,26 +20,10 @@ class Music(commands.Cog):
         bot.loop.create_task(self.initialize())
 
     async def initialize(self):
-        """Ensures HTTP session is created and connects to Lavalink."""
+        """Ensures HTTP session is created."""
         await self.bot.wait_until_ready()
         if self.session is None:
             self.session = aiohttp.ClientSession()
-        await self.create_lavalink_session()
-
-    async def create_lavalink_session(self):
-        """Creates a session for the bot in Lavalink v4."""
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
-        headers = {
-            "Authorization": self.node["password"],
-            "Content-Type": "application/json",
-        }
-
-        async with self.session.post(url, headers=headers, json={}) as response:
-            if response.status != 201:  # 201 = Created
-                error_text = await response.text()
-                print(f"❌ Failed to create Lavalink session: {error_text}")
-                return None
-            print(f"✅ Lavalink session created: {self.session_id}")
 
     async def send_lavalink(self, guild_id: int, data: dict):
         """Sends an update request to Lavalink (PATCH request)."""
@@ -103,7 +87,7 @@ class Music(commands.Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # **PATCH request (not PUT) to play the track**
+        # Send play request (this auto-creates the Lavalink session)
         await self.send_lavalink(ctx.guild.id, {"track": track_id, "paused": False})
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
