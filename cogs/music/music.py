@@ -131,17 +131,25 @@ class Music(Cog):
     async def play_next(self, ctx):
         """Plays the next song in the queue."""
         if ctx.guild.id not in self.queues or not self.queues[ctx.guild.id]:
-            return
+            return await ctx.send("❌ No more songs in the queue!")
 
-        track = self.queues[ctx.guild.id].pop(0)
+        track_data = self.queues[ctx.guild.id].pop(0)  # Get first track in queue
 
+        # Extract the correct track ID (Lavalink v4 uses 'encoded')
+        track_id = track_data.get("encoded")  # Fix here!
+
+        if not track_id:
+            return await ctx.send("❌ Failed to retrieve track data!")
+
+        # Send play request to Lavalink
         await self.send_ws({
             "op": "play",
             "guildId": str(ctx.guild.id),
-            "track": track["track"]
+            "track": track_id  # Corrected from 'track["track"]' to 'track_id'
         })
 
-        await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
+        track_info = track_data["info"]
+        await ctx.send(f"🎵 Now playing: **{track_info['title']}** - {track_info['uri']}")
 
     @command()
     async def queue(self, ctx):
