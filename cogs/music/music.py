@@ -27,12 +27,15 @@ class Music(Cog):
 
     async def create_lavalink_session(self):
         """Creates a new Lavalink session if it doesn't exist."""
+
+        print(f"🛠 DEBUG: `create_lavalink_session()` called for session `{self.session_id}`")
+
         url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
         headers = {"Authorization": self.node["password"], "Content-Type": "application/json"}
 
-        print(f"📡 Creating Lavalink session: {self.session_id}")
-
         async with self.session.patch(url, headers=headers, json={}) as response:
+            print(f"📡 DEBUG: Sent PATCH request to Lavalink, received status {response.status}")
+
             if response.status in (200, 204):
                 print(f"✅ Lavalink session `{self.session_id}` created successfully.")
                 return True
@@ -77,21 +80,26 @@ class Music(Cog):
 
     async def join_voice(self, ctx):
         """Joins a voice channel and ensures Lavalink recognizes it."""
+
+        print("🛠 DEBUG: `join_voice()` function started")
+
         if not ctx.author.voice:
+            print("❌ User is not in a voice channel!")
             await ctx.send("❌ You must be in a voice channel!")
             return None
 
         channel = ctx.author.voice.channel
+        print(f"🔊 Attempting to join {channel.name}")
 
-        if ctx.guild.voice_client:  # Already connected
+        if ctx.guild.voice_client:
+            print("✅ Already connected to voice")
             return ctx.guild.voice_client.channel
 
-        print(f"🔊 Connecting to voice channel: {channel.name} in {ctx.guild.name}")
+        print(f"🚀 Connecting to {channel.name}...")
+        vc = await channel.connect()
+        await asyncio.sleep(2)
 
-        vc = await channel.connect()  # ✅ Connects to voice
-        await asyncio.sleep(2)  # ✅ Wait 2 seconds for Lavalink to detect connection
-
-        print(f"✅ Connected to {channel.name}")
+        print(f"✅ Successfully connected to {channel.name}")
         return vc.channel
 
     @command()
