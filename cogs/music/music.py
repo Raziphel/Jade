@@ -76,7 +76,7 @@ class Music(Cog):
             return data["data"][0] if data["data"] else None
 
     async def join_voice(self, ctx):
-        """Joins a voice channel and ensures Lavalink recognizes it."""
+        """Forces the bot to join a voice channel by updating its voice state manually."""
 
         print("🛠 DEBUG: `join_voice()` function started")
 
@@ -88,41 +88,37 @@ class Music(Cog):
         channel = ctx.author.voice.channel
         print(f"🔊 Attempting to join {channel.name}")
 
-        # ✅ If bot is already in VC, force a disconnect first
+        # ✅ If bot is already in VC, disconnect first
         if ctx.guild.voice_client:
-            print("⚠️ Bot is already connected. Forcing disconnect...")
+            print("⚠️ Bot is already connected. Disconnecting first...")
             await ctx.guild.voice_client.disconnect(force=True)
             await asyncio.sleep(2)  # ✅ Ensure disconnection is processed
 
-        print(f"🚀 Connecting to {channel.name}...")
+        print(f"🚀 Forcing voice state update to join {channel.name}...")
 
         try:
-            vc = await channel.connect(reconnect=True)
-            await asyncio.sleep(2)  # Give Discord time to register the connection
+            await ctx.guild.change_voice_state(channel=channel, self_deaf=True)  # 🔹 Force move bot to VC
+            await asyncio.sleep(3)  # ✅ Give Discord time to process
 
-            # 🔹 Manually wait for the bot to register as connected
-            for _ in range(10):  # Try checking 10 times over 10 seconds
-                await asyncio.sleep(1)
-                if ctx.guild.voice_client and ctx.guild.voice_client.is_connected():
-                    print(f"✅ Successfully connected to {channel.name}")
-                    return vc.channel
+            if ctx.guild.voice_client and ctx.guild.voice_client.is_connected():
+                print(f"✅ Successfully connected to {channel.name}")
+                return ctx.guild.voice_client.channel  # ✅ Return channel if connection works
 
-            # 🔹 If still not recognized, force a reconnect
             print("⏳ Bot joined VC but never registered as 'connected'! Retrying...")
             await ctx.guild.voice_client.disconnect()
-            await asyncio.sleep(2)  # Wait for the disconnect
-            vc = await channel.connect(reconnect=True)
-            await asyncio.sleep(2)  # Give time for recognition
+            await asyncio.sleep(2)  # Wait for disconnect
+            await ctx.guild.change_voice_state(channel=channel, self_deaf=True)  # Try again
+            await asyncio.sleep(3)
 
             if ctx.guild.voice_client and ctx.guild.voice_client.is_connected():
                 print(f"✅ Successfully connected to {channel.name} (after retry)")
-                return vc.channel
+                return ctx.guild.voice_client.channel
 
             print("❌ Voice connection completely failed!")
             return None
 
         except Exception as e:
-            print(f"❌ Exception occurred while connecting to voice: {e}")
+            print(f"❌ Exception occurred while forcing VC connection: {e}")
             return None
 
     @command()
