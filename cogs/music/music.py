@@ -26,14 +26,14 @@ class Music(commands.Cog):
             self.session = aiohttp.ClientSession()
 
     async def send_lavalink(self, guild_id: int, data: dict):
-        """Sends a correctly formatted update request to Lavalink (PUT instead of PATCH)."""
+        """Sends a correctly formatted update request to Lavalink."""
         url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{guild_id}"
         headers = {
             "Authorization": self.node["password"],
             "Content-Type": "application/json",
         }
 
-        async with self.session.put(url, headers=headers, json=data) as response:  # FIXED: Changed PATCH to PUT
+        async with self.session.patch(url, headers=headers, json=data) as response:  # 🔹 Changed `PUT` → `PATCH`
             if response.status not in (200, 204):
                 error_text = await response.text()
                 print(f"❌ Lavalink REST Error: {error_text}")
