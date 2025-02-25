@@ -8,7 +8,6 @@ class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = None
-        self.lavalink_session_id = None  # Store Lavalink session ID
         self.node = {
             "host": "172.18.0.1",
             "port": 8197,
@@ -25,32 +24,10 @@ class Music(Cog):
         if self.session is None:
             self.session = aiohttp.ClientSession()
 
-        await self.get_lavalink_session()  # Retrieve session instead of creating one
-
-    async def get_lavalink_session(self):
-        """Retrieves Lavalink session (v4 automatically creates it)."""
-        async with self.session.get(
-            f"http://{self.node['host']}:{self.node['port']}/v4/sessions",
-            headers={"Authorization": self.node["password"]}
-        ) as response:
-            if response.status == 200:
-                data = await response.json()
-                if isinstance(data, dict) and data:
-                    self.lavalink_session_id = list(data.keys())[0]  # Get first session ID
-                    print(f"✅ Lavalink Session Retrieved: {self.lavalink_session_id}")
-                else:
-                    print("❌ No active Lavalink sessions found!")
-            else:
-                print(f"❌ Failed to retrieve Lavalink session: {await response.text()}")
-
     async def send_ws(self, guild_id, data: dict):
         """Sends a JSON payload to Lavalink using REST API."""
-        if not self.lavalink_session_id:
-            print("❌ Cannot send request: Lavalink session not initialized!")
-            return
-
         async with self.session.patch(
-            f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.lavalink_session_id}/players/{guild_id}",
+            f"http://{self.node['host']}:{self.node['port']}/v4/players/{guild_id}",  # No session ID needed
             headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
             json=data
         ) as response:
