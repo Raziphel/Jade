@@ -51,7 +51,10 @@ class Music(Cog):
                 error_text = await response.text()
                 print(f"❌ Lavalink REST Error: {error_text}")
                 return None
+
+            print(f"✅ Lavalink response: {response.status}")  # Debugging log
             return await response.json() if response.status == 200 else None
+
 
     async def search_track(self, query: str):
         """Searches for a track on Lavalink."""
