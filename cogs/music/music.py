@@ -96,40 +96,30 @@ class Music(Cog):
         await ctx.send(f"🎶 Joined **{channel.name}**!")
         return channel
 
-
     @command()
     async def play(self, ctx, *, query: str):
-        """Plays a song from YouTube or adds it to the queue. Joins voice if not already in one."""
-
-        # Automatically join the user's voice channel if not already in one
-        channel = await self.join_voice(ctx)
+        """Plays a song. Joins voice if not already in one."""
+        channel = await self.join_voice(ctx)  # Auto-join before playing!
         if not channel:
             return
 
-        # Check if the input is a URL or a search term
-        search_query = query if query.startswith("http") else f"ytsearch:{query}"
-
-        # Search for the track
-        track_data = await self.search_track(search_query)
-        if not track_data:
+        track = await self.search_track(query)
+        if not track:
             return await ctx.send("❌ No results found!")
 
-        # Extract track info
-        track = track_data["info"]
-        track_url = track["uri"]
-        track_title = track["title"]
+        track_id = track.get("encoded")  # Lavalink v4 fix!
+        if not track_id:
+            return await ctx.send("❌ Failed to retrieve track data!")
 
-        # Add track to queue
-        if ctx.guild.id not in self.queues:
-            self.queues[ctx.guild.id] = []
+        # Send play request to Lavalink
+        await self.send_ws({
+            "op": "play",
+            "guildId": str(ctx.guild.id),
+            "track": track_id
+        })
 
-        self.queues[ctx.guild.id].append(track_data)
+        await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
-        # Play if no other songs are queued
-        if len(self.queues[ctx.guild.id]) == 1:
-            await self.play_next(ctx)
-
-        await ctx.send(f"🎵 **Added to queue:** [{track_title}]({track_url})")
 
     async def play_next(self, ctx):
         """Plays the next song in the queue."""
