@@ -48,13 +48,23 @@ class Music(Cog):
             await self.lavalink_ws.send_json(data)
 
     async def search_track(self, query: str):
-        """Searches for a track on Lavalink."""
+        """Searches for a track on Lavalink and handles errors properly."""
         async with self.session.get(
-            f"http://{self.node['host']}:{self.node['port']}/loadtracks",
-            params={"identifier": f"ytsearch:{query}"},
-            headers={"Authorization": self.node["password"]}
+                f"http://{self.node['host']}:{self.node['port']}/v4/loadtracks",  # Updated for Lavalink v4
+                params={"identifier": f"ytsearch:{query}"},
+                headers={"Authorization": self.node["password"]}
         ) as response:
-            data = await response.json()
+            try:
+                data = await response.json()
+            except Exception as e:
+                print(f"❌ Error parsing Lavalink response: {e}")
+                return None
+
+            # Check if the response contains the expected data
+            if "tracks" not in data or not isinstance(data["tracks"], list):
+                print(f"❌ Lavalink returned an unexpected response: {data}")
+                return None
+
             return data["tracks"][0] if data["tracks"] else None
 
     async def join_voice(self, ctx):
