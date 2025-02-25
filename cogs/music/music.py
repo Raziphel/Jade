@@ -7,7 +7,7 @@ import asyncio
 class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.session = None  # Delay session creation
+        self.session = None
         self.node = {
             "host": "172.18.0.1",
             "port": 8197,
@@ -16,24 +16,21 @@ class Music(Cog):
         self.players = {}
         self.queues = {}
 
-        self.bot.loop.create_task(self.initialize())  # Run async init function
+        self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
-        """Ensures session is created and Lavalink is connected."""
+        """Ensures session is created and Lavalink is ready."""
         await self.bot.wait_until_ready()
         if self.session is None:
-            self.session = aiohttp.ClientSession()  # Fixes 'no running event loop' error
+            self.session = aiohttp.ClientSession()
 
-    async def send_lavalink(self, guild_id, data: dict):
-        """Sends a REST API request to Lavalink."""
+    async def send_lavalink(self, guild_id, data: dict, method="PUT"):
+        """Sends a request to Lavalink v4 API."""
         url = f"http://{self.node['host']}:{self.node['port']}/v4/players/{guild_id}"
 
-        async with self.session.patch(
-            url,
-            headers={
-                "Authorization": self.node["password"],
-                "Content-Type": "application/json"
-            },
+        async with self.session.request(
+            method, url,
+            headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
             json=data
         ) as response:
             if response.status not in [200, 204]:
@@ -59,7 +56,7 @@ class Music(Cog):
             return data["data"][0] if data["data"] else None
 
     async def join_voice(self, ctx):
-        """Joins a voice channel."""
+        """Joins a voice channel and sends voice update to Lavalink."""
         if not ctx.author.voice:
             await ctx.send("❌ You must be in a voice channel!")
             return None
@@ -68,15 +65,16 @@ class Music(Cog):
         if ctx.guild.voice_client:
             return ctx.guild.voice_client.channel
 
-        await ctx.guild.change_voice_state(channel=channel)  # Works with Novus/Legacy dpy
+        await ctx.guild.change_voice_state(channel=channel)  # Works with Novus
 
         self.players[ctx.guild.id] = {"channel": channel.id}
 
+        # Send voice update event to Lavalink (important for v4)
         await self.send_lavalink(ctx.guild.id, {
             "guildId": str(ctx.guild.id),
             "channelId": str(channel.id),
             "selfDeaf": True
-        })
+        }, method="PATCH")  # v4 requires PATCH for voice updates
 
         await asyncio.sleep(1)
         await ctx.send(f"🎶 Joined **{channel.name}**!")
@@ -84,7 +82,7 @@ class Music(Cog):
 
     @command()
     async def play(self, ctx, *, query: str):
-        """Plays a song, joining VC if needed."""
+        """Plays a song and joins VC if needed."""
         channel = await self.join_voice(ctx)
         if not channel:
             return
@@ -97,11 +95,12 @@ class Music(Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
+        # Send `PUT` request to create a player before playing (Lavalink v4 fix)
         await self.send_lavalink(ctx.guild.id, {
             "track": track_id,
             "guildId": str(ctx.guild.id),
             "paused": False
-        })
+        }, method="PUT")
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
@@ -120,7 +119,7 @@ class Music(Cog):
             "track": track_id,
             "guildId": str(ctx.guild.id),
             "paused": False
-        })
+        }, method="PUT")
 
         track_info = track_data["info"]
         await ctx.send(f"🎵 Now playing: **{track_info['title']}** - {track_info['uri']}")
@@ -147,9 +146,8 @@ class Music(Cog):
         self.queues[ctx.guild.id] = []
 
         await self.send_lavalink(ctx.guild.id, {
-            "paused": True,
-            "guildId": str(ctx.guild.id)
-        })
+            "paused": True
+        }, method="PUT")
 
         await ctx.send("🎵 Stopped the music and cleared the queue!")
 
@@ -164,9 +162,8 @@ class Music(Cog):
             return await ctx.send("❌ I'm not playing anything!")
 
         await self.send_lavalink(ctx.guild.id, {
-            "paused": True,
-            "guildId": str(ctx.guild.id)
-        })
+            "paused": True
+        }, method="PUT")
 
         await ctx.send("⏩ Skipped the song!")
         await self.play_next(ctx)
@@ -178,9 +175,8 @@ class Music(Cog):
             return await ctx.send("❌ I'm not in a voice channel!")
 
         await self.send_lavalink(ctx.guild.id, {
-            "paused": True,
-            "guildId": str(ctx.guild.id)
-        })
+            "paused": True
+        }, method="PUT")
 
         if ctx.guild.voice_client:
             await ctx.guild.voice_client.disconnect()
