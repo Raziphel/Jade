@@ -74,7 +74,7 @@ class Music(Cog):
             return data["data"][0] if data["data"] else None
 
     async def join_voice(self, ctx):
-        """Joins a voice channel and updates Lavalink."""
+        """Joins a voice channel and ensures Lavalink recognizes it."""
         if not ctx.author.voice:
             await ctx.send("❌ You must be in a voice channel!")
             return None
@@ -84,31 +84,35 @@ class Music(Cog):
         if ctx.guild.voice_client:  # Already connected
             return ctx.guild.voice_client.channel
 
-        await channel.connect()  # Properly joins VC
-        self.players[ctx.guild.id] = {"channel": channel.id}
-        await asyncio.sleep(1)  # Let Lavalink process connection
+        print(f"🔊 Connecting to voice channel: {channel.name} in {ctx.guild.name}")
 
-        return channel
+        vc = await channel.connect()  # ✅ Connects to voice
+        await asyncio.sleep(2)  # ✅ Wait 2 seconds for Lavalink to detect connection
+
+        print(f"✅ Connected to {channel.name}")
+        return vc.channel
 
     @command()
     async def play(self, ctx, *, query: str):
         """Plays a song. Joins voice if not already in one."""
-        print(f"🎵 Play command called by {ctx.author} in {ctx.guild.name}")  # Debugging log
+        print(f"🎵 Play command called by {ctx.author} in {ctx.guild.name}")
 
-        channel = await self.join_voice(ctx)  # Ensure bot joins VC
+        channel = await self.join_voice(ctx)  # ✅ Ensure bot joins VC
         if not channel:
             return
 
-        # ✅ Ensure the Lavalink session exists before playing
+        # ✅ Ensure Lavalink session exists **before sending play request**
         session_created = await self.create_lavalink_session()
         if not session_created:
             return await ctx.send("❌ Failed to create a Lavalink session. Try again later!")
+
+        await asyncio.sleep(2)  # ✅ Ensure Lavalink has time to process the session
 
         track = await self.search_track(query)
         if not track:
             return await ctx.send("❌ No results found!")
 
-        track_id = track.get("encoded")  # Lavalink v4 requires "encoded"
+        track_id = track.get("encoded")
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
@@ -118,6 +122,7 @@ class Music(Cog):
             "volume": 100
         }
 
+        print(f"📡 Sending play request to Lavalink: {payload}")
         await self.send_lavalink(ctx.guild.id, payload)
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
