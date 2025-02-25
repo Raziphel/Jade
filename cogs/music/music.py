@@ -27,11 +27,11 @@ class Music(Cog):
 
     async def create_player_session(self, guild_id: int):
         """Ensures a player session exists for the guild."""
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{guild_id}"
+        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
         headers = {"Authorization": self.node["password"], "Content-Type": "application/json"}
 
-        async with self.session.post(url, headers=headers, json={}) as response:
-            if response.status not in (200, 201):
+        async with self.session.patch(url, headers=headers, json={}) as response:  # ✅ FIXED: Use PATCH, not POST!
+            if response.status not in (200, 204):
                 print(f"❌ Failed to create player session: {await response.text()}")
                 return False
         return True
@@ -96,7 +96,7 @@ class Music(Cog):
         if not channel:
             return
 
-        # Ensure a Lavalink player session exists before playing
+        # ✅ FIXED: Correctly create the player session
         await self.create_player_session(ctx.guild.id)
 
         track = await self.search_track(query)
@@ -107,15 +107,15 @@ class Music(Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # ✅ FIXED: Only sending the "Now playing" message once!
         payload = {
-            "track": {"encoded": track_id},  # Correct format
+            "track": {"encoded": track_id},  # ✅ Lavalink v4 expects this format!
             "paused": False,
             "volume": 100
         }
 
+        # ✅ FIXED: Only using PATCH (no POST mistakes!)
         await self.send_lavalink(ctx.guild.id, payload)
-        await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")  # ✅ No duplicates!
+        await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
     @command()
     async def stop(self, ctx):
