@@ -44,9 +44,15 @@ class Music(Cog):
                 await asyncio.sleep(5)
 
     async def send_ws(self, data: dict):
-        """Sends a JSON payload to Lavalink."""
-        if self.lavalink_ws:
-            await self.lavalink_ws.send_json(data)
+        """Sends a JSON payload to Lavalink (Replaced with HTTP API)."""
+        session_id = self.bot.user.id  # Lavalink v4 requires a session per bot ID
+        async with self.session.patch(
+                f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{session_id}/players/{data['guildId']}",
+                headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
+                json=data
+        ) as response:
+            if response.status != 204:  # 204 = success with no content
+                print(f"❌ Failed to send data to Lavalink: {await response.text()}")
 
     async def search_track(self, query: str):
         """Searches for a track on Lavalink and handles errors properly."""
@@ -88,11 +94,11 @@ class Music(Cog):
         # Store player info
         self.players[ctx.guild.id] = {"channel": channel.id}
 
-        # Send Lavalink voice update
+        # Send voice update using REST API
         await self.send_ws({
-            "op": "voiceUpdate",
             "guildId": str(ctx.guild.id),
-            "channelId": str(channel.id)
+            "channelId": str(channel.id),
+            "selfDeaf": True
         })
 
         await asyncio.sleep(1)  # Give Lavalink time to process the connection
@@ -103,7 +109,7 @@ class Music(Cog):
     @command()
     async def play(self, ctx, *, query: str):
         """Plays a song. Joins voice if not already in one."""
-        channel = await self.join_voice(ctx)  # Auto-join before playing!
+        channel = await self.join_voice(ctx)  # Auto-join before playing
         if not channel:
             return
 
@@ -115,11 +121,11 @@ class Music(Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # Send play request to Lavalink
+        # Send play request via REST API
         await self.send_ws({
-            "op": "play",
+            "track": track_id,
             "guildId": str(ctx.guild.id),
-            "track": track_id
+            "paused": False
         })
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
