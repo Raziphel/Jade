@@ -57,13 +57,16 @@ class Music(Cog):
             data = await response.json()
             return data["tracks"][0] if data["tracks"] else None
 
-    @command()
-    async def join(self, ctx):
-        """Make the bot join the user's voice channel."""
+    async def join_voice(self, ctx):
+        """Joins the voice channel of the user if not already connected."""
         if not ctx.author.voice:
-            return await ctx.send("You must be in a voice channel! 🎤")
+            await ctx.send("❌ You must be in a voice channel!")
+            return None
 
         channel = ctx.author.voice.channel
+        if ctx.guild.voice_client:
+            return ctx.guild.voice_client.channel
+
         self.players[ctx.guild.id] = {"channel": channel.id}
 
         await self.send_ws({
@@ -73,16 +76,18 @@ class Music(Cog):
         })
 
         await ctx.send(f"🎶 Joined **{channel.name}**!")
+        return channel
 
     @command()
     async def play(self, ctx, *, query: str):
-        """Search and play a song."""
-        if ctx.guild.id not in self.players:
-            return await ctx.send("I'm not in a voice channel! ❌")
+        """Plays a song. Joins voice if not already in one."""
+        channel = await self.join_voice(ctx)
+        if not channel:
+            return
 
         track = await self.search_track(query)
         if not track:
-            return await ctx.send("No results found! 😿")
+            return await ctx.send("❌ No results found!")
 
         await self.send_ws({
             "op": "play",
@@ -94,9 +99,9 @@ class Music(Cog):
 
     @command()
     async def stop(self, ctx):
-        """Stop playback."""
+        """Stops music and leaves voice."""
         if ctx.guild.id not in self.players:
-            return await ctx.send("I'm not playing anything! ❌")
+            return await ctx.send("❌ I'm not playing anything!")
 
         await self.send_ws({
             "op": "stop",
@@ -105,11 +110,15 @@ class Music(Cog):
 
         await ctx.send("🎵 Stopped the music!")
 
+        if ctx.guild.voice_client:
+            await ctx.guild.voice_client.disconnect()
+            del self.players[ctx.guild.id]
+
     @command()
     async def skip(self, ctx):
-        """Skip the current song."""
+        """Skips the current song."""
         if ctx.guild.id not in self.players:
-            return await ctx.send("I'm not playing anything! ⏭️")
+            return await ctx.send("❌ I'm not playing anything!")
 
         await self.send_ws({
             "op": "stop",
@@ -118,12 +127,7 @@ class Music(Cog):
 
         await ctx.send("⏩ Skipped the song!")
 
-    async def cog_unload(self):
-        """Cleanup when the cog is unloaded."""
-        if self.session:
-            await self.session.close()
-        if self.lavalink_ws:
-            await self.lavalink_ws.close()
+
 
 
 def setup(bot):
