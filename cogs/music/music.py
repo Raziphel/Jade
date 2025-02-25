@@ -49,11 +49,11 @@ class Music(Cog):
             await self.lavalink_ws.send_json(data)
 
     async def search_track(self, query: str):
-        """Searches for a track on YouTube using Lavalink."""
+        """Searches for a track on Lavalink and handles errors properly."""
         async with self.session.get(
-            f"http://{self.node['host']}:{self.node['port']}/v4/loadtracks",
-            params={"identifier": f"ytsearch:{query}"},
-            headers={"Authorization": self.node["password"]}
+                f"http://{self.node['host']}:{self.node['port']}/v4/loadtracks",
+                params={"identifier": f"ytsearch:{query}"},
+                headers={"Authorization": self.node["password"]}
         ) as response:
             try:
                 data = await response.json()
@@ -61,11 +61,16 @@ class Music(Cog):
                 print(f"❌ Error parsing Lavalink response: {e}")
                 return None
 
-            if "tracks" not in data or not isinstance(data["tracks"], list) or not data["tracks"]:
-                print(f"❌ Lavalink returned an unexpected response: {data}")
+            # Debugging response
+            print(f"🔍 Lavalink Response: {data}")
+
+            # Ensure 'data' key exists and contains tracks
+            if "data" not in data or not isinstance(data["data"], list):
+                print(f"❌ Unexpected response structure: {data}")
                 return None
 
-            return data["tracks"][0]  # Return first search result
+            # Get the first track from search results
+            return data["data"][0] if data["data"] else None
 
     async def join_voice(self, ctx):
         """Joins the user's voice channel if not already connected."""
@@ -99,10 +104,7 @@ class Music(Cog):
             return
 
         # Check if the input is a URL or a search term
-        if query.startswith("http"):
-            search_query = query  # Direct URL
-        else:
-            search_query = f"ytsearch:{query}"  # Search for a track on YouTube
+        search_query = query if query.startswith("http") else f"ytsearch:{query}"
 
         # Search for the track
         track_data = await self.search_track(search_query)
@@ -120,7 +122,8 @@ class Music(Cog):
 
         self.queues[ctx.guild.id].append(track_data)
 
-        if len(self.queues[ctx.guild.id]) == 1:  # If queue was empty, start playing
+        # Play if no other songs are queued
+        if len(self.queues[ctx.guild.id]) == 1:
             await self.play_next(ctx)
 
         await ctx.send(f"🎵 **Added to queue:** [{track_title}]({track_url})")
