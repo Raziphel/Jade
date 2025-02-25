@@ -8,6 +8,7 @@ class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = None
+        self.lavalink_session_id = None  # Store Lavalink session ID
         self.node = {
             "host": "172.18.0.1",
             "port": 8197,
@@ -24,10 +25,32 @@ class Music(Cog):
         if self.session is None:
             self.session = aiohttp.ClientSession()
 
+        await self.fetch_lavalink_session()  # Get the correct session ID
+
+    async def fetch_lavalink_session(self):
+        """Retrieves Lavalink's automatically created session ID."""
+        async with self.session.get(
+            f"http://{self.node['host']}:{self.node['port']}/v4/sessions",
+            headers={"Authorization": self.node["password"]}
+        ) as response:
+            if response.status == 200:
+                data = await response.json()
+                if isinstance(data, list) and len(data) > 0:
+                    self.lavalink_session_id = data[0]["id"]  # Store session ID
+                    print(f"✅ Lavalink Session ID: {self.lavalink_session_id}")
+                else:
+                    print("❌ No active Lavalink session found!")
+            else:
+                print(f"❌ Failed to retrieve Lavalink session: {await response.text()}")
+
     async def send_ws(self, guild_id, data: dict):
         """Sends a JSON payload to Lavalink using REST API."""
+        if not self.lavalink_session_id:
+            print("❌ Cannot send request: Lavalink session not initialized!")
+            return
+
         async with self.session.patch(
-            f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.bot.user.id}/players/{guild_id}",
+            f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.lavalink_session_id}/players/{guild_id}",
             headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
             json=data
         ) as response:
@@ -134,19 +157,6 @@ class Music(Cog):
         await ctx.send(f"🎵 Now playing: **{track_info['title']}** - {track_info['uri']}")
 
     @command()
-    async def queue(self, ctx):
-        """Displays the queue."""
-        if ctx.guild.id not in self.queues or not self.queues[ctx.guild.id]:
-            return await ctx.send("📭 The queue is empty!")
-
-        queue_list = "\n".join(
-            [f"{i+1}. {track['info']['title']}" for i, track in enumerate(self.queues[ctx.guild.id])]
-        )
-
-        embed = discord.Embed(title="🎶 Music Queue", description=queue_list, color=discord.Color.blue())
-        await ctx.send(embed=embed)
-
-    @command()
     async def stop(self, ctx):
         """Stops music and clears the queue."""
         if ctx.guild.id not in self.players:
@@ -165,21 +175,6 @@ class Music(Cog):
         if ctx.guild.voice_client:
             await ctx.guild.voice_client.disconnect()
             del self.players[ctx.guild.id]
-
-    @command()
-    async def skip(self, ctx):
-        """Skips the current song and plays the next one."""
-        if ctx.guild.id not in self.players:
-            return await ctx.send("❌ I'm not playing anything!")
-
-        await self.send_ws(ctx.guild.id, {
-            "op": "stop",
-            "guildId": str(ctx.guild.id)
-        })
-
-        await ctx.send("⏩ Skipped the song!")
-
-        await self.play_next(ctx)
 
     @command()
     async def leave(self, ctx):
