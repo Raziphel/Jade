@@ -2,7 +2,6 @@ import discord
 from discord.ext.commands import Cog, command
 import aiohttp
 import asyncio
-import uuid  # Used to generate session IDs
 
 
 class Music(Cog):
@@ -16,7 +15,6 @@ class Music(Cog):
         }
         self.players = {}
         self.queues = {}
-        self.session_id = str(uuid.uuid4())  # Generate a session ID
 
         self.bot.loop.create_task(self.initialize())
 
@@ -25,24 +23,10 @@ class Music(Cog):
         await self.bot.wait_until_ready()
         if self.session is None:
             self.session = aiohttp.ClientSession()
-        await self.create_lavalink_session()
 
-    async def create_lavalink_session(self):
-        """Creates a Lavalink session."""
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
-        async with self.session.post(
-            url,
-            headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
-            json={"resuming": False, "timeout": 60}
-        ) as response:
-            if response.status not in [200, 204]:
-                print(f"❌ Failed to create Lavalink session: {await response.text()}")
-            else:
-                print(f"✅ Created Lavalink session: {self.session_id}")
-
-    async def send_lavalink(self, guild_id, data: dict, method="PUT"):
-        """Sends a request to Lavalink using the correct session-based endpoint."""
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{guild_id}"
+    async def send_lavalink(self, guild_id, data: dict, method="PATCH"):
+        """Sends a request to Lavalink using the correct `/v4/player/{guildId}` endpoint."""
+        url = f"http://{self.node['host']}:{self.node['port']}/v4/player/{guild_id}"
 
         async with self.session.request(
             method, url,
@@ -85,12 +69,12 @@ class Music(Cog):
 
         self.players[ctx.guild.id] = {"channel": channel.id}
 
-        # Send voice update event to Lavalink (important for v4)
+        # Send voice update to Lavalink
         await self.send_lavalink(ctx.guild.id, {
             "guildId": str(ctx.guild.id),
             "channelId": str(channel.id),
             "selfDeaf": True
-        }, method="PATCH")  # v4 requires PATCH for voice updates
+        })
 
         await asyncio.sleep(1)
         await ctx.send(f"🎶 Joined **{channel.name}**!")
@@ -111,12 +95,12 @@ class Music(Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # Send `PUT` request to create a player before playing (Lavalink v4 fix)
+        # Send `PATCH` request to start playing the track
         await self.send_lavalink(ctx.guild.id, {
             "track": track_id,
             "guildId": str(ctx.guild.id),
             "paused": False
-        }, method="PUT")
+        }, method="PATCH")
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
@@ -135,7 +119,7 @@ class Music(Cog):
             "track": track_id,
             "guildId": str(ctx.guild.id),
             "paused": False
-        }, method="PUT")
+        }, method="PATCH")
 
         track_info = track_data["info"]
         await ctx.send(f"🎵 Now playing: **{track_info['title']}** - {track_info['uri']}")
@@ -163,7 +147,7 @@ class Music(Cog):
 
         await self.send_lavalink(ctx.guild.id, {
             "paused": True
-        }, method="PUT")
+        }, method="PATCH")
 
         await ctx.send("🎵 Stopped the music and cleared the queue!")
 
@@ -179,7 +163,7 @@ class Music(Cog):
 
         await self.send_lavalink(ctx.guild.id, {
             "paused": True
-        }, method="PUT")
+        }, method="PATCH")
 
         await ctx.send("⏩ Skipped the song!")
         await self.play_next(ctx)
@@ -192,7 +176,7 @@ class Music(Cog):
 
         await self.send_lavalink(ctx.guild.id, {
             "paused": True
-        }, method="PUT")
+        }, method="PATCH")
 
         if ctx.guild.voice_client:
             await ctx.guild.voice_client.disconnect()
@@ -203,5 +187,5 @@ class Music(Cog):
 
 
 def setup(bot):
-    """Loads the cog into the bot (legacy discord.py)."""
+    """Loads the cog into the bot."""
     bot.add_cog(Music(bot))
