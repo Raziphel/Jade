@@ -97,18 +97,29 @@ class Music(Cog):
         print(f"🚀 Connecting to {channel.name}...")
 
         try:
-            vc = await channel.connect(reconnect=True)  # Try connecting
-            await asyncio.sleep(2)  # Wait for Discord to register the connection
+            vc = await channel.connect(reconnect=True)
+            await asyncio.sleep(2)  # Give Discord time to register the connection
 
-            # 🔹 Manually check if the bot is actually connected
-            for _ in range(5):  # Try checking 5 times
+            # 🔹 Manually wait for the bot to register as connected
+            for _ in range(10):  # Try checking 10 times over 10 seconds
                 await asyncio.sleep(1)
                 if ctx.guild.voice_client and ctx.guild.voice_client.is_connected():
                     print(f"✅ Successfully connected to {channel.name}")
                     return vc.channel
 
-            print("⏳ Bot joined VC but never registered as 'connected'!")
-            return None  # Fail if it never confirms connection
+            # 🔹 If still not recognized, force a reconnect
+            print("⏳ Bot joined VC but never registered as 'connected'! Retrying...")
+            await ctx.guild.voice_client.disconnect()
+            await asyncio.sleep(2)  # Wait for the disconnect
+            vc = await channel.connect(reconnect=True)
+            await asyncio.sleep(2)  # Give time for recognition
+
+            if ctx.guild.voice_client and ctx.guild.voice_client.is_connected():
+                print(f"✅ Successfully connected to {channel.name} (after retry)")
+                return vc.channel
+
+            print("❌ Voice connection completely failed!")
+            return None
 
         except Exception as e:
             print(f"❌ Exception occurred while connecting to voice: {e}")
