@@ -83,16 +83,20 @@ class Music(Cog):
         if not track:
             return await ctx.send("❌ No results found!")
 
-        track_id = track.get("encoded")  # Lavalink v4 requires "encoded" only!
+        track_id = track.get("encoded")  # Lavalink v4 requires "encoded" inside an object
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # 🔹 FIXED: Sending only "encoded" string, NOT an object!
+        # ✅ FIXED: Track must be inside an object
         payload = {
-            "track": track_id,  # ✅ Correct format
+            "track": {"encoded": track_id},  # 🔹 Corrected format
             "paused": False,
             "volume": 100
         }
+
+        await self.send_lavalink(ctx.guild.id, payload)
+
+        await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
         await self.send_lavalink(ctx.guild.id, payload)
 
