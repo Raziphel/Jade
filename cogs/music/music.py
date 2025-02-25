@@ -99,7 +99,7 @@ class Music(Cog):
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
 
-    @commands.command()
+    @command()
     async def stop(self, ctx):
         """Stops music and clears the queue."""
         if ctx.guild.id not in self.players:
@@ -112,7 +112,7 @@ class Music(Cog):
         del self.players[ctx.guild.id]
         await ctx.send("🎵 Stopped the music!")
 
-    @commands.command()
+    @command()
     async def skip(self, ctx):
         """Skips the current song."""
         if ctx.guild.id not in self.players:
@@ -121,7 +121,7 @@ class Music(Cog):
         await self.send_lavalink(ctx.guild.id, {"track": None})
         await ctx.send("⏩ Skipped the song!")
 
-    @commands.command()
+    @command()
     async def leave(self, ctx):
         """Disconnects the bot from the voice channel."""
         if ctx.guild.voice_client:
