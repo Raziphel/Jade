@@ -30,13 +30,15 @@ class Music(Cog):
         url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
         headers = {"Authorization": self.node["password"], "Content-Type": "application/json"}
 
+        print(f"📡 Creating Lavalink session: {self.session_id}")
+
         async with self.session.patch(url, headers=headers, json={}) as response:
             if response.status in (200, 204):
-                print(f"✅ Lavalink session {self.session_id} created successfully.")
+                print(f"✅ Lavalink session `{self.session_id}` created successfully.")
                 return True
             else:
                 error_text = await response.text()
-                print(f"❌ Failed to create Lavalink session: {error_text}")
+                print(f"❌ Lavalink session creation failed: {response.status} - {error_text}")
                 return False
 
     async def send_lavalink(self, guild_id: int, data: dict):
@@ -97,7 +99,6 @@ class Music(Cog):
         """Plays a song. Joins voice if not already in one."""
         print(f"🎵 Play command called by {ctx.author} in {ctx.guild.name}")
 
-        # Step 1: Join voice channel
         channel = await self.join_voice(ctx)
         if not channel:
             print("❌ Bot failed to join voice!")
@@ -105,30 +106,32 @@ class Music(Cog):
 
         print(f"✅ Bot joined {channel.name}")
 
-        # Step 2: Ensure Lavalink session exists
+        # ✅ First attempt to create a session
         session_created = await self.create_lavalink_session()
+
+        # 🔄 Retry once if it fails
         if not session_created:
-            print("❌ Lavalink session failed to create!")
+            print("⚠️ Session creation failed! Retrying in 3 seconds...")
+            await asyncio.sleep(3)
+            session_created = await self.create_lavalink_session()
+
+        if not session_created:
             return await ctx.send("❌ Failed to create a Lavalink session. Try again later!")
 
         print(f"✅ Lavalink session `{self.session_id}` is ready")
 
-        # Step 3: Search for the track
         track = await self.search_track(query)
         if not track:
-            print("❌ No results found!")
             return await ctx.send("❌ No results found!")
 
         track_id = track.get("encoded")
         if not track_id:
-            print("❌ Failed to retrieve track data!")
             return await ctx.send("❌ Failed to retrieve track data!")
 
         print(f"✅ Found track: {track['info']['title']}")
 
-        # Step 4: Send play request to Lavalink
         payload = {
-            "track": {"encoded": track_id},  # ✅ Correct format!
+            "track": {"encoded": track_id},
             "paused": False,
             "volume": 100
         }
