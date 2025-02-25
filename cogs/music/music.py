@@ -1,3 +1,4 @@
+import discord
 from discord.ext.commands import Cog, command
 import aiohttp
 import asyncio
@@ -10,17 +11,18 @@ class Music(Cog):
         self.lavalink_ws = None
         self.node = {
             "host": "172.18.0.1",
-            "port": 8197,  # Lavalink port (make sure this matches your server config)
+            "port": 8197,
             "password": "youshallnotpass",
         }
-        self.players = {}
+        self.players = {}  # Keeps track of guild music states
+        self.queues = {}  # New: Track queues for each guild
 
         self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
         """Ensures session is created and connects to Lavalink."""
         await self.bot.wait_until_ready()
-        if self.session is None:  # Ensure session is only created once
+        if self.session is None:
             self.session = aiohttp.ClientSession()
         await self.connect_lavalink()
 
@@ -29,15 +31,14 @@ class Music(Cog):
         while True:
             try:
                 self.lavalink_ws = await self.session.ws_connect(
-                    f"ws://{self.node['host']}:{self.node['port']}/v4/websocket",
+                    f"http://{self.node['host']}:{self.node['port']}/v4/websocket",
                     headers={
                         "Authorization": self.node["password"],
-                        "User-Id": str(self.bot.user.id)  # Required for Lavalink v4
+                        "User-Id": str(self.bot.user.id),
                     }
                 )
-
                 print("🎶 Connected to Lavalink!")
-                return  # Exit loop when successfully connected
+                return
             except aiohttp.ClientError:
                 print("⚠️ Failed to connect to Lavalink. Retrying in 5 seconds...")
                 await asyncio.sleep(5)
@@ -48,11 +49,11 @@ class Music(Cog):
             await self.lavalink_ws.send_json(data)
 
     async def search_track(self, query: str):
-        """Searches for a track on Lavalink and handles errors properly."""
+        """Searches for a track on YouTube using Lavalink."""
         async with self.session.get(
-                f"http://{self.node['host']}:{self.node['port']}/v4/loadtracks",  # Updated for Lavalink v4
-                params={"identifier": f"ytsearch:{query}"},
-                headers={"Authorization": self.node["password"]}
+            f"http://{self.node['host']}:{self.node['port']}/v4/loadtracks",
+            params={"identifier": f"ytsearch:{query}"},
+            headers={"Authorization": self.node["password"]}
         ) as response:
             try:
                 data = await response.json()
@@ -60,24 +61,24 @@ class Music(Cog):
                 print(f"❌ Error parsing Lavalink response: {e}")
                 return None
 
-            # Check if the response contains the expected data
-            if "tracks" not in data or not isinstance(data["tracks"], list):
+            if "tracks" not in data or not isinstance(data["tracks"], list) or not data["tracks"]:
                 print(f"❌ Lavalink returned an unexpected response: {data}")
                 return None
 
-            return data["tracks"][0] if data["tracks"] else None
+            return data["tracks"][0]  # Return first search result
 
     async def join_voice(self, ctx):
-        """Joins the voice channel of the user if not already connected."""
+        """Joins the user's voice channel if not already connected."""
         if not ctx.author.voice:
             await ctx.send("❌ You must be in a voice channel!")
             return None
 
         channel = ctx.author.voice.channel
         if ctx.guild.voice_client:
-            return ctx.guild.voice_client.channel
+            return ctx.guild.voice_client.channel  # Already connected
 
         self.players[ctx.guild.id] = {"channel": channel.id}
+        self.queues[ctx.guild.id] = []  # Initialize queue
 
         await self.send_ws({
             "op": "voiceUpdate",
@@ -90,7 +91,7 @@ class Music(Cog):
 
     @command()
     async def play(self, ctx, *, query: str):
-        """Plays a song. Joins voice if not already in one."""
+        """Plays a song or adds it to the queue."""
         channel = await self.join_voice(ctx)
         if not channel:
             return
@@ -98,6 +99,23 @@ class Music(Cog):
         track = await self.search_track(query)
         if not track:
             return await ctx.send("❌ No results found!")
+
+        if ctx.guild.id not in self.queues:
+            self.queues[ctx.guild.id] = []
+
+        self.queues[ctx.guild.id].append(track)
+
+        if len(self.queues[ctx.guild.id]) == 1:  # Start playing if queue was empty
+            await self.play_next(ctx)
+
+        await ctx.send(f"🎵 Added to queue: **{track['info']['title']}**")
+
+    async def play_next(self, ctx):
+        """Plays the next song in the queue."""
+        if ctx.guild.id not in self.queues or not self.queues[ctx.guild.id]:
+            return
+
+        track = self.queues[ctx.guild.id].pop(0)
 
         await self.send_ws({
             "op": "play",
@@ -108,17 +126,32 @@ class Music(Cog):
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
     @command()
+    async def queue(self, ctx):
+        """Displays the queue."""
+        if ctx.guild.id not in self.queues or not self.queues[ctx.guild.id]:
+            return await ctx.send("📭 The queue is empty!")
+
+        queue_list = "\n".join(
+            [f"{i+1}. {track['info']['title']}" for i, track in enumerate(self.queues[ctx.guild.id])]
+        )
+
+        embed = discord.Embed(title="🎶 Music Queue", description=queue_list, color=discord.Color.blue())
+        await ctx.send(embed=embed)
+
+    @command()
     async def stop(self, ctx):
-        """Stops music and leaves voice."""
+        """Stops music and clears the queue."""
         if ctx.guild.id not in self.players:
             return await ctx.send("❌ I'm not playing anything!")
+
+        self.queues[ctx.guild.id] = []  # Clear queue
 
         await self.send_ws({
             "op": "stop",
             "guildId": str(ctx.guild.id)
         })
 
-        await ctx.send("🎵 Stopped the music!")
+        await ctx.send("🎵 Stopped the music and cleared the queue!")
 
         if ctx.guild.voice_client:
             await ctx.guild.voice_client.disconnect()
@@ -126,7 +159,7 @@ class Music(Cog):
 
     @command()
     async def skip(self, ctx):
-        """Skips the current song."""
+        """Skips the current song and plays the next one."""
         if ctx.guild.id not in self.players:
             return await ctx.send("❌ I'm not playing anything!")
 
@@ -137,7 +170,25 @@ class Music(Cog):
 
         await ctx.send("⏩ Skipped the song!")
 
+        await self.play_next(ctx)  # Play next song in queue
 
+    @command()
+    async def leave(self, ctx):
+        """Makes the bot leave the voice channel."""
+        if ctx.guild.id not in self.players:
+            return await ctx.send("❌ I'm not in a voice channel!")
+
+        await self.send_ws({
+            "op": "destroy",
+            "guildId": str(ctx.guild.id)
+        })
+
+        if ctx.guild.voice_client:
+            await ctx.guild.voice_client.disconnect()
+
+        del self.players[ctx.guild.id]
+        del self.queues[ctx.guild.id]
+        await ctx.send("👋 Left the voice channel!")
 
 
 def setup(bot):
