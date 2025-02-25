@@ -19,29 +19,15 @@ class Music(Cog):
         self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
-        """Ensures session is created and Lavalink session is registered."""
+        """Ensures session is created before making requests to Lavalink."""
         await self.bot.wait_until_ready()
         if self.session is None:
             self.session = aiohttp.ClientSession()
-        await self.create_lavalink_session()  # 🔹 Creates a session before using Lavalink!
 
-    async def create_lavalink_session(self):
-        """Creates a Lavalink session for the bot."""
-        async with self.session.post(
-            f"http://{self.node['host']}:{self.node['port']}/v4/sessions",
-            headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
-            json={"resumingKey": "my-session", "timeout": 60}
-        ) as response:
-            if response.status == 201:
-                print("✅ Lavalink session created successfully!")
-            else:
-                print(f"❌ Failed to create session: {await response.text()}")
-
-    async def send_ws(self, data: dict):
+    async def send_ws(self, guild_id, data: dict):
         """Sends a JSON payload to Lavalink using REST API."""
-        session_id = "my-session"
         async with self.session.patch(
-            f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{session_id}/players/{data['guildId']}",
+            f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.bot.user.id}/players/{guild_id}",
             headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
             json=data
         ) as response:
@@ -49,7 +35,7 @@ class Music(Cog):
                 print(f"❌ Failed to send data to Lavalink: {await response.text()}")
 
     async def search_track(self, query: str):
-        """Searches for a track on Lavalink and handles errors properly."""
+        """Searches for a track on Lavalink."""
         async with self.session.get(
             f"http://{self.node['host']}:{self.node['port']}/v4/loadtracks",
             params={"identifier": f"ytsearch:{query}"},
@@ -85,7 +71,7 @@ class Music(Cog):
 
         await asyncio.sleep(1)
 
-        await self.send_ws({
+        await self.send_ws(ctx.guild.id, {
             "guildId": str(ctx.guild.id),
             "channelId": str(channel.id),
             "selfDeaf": True
@@ -118,7 +104,7 @@ class Music(Cog):
 
         self.players[ctx.guild.id]["playing"] = True
 
-        await self.send_ws({
+        await self.send_ws(ctx.guild.id, {
             "track": track_id,
             "guildId": str(ctx.guild.id),
             "paused": False
@@ -138,7 +124,7 @@ class Music(Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        await self.send_ws({
+        await self.send_ws(ctx.guild.id, {
             "track": track_id,
             "guildId": str(ctx.guild.id),
             "paused": False
@@ -169,7 +155,7 @@ class Music(Cog):
         self.queues[ctx.guild.id] = []
         self.players[ctx.guild.id]["playing"] = False
 
-        await self.send_ws({
+        await self.send_ws(ctx.guild.id, {
             "op": "stop",
             "guildId": str(ctx.guild.id)
         })
@@ -186,7 +172,7 @@ class Music(Cog):
         if ctx.guild.id not in self.players:
             return await ctx.send("❌ I'm not playing anything!")
 
-        await self.send_ws({
+        await self.send_ws(ctx.guild.id, {
             "op": "stop",
             "guildId": str(ctx.guild.id)
         })
@@ -201,7 +187,7 @@ class Music(Cog):
         if ctx.guild.id not in self.players:
             return await ctx.send("❌ I'm not in a voice channel!")
 
-        await self.send_ws({
+        await self.send_ws(ctx.guild.id, {
             "op": "destroy",
             "guildId": str(ctx.guild.id)
         })
