@@ -97,25 +97,36 @@ class Music(Cog):
         """Plays a song. Joins voice if not already in one."""
         print(f"🎵 Play command called by {ctx.author} in {ctx.guild.name}")
 
-        channel = await self.join_voice(ctx)  # ✅ Ensure bot joins VC
+        # Step 1: Join voice channel
+        channel = await self.join_voice(ctx)
         if not channel:
+            print("❌ Bot failed to join voice!")
             return
 
-        # ✅ Ensure Lavalink session exists **before sending play request**
+        print(f"✅ Bot joined {channel.name}")
+
+        # Step 2: Ensure Lavalink session exists
         session_created = await self.create_lavalink_session()
         if not session_created:
+            print("❌ Lavalink session failed to create!")
             return await ctx.send("❌ Failed to create a Lavalink session. Try again later!")
 
-        await asyncio.sleep(2)  # ✅ Ensure Lavalink has time to process the session
+        print(f"✅ Lavalink session `{self.session_id}` is ready")
 
+        # Step 3: Search for the track
         track = await self.search_track(query)
         if not track:
+            print("❌ No results found!")
             return await ctx.send("❌ No results found!")
 
         track_id = track.get("encoded")
         if not track_id:
+            print("❌ Failed to retrieve track data!")
             return await ctx.send("❌ Failed to retrieve track data!")
 
+        print(f"✅ Found track: {track['info']['title']}")
+
+        # Step 4: Send play request to Lavalink
         payload = {
             "track": {"encoded": track_id},  # ✅ Correct format!
             "paused": False,
@@ -123,7 +134,13 @@ class Music(Cog):
         }
 
         print(f"📡 Sending play request to Lavalink: {payload}")
-        await self.send_lavalink(ctx.guild.id, payload)
+        response = await self.send_lavalink(ctx.guild.id, payload)
+
+        if response is None:
+            print("❌ Lavalink did not accept the request!")
+            return await ctx.send("❌ Something went wrong with playback!")
+
+        print("✅ Song started playing!")
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
     @command()
