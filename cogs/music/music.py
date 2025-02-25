@@ -12,26 +12,26 @@ class Music(commands.Cog):
             "port": 8197,
             "password": "youshallnotpass",
         }
-        self.players = {}  # Stores music player state
-        self.queues = {}  # Stores track queues
+        self.players = {}  # Tracks active players
+        self.queues = {}  # Track queues
 
         bot.loop.create_task(self.initialize())
 
     async def initialize(self):
-        """Ensures an HTTP session is created."""
+        """Ensures HTTP session is created."""
         await self.bot.wait_until_ready()
         if self.session is None:
             self.session = aiohttp.ClientSession()
 
-    async def send_lavalink(self, guild_id: int, data: dict, method="PATCH"):
-        """Sends a request to Lavalink's REST API."""
+    async def send_lavalink(self, guild_id: int, data: dict):
+        """Sends an update request to Lavalink (PATCH request)."""
         url = f"http://{self.node['host']}:{self.node['port']}/v4/players/{guild_id}"
         headers = {
             "Authorization": self.node["password"],
             "Content-Type": "application/json",
         }
 
-        async with self.session.request(method, url, headers=headers, json=data) as response:
+        async with self.session.patch(url, headers=headers, json=data) as response:
             if response.status not in (200, 204):
                 error_text = await response.text()
                 print(f"❌ Lavalink REST Error: {error_text}")
@@ -85,8 +85,8 @@ class Music(commands.Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # Play track via Lavalink REST API
-        await self.send_lavalink(ctx.guild.id, {"track": track_id, "paused": False}, method="PUT")
+        # **PATCH request (not PUT) to play the track**
+        await self.send_lavalink(ctx.guild.id, {"track": track_id, "paused": False})
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
@@ -97,7 +97,7 @@ class Music(commands.Cog):
             return await ctx.send("❌ I'm not playing anything!")
 
         self.queues[ctx.guild.id] = []  # Clear queue
-        await self.send_lavalink(ctx.guild.id, {"paused": True}, method="PATCH")
+        await self.send_lavalink(ctx.guild.id, {"paused": True})
         await ctx.guild.voice_client.disconnect()
 
         del self.players[ctx.guild.id]
@@ -109,7 +109,7 @@ class Music(commands.Cog):
         if ctx.guild.id not in self.players:
             return await ctx.send("❌ I'm not playing anything!")
 
-        await self.send_lavalink(ctx.guild.id, {"track": None}, method="PATCH")
+        await self.send_lavalink(ctx.guild.id, {"track": None})
         await ctx.send("⏩ Skipped the song!")
 
     @commands.command()
