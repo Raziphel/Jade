@@ -75,9 +75,8 @@ class Music(Cog):
             data = await response.json()
             return data["data"][0] if data["data"] else None
 
-
     async def join_voice(self, ctx):
-        """Properly joins a voice channel while manually checking connection status."""
+        """Forces the bot to join a voice channel using raw voice state updates."""
 
         print("🛠 DEBUG: `join_voice()` function started")
 
@@ -87,7 +86,7 @@ class Music(Cog):
             return None
 
         channel = ctx.author.voice.channel
-        print(f"🔊 Attempting to join {channel.name}")
+        print(f"🔊 Attempting to join {channel.name} using a raw voice state update")
 
         # ✅ If bot is already in VC, disconnect first
         if ctx.guild.voice_client:
@@ -98,42 +97,30 @@ class Music(Cog):
                 print(f"⚠️ Error while disconnecting: {e}")
             await asyncio.sleep(2)  # ✅ Ensure disconnection is processed
 
-        print(f"🚀 Connecting to {channel.name} using `channel.connect()`...")
+        print(f"🚀 Sending raw voice state update to force connection...")
 
         try:
-            vc = await asyncio.wait_for(channel.connect(), timeout=5)  # ⏳ Timeout after 5 seconds
-            await asyncio.sleep(2)  # ✅ Wait for Discord to process connection
+            # 🔹 Manually tell Discord to move the bot to the VC
+            await self.bot.ws.voice_state(ctx.guild.id, channel.id, self_mute=False, self_deaf=True)
 
-            # ✅ Manually check if bot is connected
-            for _ in range(5):  # Retry check for 5 seconds
-                await asyncio.sleep(1)
-                vc = ctx.guild.voice_client  # Refresh the VC object
-                if vc and vc.is_connected():
-                    print(f"✅ Successfully connected to {channel.name}")
-                    return vc.channel
+            await asyncio.sleep(3)  # ✅ Give Discord time to update
 
-            print("⏳ Bot joined VC but never registered as 'connected'! Retrying...")
-            await vc.disconnect()
-            await asyncio.sleep(2)  # Wait for disconnect
-            vc = await asyncio.wait_for(channel.connect(), timeout=5)  # Try again
-            await asyncio.sleep(2)
+            vc = ctx.guild.voice_client
+            if not vc:
+                print("⚠️ Voice client is still None, assigning manually...")
+                vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
-            for _ in range(5):
-                await asyncio.sleep(1)
-                vc = ctx.guild.voice_client
-                if vc and vc.is_connected():
-                    print(f"✅ Successfully connected to {channel.name} (after retry)")
-                    return vc.channel
+            if vc and vc.is_connected():
+                print(f"✅ Successfully connected to {channel.name}")
+                return vc.channel
 
-            print("❌ Voice connection completely failed!")
+            print("❌ Bot failed to join voice!")
             return None
 
-        except asyncio.TimeoutError:
-            print("⏳ TimeoutError: `channel.connect()` took too long! Skipping connection attempt.")
-            return None
         except Exception as e:
-            print(f"❌ Exception occurred while connecting to voice: {e}")
+            print(f"❌ Exception occurred while forcing VC connection: {e}")
             return None
+
 
     @command()
     async def play(self, ctx, *, query: str):
