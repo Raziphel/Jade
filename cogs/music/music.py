@@ -72,10 +72,10 @@ class Music(commands.Cog):
 
         return channel
 
-    @commands.command()
+    @command()
     async def play(self, ctx, *, query: str):
-        """Plays a song or adds to queue."""
-        channel = await self.join_voice(ctx)
+        """Plays a song. Joins voice if not already in one."""
+        channel = await self.join_voice(ctx)  # Ensure bot joins VC
         if not channel:
             return
 
@@ -83,15 +83,15 @@ class Music(commands.Cog):
         if not track:
             return await ctx.send("❌ No results found!")
 
-        track_id = track.get("encoded")
+        track_id = track.get("encoded")  # Lavalink v4 requires "encoded" only!
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # Send play request (this auto-creates the Lavalink session)
+        # Send play request to Lavalink
         await self.send_lavalink(ctx.guild.id, {
-            "track": {"encoded": track_id},  # 🔹 FIXED: Now track is an object!
+            "track": track_id,  # 🔹 FIXED: Sending only "encoded" string, NOT an object!
             "paused": False,
-            "volume": 100  # Default volume
+            "volume": 100
         })
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
