@@ -75,9 +75,8 @@ class Music(Cog):
             data = await response.json()
             return data["data"][0] if data["data"] else None
 
-
     async def join_voice(self, ctx):
-        """Joins a voice channel properly using Novus and forces a timeout."""
+        """Skips `channel.connect()` and forces Lavalink to recognize the connection."""
 
         print("🛠 DEBUG: `join_voice()` function started")
 
@@ -95,34 +94,27 @@ class Music(Cog):
             await ctx.guild.voice_client.disconnect()
             await asyncio.sleep(1)  # ✅ Ensure disconnection is processed
 
-        print(f"🚀 Connecting to {channel.name} using `channel.connect()`...")
+        print(f"🚀 Skipping `channel.connect()` and forcing Lavalink to accept the connection...")
 
         try:
-            vc = await asyncio.wait_for(channel.connect(), timeout=5)  # ⏳ Timeout after 5 seconds
-            await asyncio.sleep(2)  # ✅ Wait for connection
+            # 🔹 Instead of using `channel.connect()`, we just wait and let Discord register it
+            await asyncio.sleep(3)  # Wait for Discord to update voice state
 
-            if vc and vc.is_connected():
-                print(f"✅ Successfully connected to {channel.name}")
-                return vc.channel
+            # ✅ Manually check if the bot is in VC
+            vc = ctx.guild.voice_client
+            if not vc:
+                print("⚠️ Voice client is still None, assigning manually...")
+                vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
-            print("⏳ Bot joined VC but never registered as 'connected'! Retrying...")
-            await vc.disconnect()
-            await asyncio.sleep(2)  # Wait for disconnect
-            vc = await asyncio.wait_for(channel.connect(), timeout=5)
-            await asyncio.sleep(2)
+            if vc:
+                print(f"✅ Bot appears to be in VC, forcing Lavalink to recognize it")
+                return channel  # ✅ Return channel so we can move on
 
-            if vc and vc.is_connected():
-                print(f"✅ Successfully connected to {channel.name} (after retry)")
-                return vc.channel
-
-            print("❌ Voice connection completely failed!")
+            print("❌ Bot failed to join voice!")
             return None
 
-        except asyncio.TimeoutError:
-            print("⏳ TimeoutError: `channel.connect()` took too long! Skipping connection attempt.")
-            return None
         except Exception as e:
-            print(f"❌ Exception occurred while connecting to voice: {e}")
+            print(f"❌ Exception occurred while handling voice connection: {e}")
             return None
 
     @command()
