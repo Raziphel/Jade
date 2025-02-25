@@ -2,6 +2,7 @@ import discord
 from discord.ext.commands import Cog, command
 import aiohttp
 import asyncio
+import uuid  # Used to generate session IDs
 
 
 class Music(Cog):
@@ -15,6 +16,7 @@ class Music(Cog):
         }
         self.players = {}
         self.queues = {}
+        self.session_id = str(uuid.uuid4())  # Generate a session ID
 
         self.bot.loop.create_task(self.initialize())
 
@@ -23,10 +25,24 @@ class Music(Cog):
         await self.bot.wait_until_ready()
         if self.session is None:
             self.session = aiohttp.ClientSession()
+        await self.create_lavalink_session()
+
+    async def create_lavalink_session(self):
+        """Creates a Lavalink session."""
+        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
+        async with self.session.post(
+            url,
+            headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
+            json={"resuming": False, "timeout": 60}
+        ) as response:
+            if response.status not in [200, 204]:
+                print(f"❌ Failed to create Lavalink session: {await response.text()}")
+            else:
+                print(f"✅ Created Lavalink session: {self.session_id}")
 
     async def send_lavalink(self, guild_id, data: dict, method="PUT"):
-        """Sends a request to Lavalink v4 API."""
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/players/{guild_id}"
+        """Sends a request to Lavalink using the correct session-based endpoint."""
+        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{guild_id}"
 
         async with self.session.request(
             method, url,
