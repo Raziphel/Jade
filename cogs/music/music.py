@@ -87,14 +87,17 @@ class Music(commands.Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # Send play request to Lavalink
-        await self.send_lavalink(ctx.guild.id, {
-            "track": track_id,  # 🔹 FIXED: Sending only "encoded" string, NOT an object!
+        # 🔹 FIXED: Sending only "encoded" string, NOT an object!
+        payload = {
+            "track": track_id,  # ✅ Correct format
             "paused": False,
             "volume": 100
-        })
+        }
+
+        await self.send_lavalink(ctx.guild.id, payload)
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
+
 
     @commands.command()
     async def stop(self, ctx):
