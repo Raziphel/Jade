@@ -82,16 +82,20 @@ class Music(Cog):
         if ctx.guild.voice_client:  # If already connected, return current channel
             return ctx.guild.voice_client.channel
 
+        # Tell Discord to connect the bot to VC (Novus-compatible)
+        await ctx.guild.change_voice_state(channel=channel)
+
+        # Store player info
         self.players[ctx.guild.id] = {"channel": channel.id}
 
-        # Tell Lavalink to connect to the voice channel
+        # Send Lavalink voice update
         await self.send_ws({
             "op": "voiceUpdate",
             "guildId": str(ctx.guild.id),
             "channelId": str(channel.id)
         })
 
-        await asyncio.sleep(1)  # Give Lavalink a second to process the connection
+        await asyncio.sleep(1)  # Give Lavalink time to process the connection
 
         await ctx.send(f"🎶 Joined **{channel.name}**!")
         return channel
@@ -119,7 +123,6 @@ class Music(Cog):
         })
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
-
 
     async def play_next(self, ctx):
         """Plays the next song in the queue."""
