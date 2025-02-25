@@ -7,51 +7,26 @@ import asyncio
 class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.session = aiohttp.ClientSession()
+        self.session = None  # Delay session creation
         self.node = {
-            "host": "172.18.0.1",  # Lavalink host
-            "port": 8197,  # Lavalink port
-            "password": "youshallnotpass",  # Lavalink password
+            "host": "172.18.0.1",
+            "port": 8197,
+            "password": "youshallnotpass",
         }
-        self.session_id = None  # Stores Lavalink session ID
-        self.players = {}  # Tracks active players
-        self.queues = {}  # Tracks song queues
+        self.players = {}
+        self.queues = {}
 
-        self.bot.loop.create_task(self.connect_lavalink())
+        self.bot.loop.create_task(self.initialize())  # Run async init function
 
-    async def connect_lavalink(self):
-        """Connects to Lavalink WebSocket and retrieves session ID."""
+    async def initialize(self):
+        """Ensures session is created and Lavalink is connected."""
         await self.bot.wait_until_ready()
+        if self.session is None:
+            self.session = aiohttp.ClientSession()  # Fixes 'no running event loop' error
 
-        while True:
-            try:
-                self.lavalink_ws = await self.session.ws_connect(
-                    f"ws://{self.node['host']}:{self.node['port']}/v4/websocket",
-                    headers={
-                        "Authorization": self.node["password"],
-                        "User-Id": str(self.bot.user.id)
-                    }
-                )
-
-                # Wait for Lavalink's "ready" message to get session ID
-                msg = await self.lavalink_ws.receive_json()
-                if msg.get("op") == "ready":
-                    self.session_id = msg["sessionId"]
-                    print(f"🎶 Lavalink Ready! Session ID: {self.session_id}")
-                    break
-                else:
-                    print(f"⚠️ Unexpected Lavalink WS message: {msg}")
-            except aiohttp.ClientError as e:
-                print(f"⚠️ Lavalink connection error: {e}")
-                await asyncio.sleep(5)
-
-    async def send_ws(self, guild_id, data: dict):
-        """Sends a PATCH request to Lavalink REST API."""
-        if not self.session_id:
-            print("❌ Cannot send data, Lavalink session ID is missing!")
-            return
-
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{guild_id}"
+    async def send_lavalink(self, guild_id, data: dict):
+        """Sends a REST API request to Lavalink."""
+        url = f"http://{self.node['host']}:{self.node['port']}/v4/players/{guild_id}"
 
         async with self.session.patch(
             url,
@@ -77,10 +52,8 @@ class Music(Cog):
                 print(f"❌ Error parsing Lavalink response: {e}")
                 return None
 
-            print(f"🔍 Lavalink Response: {data}")
-
             if "data" not in data or not isinstance(data["data"], list):
-                print(f"❌ Unexpected Lavalink response structure: {data}")
+                print(f"❌ Unexpected Lavalink response: {data}")
                 return None
 
             return data["data"][0] if data["data"] else None
@@ -95,17 +68,17 @@ class Music(Cog):
         if ctx.guild.voice_client:
             return ctx.guild.voice_client.channel
 
-        await ctx.guild.change_voice_state(channel=channel)  # Novus-compatible VC join
+        await ctx.guild.change_voice_state(channel=channel)  # Works with Novus/Legacy dpy
 
         self.players[ctx.guild.id] = {"channel": channel.id}
 
-        await self.send_ws(ctx.guild.id, {
+        await self.send_lavalink(ctx.guild.id, {
             "guildId": str(ctx.guild.id),
             "channelId": str(channel.id),
             "selfDeaf": True
         })
 
-        await asyncio.sleep(1)  # Allow time for Lavalink to process connection
+        await asyncio.sleep(1)
         await ctx.send(f"🎶 Joined **{channel.name}**!")
         return channel
 
@@ -120,11 +93,11 @@ class Music(Cog):
         if not track:
             return await ctx.send("❌ No results found!")
 
-        track_id = track.get("encoded")  # Lavalink v4 fix
+        track_id = track.get("encoded")
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        await self.send_ws(ctx.guild.id, {
+        await self.send_lavalink(ctx.guild.id, {
             "track": track_id,
             "guildId": str(ctx.guild.id),
             "paused": False
@@ -143,10 +116,10 @@ class Music(Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        await self.send_ws(ctx.guild.id, {
-            "op": "play",
+        await self.send_lavalink(ctx.guild.id, {
+            "track": track_id,
             "guildId": str(ctx.guild.id),
-            "track": track_id
+            "paused": False
         })
 
         track_info = track_data["info"]
@@ -173,8 +146,8 @@ class Music(Cog):
 
         self.queues[ctx.guild.id] = []
 
-        await self.send_ws(ctx.guild.id, {
-            "op": "stop",
+        await self.send_lavalink(ctx.guild.id, {
+            "paused": True,
             "guildId": str(ctx.guild.id)
         })
 
@@ -190,8 +163,8 @@ class Music(Cog):
         if ctx.guild.id not in self.players:
             return await ctx.send("❌ I'm not playing anything!")
 
-        await self.send_ws(ctx.guild.id, {
-            "op": "stop",
+        await self.send_lavalink(ctx.guild.id, {
+            "paused": True,
             "guildId": str(ctx.guild.id)
         })
 
@@ -204,8 +177,8 @@ class Music(Cog):
         if ctx.guild.id not in self.players:
             return await ctx.send("❌ I'm not in a voice channel!")
 
-        await self.send_ws(ctx.guild.id, {
-            "op": "destroy",
+        await self.send_lavalink(ctx.guild.id, {
+            "paused": True,
             "guildId": str(ctx.guild.id)
         })
 
@@ -218,5 +191,5 @@ class Music(Cog):
 
 
 def setup(bot):
-    """Loads the cog into the bot."""
+    """Loads the cog into the bot (legacy discord.py)."""
     bot.add_cog(Music(bot))
