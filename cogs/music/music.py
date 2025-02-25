@@ -26,14 +26,14 @@ class Music(commands.Cog):
             self.session = aiohttp.ClientSession()
 
     async def send_lavalink(self, guild_id: int, data: dict):
-        """Sends an update request to Lavalink (PATCH request)."""
+        """Sends a correctly formatted update request to Lavalink (PUT instead of PATCH)."""
         url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{guild_id}"
         headers = {
             "Authorization": self.node["password"],
             "Content-Type": "application/json",
         }
 
-        async with self.session.patch(url, headers=headers, json=data) as response:
+        async with self.session.put(url, headers=headers, json=data) as response:  # FIXED: Changed PATCH to PUT
             if response.status not in (200, 204):
                 error_text = await response.text()
                 print(f"❌ Lavalink REST Error: {error_text}")
@@ -88,7 +88,11 @@ class Music(commands.Cog):
             return await ctx.send("❌ Failed to retrieve track data!")
 
         # Send play request (this auto-creates the Lavalink session)
-        await self.send_lavalink(ctx.guild.id, {"track": track_id, "paused": False})
+        await self.send_lavalink(ctx.guild.id, {
+            "track": {"encoded": track_id},  # 🔹 FIXED: Now track is an object!
+            "paused": False,
+            "volume": 100  # Default volume
+        })
 
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
