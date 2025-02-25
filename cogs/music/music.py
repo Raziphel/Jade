@@ -25,16 +25,19 @@ class Music(Cog):
         if self.session is None:
             self.session = aiohttp.ClientSession()
 
-    async def create_player_session(self, guild_id: int):
-        """Ensures a player session exists for the guild."""
+    async def create_lavalink_session(self):
+        """Creates a new Lavalink session if it doesn't exist."""
         url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
         headers = {"Authorization": self.node["password"], "Content-Type": "application/json"}
 
-        async with self.session.patch(url, headers=headers, json={}) as response:  # ✅ FIXED: Use PATCH, not POST!
-            if response.status not in (200, 204):
-                print(f"❌ Failed to create player session: {await response.text()}")
+        async with self.session.patch(url, headers=headers, json={}) as response:
+            if response.status in (200, 204):
+                print(f"✅ Lavalink session {self.session_id} created successfully.")
+                return True
+            else:
+                error_text = await response.text()
+                print(f"❌ Failed to create Lavalink session: {error_text}")
                 return False
-        return True
 
     async def send_lavalink(self, guild_id: int, data: dict):
         """Sends a correctly formatted update request to Lavalink."""
@@ -96,8 +99,10 @@ class Music(Cog):
         if not channel:
             return
 
-        # ✅ FIXED: Correctly create the player session
-        await self.create_player_session(ctx.guild.id)
+        # ✅ Ensure the Lavalink session exists before playing
+        session_created = await self.create_lavalink_session()
+        if not session_created:
+            return await ctx.send("❌ Failed to create a Lavalink session. Try again later!")
 
         track = await self.search_track(query)
         if not track:
@@ -108,12 +113,11 @@ class Music(Cog):
             return await ctx.send("❌ Failed to retrieve track data!")
 
         payload = {
-            "track": {"encoded": track_id},  # ✅ Lavalink v4 expects this format!
+            "track": {"encoded": track_id},  # ✅ Correct format!
             "paused": False,
             "volume": 100
         }
 
-        # ✅ FIXED: Only using PATCH (no POST mistakes!)
         await self.send_lavalink(ctx.guild.id, payload)
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
