@@ -91,24 +91,39 @@ class Music(Cog):
 
     @command()
     async def play(self, ctx, *, query: str):
-        """Plays a song or adds it to the queue."""
+        """Plays a song from YouTube or adds it to the queue. Joins voice if not already in one."""
+
+        # Automatically join the user's voice channel if not already in one
         channel = await self.join_voice(ctx)
         if not channel:
             return
 
-        track = await self.search_track(query)
-        if not track:
+        # Check if the input is a URL or a search term
+        if query.startswith("http"):
+            search_query = query  # Direct URL
+        else:
+            search_query = f"ytsearch:{query}"  # Search for a track on YouTube
+
+        # Search for the track
+        track_data = await self.search_track(search_query)
+        if not track_data:
             return await ctx.send("❌ No results found!")
 
+        # Extract track info
+        track = track_data["info"]
+        track_url = track["uri"]
+        track_title = track["title"]
+
+        # Add track to queue
         if ctx.guild.id not in self.queues:
             self.queues[ctx.guild.id] = []
 
-        self.queues[ctx.guild.id].append(track)
+        self.queues[ctx.guild.id].append(track_data)
 
-        if len(self.queues[ctx.guild.id]) == 1:  # Start playing if queue was empty
+        if len(self.queues[ctx.guild.id]) == 1:  # If queue was empty, start playing
             await self.play_next(ctx)
 
-        await ctx.send(f"🎵 Added to queue: **{track['info']['title']}**")
+        await ctx.send(f"🎵 **Added to queue:** [{track_title}]({track_url})")
 
     async def play_next(self, ctx):
         """Plays the next song in the queue."""
