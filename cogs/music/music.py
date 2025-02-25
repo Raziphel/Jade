@@ -1,10 +1,10 @@
 import discord
-from discord.ext import commands
+from discord.ext import command, Cog
 import aiohttp
 import asyncio
 import uuid  # Lavalink needs a unique session ID
 
-class Music(commands.Cog):
+class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = None
