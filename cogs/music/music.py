@@ -1,5 +1,5 @@
 import discord
-from discord.ext import command, Cog
+from discord.ext.commands import command, Cog, cog
 import aiohttp
 import asyncio
 import uuid  # Lavalink needs a unique session ID
