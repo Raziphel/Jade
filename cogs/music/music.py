@@ -75,8 +75,9 @@ class Music(Cog):
             data = await response.json()
             return data["data"][0] if data["data"] else None
 
+
     async def join_voice(self, ctx):
-        """Joins a voice channel properly using Novus (discord.py 1.7.3 behavior)."""
+        """Joins a voice channel properly using Novus and forces a timeout."""
 
         print("🛠 DEBUG: `join_voice()` function started")
 
@@ -97,7 +98,7 @@ class Music(Cog):
         print(f"🚀 Connecting to {channel.name} using `channel.connect()`...")
 
         try:
-            vc = await channel.connect()  # ✅ Correct method for Novus
+            vc = await asyncio.wait_for(channel.connect(), timeout=5)  # ⏳ Timeout after 5 seconds
             await asyncio.sleep(2)  # ✅ Wait for connection
 
             if vc and vc.is_connected():
@@ -107,7 +108,7 @@ class Music(Cog):
             print("⏳ Bot joined VC but never registered as 'connected'! Retrying...")
             await vc.disconnect()
             await asyncio.sleep(2)  # Wait for disconnect
-            vc = await channel.connect()
+            vc = await asyncio.wait_for(channel.connect(), timeout=5)
             await asyncio.sleep(2)
 
             if vc and vc.is_connected():
@@ -117,6 +118,9 @@ class Music(Cog):
             print("❌ Voice connection completely failed!")
             return None
 
+        except asyncio.TimeoutError:
+            print("⏳ TimeoutError: `channel.connect()` took too long! Skipping connection attempt.")
+            return None
         except Exception as e:
             print(f"❌ Exception occurred while connecting to voice: {e}")
             return None
