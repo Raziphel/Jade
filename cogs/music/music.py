@@ -76,7 +76,7 @@ class Music(Cog):
             return data["data"][0] if data["data"] else None
 
     async def join_voice(self, ctx):
-        """Forces the bot to join a voice channel by updating its voice state manually."""
+        """Joins a voice channel properly using Novus (discord.py 1.7.3 behavior)."""
 
         print("🛠 DEBUG: `join_voice()` function started")
 
@@ -91,34 +91,34 @@ class Music(Cog):
         # ✅ If bot is already in VC, disconnect first
         if ctx.guild.voice_client:
             print("⚠️ Bot is already connected. Disconnecting first...")
-            await ctx.guild.voice_client.disconnect(force=True)
-            await asyncio.sleep(2)  # ✅ Ensure disconnection is processed
+            await ctx.guild.voice_client.disconnect()
+            await asyncio.sleep(1)  # ✅ Ensure disconnection is processed
 
-        print(f"🚀 Forcing voice state update to join {channel.name}...")
+        print(f"🚀 Connecting to {channel.name} using `channel.connect()`...")
 
         try:
-            await ctx.guild.change_voice_state(channel=channel, self_deaf=True)  # 🔹 Force move bot to VC
-            await asyncio.sleep(3)  # ✅ Give Discord time to process
+            vc = await channel.connect()  # ✅ Correct method for Novus
+            await asyncio.sleep(2)  # ✅ Wait for connection
 
-            if ctx.guild.voice_client and ctx.guild.voice_client.is_connected():
+            if vc and vc.is_connected():
                 print(f"✅ Successfully connected to {channel.name}")
-                return ctx.guild.voice_client.channel  # ✅ Return channel if connection works
+                return vc.channel
 
             print("⏳ Bot joined VC but never registered as 'connected'! Retrying...")
-            await ctx.guild.voice_client.disconnect()
+            await vc.disconnect()
             await asyncio.sleep(2)  # Wait for disconnect
-            await ctx.guild.change_voice_state(channel=channel, self_deaf=True)  # Try again
-            await asyncio.sleep(3)
+            vc = await channel.connect()
+            await asyncio.sleep(2)
 
-            if ctx.guild.voice_client and ctx.guild.voice_client.is_connected():
+            if vc and vc.is_connected():
                 print(f"✅ Successfully connected to {channel.name} (after retry)")
-                return ctx.guild.voice_client.channel
+                return vc.channel
 
             print("❌ Voice connection completely failed!")
             return None
 
         except Exception as e:
-            print(f"❌ Exception occurred while forcing VC connection: {e}")
+            print(f"❌ Exception occurred while connecting to voice: {e}")
             return None
 
     @command()
