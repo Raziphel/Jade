@@ -73,26 +73,29 @@ class Music(Cog):
             return data["data"][0] if data["data"] else None
 
     async def join_voice(self, ctx):
-        """Joins the user's voice channel if not already connected."""
+        """Joins the voice channel of the user if not already connected."""
         if not ctx.author.voice:
             await ctx.send("❌ You must be in a voice channel!")
             return None
 
         channel = ctx.author.voice.channel
-        if ctx.guild.voice_client:
-            return ctx.guild.voice_client.channel  # Already connected
+        if ctx.guild.voice_client:  # If already connected, return current channel
+            return ctx.guild.voice_client.channel
 
         self.players[ctx.guild.id] = {"channel": channel.id}
-        self.queues[ctx.guild.id] = []  # Initialize queue
 
+        # Tell Lavalink to connect to the voice channel
         await self.send_ws({
             "op": "voiceUpdate",
             "guildId": str(ctx.guild.id),
             "channelId": str(channel.id)
         })
 
+        await asyncio.sleep(1)  # Give Lavalink a second to process the connection
+
         await ctx.send(f"🎶 Joined **{channel.name}**!")
         return channel
+
 
     @command()
     async def play(self, ctx, *, query: str):
