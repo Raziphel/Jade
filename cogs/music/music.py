@@ -2,6 +2,7 @@ import discord
 from discord.ext.commands import Cog, command
 import aiohttp
 import asyncio
+import uuid  # Used to generate unique session IDs
 
 
 class Music(Cog):
@@ -25,23 +26,21 @@ class Music(Cog):
         if self.session is None:
             self.session = aiohttp.ClientSession()
 
-        await self.fetch_lavalink_session()  # Get the correct session ID
+        await self.create_lavalink_session()  # Create a session before playing music
 
-    async def fetch_lavalink_session(self):
-        """Retrieves Lavalink's automatically created session ID."""
-        async with self.session.get(
-            f"http://{self.node['host']}:{self.node['port']}/v4/sessions",
-            headers={"Authorization": self.node["password"]}
+    async def create_lavalink_session(self):
+        """Creates a new session for Lavalink v4 (fixes 'No endpoint GET /v4/sessions')."""
+        session_id = str(uuid.uuid4())  # Generate a unique session ID
+        async with self.session.post(
+            f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{session_id}",
+            headers={"Authorization": self.node["password"], "Content-Type": "application/json"},
+            json={"resuming": True, "timeout": 60}
         ) as response:
-            if response.status == 200:
-                data = await response.json()
-                if isinstance(data, list) and len(data) > 0:
-                    self.lavalink_session_id = data[0]["id"]  # Store session ID
-                    print(f"✅ Lavalink Session ID: {self.lavalink_session_id}")
-                else:
-                    print("❌ No active Lavalink session found!")
+            if response.status == 201:  # 201 = Session Created
+                self.lavalink_session_id = session_id  # Store the session ID
+                print(f"✅ Lavalink Session Created: {self.lavalink_session_id}")
             else:
-                print(f"❌ Failed to retrieve Lavalink session: {await response.text()}")
+                print(f"❌ Failed to create Lavalink session: {await response.text()}")
 
     async def send_ws(self, guild_id, data: dict):
         """Sends a JSON payload to Lavalink using REST API."""
