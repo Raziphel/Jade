@@ -4,6 +4,7 @@ import aiohttp
 import asyncio
 import uuid  # Lavalink needs a unique session ID
 
+
 class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -27,15 +28,12 @@ class Music(Cog):
 
     async def create_lavalink_session(self):
         """Creates a new Lavalink session if it doesn't exist."""
-
-        print(f"🛠 DEBUG: `create_lavalink_session()` called for session `{self.session_id}`")
-
         url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}"
         headers = {"Authorization": self.node["password"], "Content-Type": "application/json"}
 
-        async with self.session.patch(url, headers=headers, json={}) as response:
-            print(f"📡 DEBUG: Sent PATCH request to Lavalink, received status {response.status}")
+        print(f"📡 Creating Lavalink session: {self.session_id}")
 
+        async with self.session.patch(url, headers=headers, json={}) as response:
             if response.status in (200, 204):
                 print(f"✅ Lavalink session `{self.session_id}` created successfully.")
                 return True
@@ -62,7 +60,6 @@ class Music(Cog):
 
             print(f"✅ Lavalink response: {response.status}")  # Debugging log
             return await response.json() if response.status == 200 else None
-
 
     async def search_track(self, query: str):
         """Searches for a track on Lavalink."""
@@ -91,16 +88,28 @@ class Music(Cog):
         channel = ctx.author.voice.channel
         print(f"🔊 Attempting to join {channel.name}")
 
+        # ✅ If bot is already in a different VC, disconnect first
         if ctx.guild.voice_client:
-            print("✅ Already connected to voice")
-            return ctx.guild.voice_client.channel
+            print("⚠️ Bot is already in a VC. Disconnecting first...")
+            await ctx.guild.voice_client.disconnect()
+            await asyncio.sleep(1)  # ✅ Ensure disconnection is processed
 
         print(f"🚀 Connecting to {channel.name}...")
-        vc = await channel.connect()
-        await asyncio.sleep(2)
 
-        print(f"✅ Successfully connected to {channel.name}")
-        return vc.channel
+        try:
+            vc = await channel.connect()
+            await asyncio.sleep(2)  # ✅ Allow time for connection
+
+            if not vc.is_connected():  # ✅ Check if bot successfully connected
+                print("❌ Voice connection failed!")
+                return None
+
+            print(f"✅ Successfully connected to {channel.name}")
+            return vc.channel
+
+        except Exception as e:
+            print(f"❌ Exception occurred while connecting to voice: {e}")
+            return None
 
     @command()
     async def play(self, ctx, *, query: str):
@@ -155,42 +164,13 @@ class Music(Cog):
         await ctx.send(f"🎵 Now playing: **{track['info']['title']}**")
 
     @command()
-    async def stop(self, ctx):
-        """Stops music, clears queue, and destroys the player session."""
-        if ctx.guild.id not in self.players:
-            return await ctx.send("❌ I'm not playing anything!")
-
-        self.queues[ctx.guild.id] = []  # Clear queue
-        await self.send_lavalink(ctx.guild.id, {"track": None})  # Stop playback
-
-        # Destroy Lavalink player session
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{ctx.guild.id}"
-        headers = {"Authorization": self.node["password"]}
-
-        async with self.session.delete(url, headers=headers) as response:
-            if response.status in (200, 204):
-                del self.players[ctx.guild.id]
-                await ctx.guild.voice_client.disconnect()
-                await ctx.send("🎵 Stopped the music and left VC!")
-            else:
-                await ctx.send("❌ Failed to properly stop the player!")
-
-    @command()
-    async def skip(self, ctx):
-        """Skips the current song."""
-        if ctx.guild.id not in self.players:
-            return await ctx.send("❌ I'm not playing anything!")
-
-        await self.send_lavalink(ctx.guild.id, {"track": None})
-        await ctx.send("⏩ Skipped the song!")
-
-    @command()
     async def leave(self, ctx):
         """Disconnects the bot from the voice channel."""
         if ctx.guild.voice_client:
             await ctx.guild.voice_client.disconnect()
             del self.players[ctx.guild.id]
             await ctx.send("👋 Left the voice channel!")
+
 
 def setup(bot):
     bot.add_cog(Music(bot))
