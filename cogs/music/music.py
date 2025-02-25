@@ -15,6 +15,7 @@ class Music(Cog):
         }
         self.players = {}
         self.queues = {}
+        self.session_id = None  # NEW: Store Lavalink session ID
 
         self.bot.loop.create_task(self.initialize())
 
@@ -23,10 +24,32 @@ class Music(Cog):
         await self.bot.wait_until_ready()
         if self.session is None:
             self.session = aiohttp.ClientSession()
+        await self.get_lavalink_session()
+
+    async def get_lavalink_session(self):
+        """Fetches the Lavalink session ID."""
+        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions"
+
+        async with self.session.get(url, headers={"Authorization": self.node["password"]}) as response:
+            if response.status == 200:
+                data = await response.json()
+                if isinstance(data, list) and data:
+                    self.session_id = data[0]["id"]
+                    print(f"✅ Lavalink Session ID: {self.session_id}")
+                else:
+                    print("❌ No active Lavalink sessions found.")
+            else:
+                print(f"❌ Failed to retrieve Lavalink session: {await response.text()}")
 
     async def send_lavalink(self, guild_id, data: dict, method="PATCH"):
-        """Sends a request to Lavalink using the correct `/v4/player/{guildId}` endpoint."""
-        url = f"http://{self.node['host']}:{self.node['port']}/v4/player/{guild_id}"
+        """Sends a request to Lavalink using the correct `/v4/sessions/{sessionId}/players/{guildId}` endpoint."""
+        if not self.session_id:
+            await self.get_lavalink_session()
+            if not self.session_id:
+                print("❌ No Lavalink session available!")
+                return
+
+        url = f"http://{self.node['host']}:{self.node['port']}/v4/sessions/{self.session_id}/players/{guild_id}"
 
         async with self.session.request(
             method, url,
@@ -95,7 +118,6 @@ class Music(Cog):
         if not track_id:
             return await ctx.send("❌ Failed to retrieve track data!")
 
-        # Send `PATCH` request to start playing the track
         await self.send_lavalink(ctx.guild.id, {
             "track": track_id,
             "guildId": str(ctx.guild.id),
