@@ -19,9 +19,9 @@ class RoleHandler(Cog):
 
         embeds = [
             Embed(description=f"# Age\n```\nLying about your age will result in a ban!\n```\n"
-                              f"> 🚬<@&{self.bot.config['age_roles']['adult']}>"
+                              f"> 🚬 **Adult Role**"
                               "`Doesn't give NSFW access, just says you're an adult!`\n"
-                              f"> 🍼<@&{self.bot.config['age_roles']['underage']}>"
+                              f"> 🍼 **Underage Role**"
                               "`Given automatically if no age role selected.`\n"
                               f"> 🐾<@&{self.bot.config['access_roles']['nsfw']}>"
                               "`Access requires staff to give you this role after some kind of proof is provided.`", color=0x8f00f8),
