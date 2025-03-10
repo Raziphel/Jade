@@ -8,12 +8,12 @@ from discord import AllowedMentions
 import utils
 from utils.database import DatabaseConnection
 
-#+ ------------------------- Serpent Main Class
-class Serpent(commands.AutoShardedBot):
+#+ ------------------------- Jade Main Class
+class Jade(commands.AutoShardedBot):
     def __init__(self, config: str, secret: str, *args, logger: logging.Logger = None, **kwargs):
         super().__init__(*args, fetch_offline_members=True, guild_subscriptions=True, allowed_mentions = AllowedMentions(roles=True, users=True, everyone=True), **kwargs)
 
-        self.logger = logger or logging.getLogger("Serpent")
+        self.logger = logger or logging.getLogger("Jade")
         self.config = config
         self.secret = secret
 

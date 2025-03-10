@@ -3,11 +3,11 @@ from glob import glob
 
 from discord import Intents
 
-from serpent import Serpent
+from jade import Jade
 
 
 intents = Intents.all()
-bot = Serpent(
+bot = Jade(
     command_prefix=["."],
     config="config/config.toml",
     secret="config/secret.toml",

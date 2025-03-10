@@ -74,7 +74,7 @@ class Verification(Cog):
 
         try:
             # Gather verification information
-            table_data['invited'] = await get_input("Where did you receive an invitation to Serpent's Garden from?")
+            table_data['invited'] = await get_input("Where did you receive an invitation to Razi's Realm from?")
             table_data['reason'] = await get_input("What is your reason for joining?")
 
             age_content = await get_input("How old are you?")
