@@ -59,7 +59,7 @@ class log_handler(Cog):
         if not self.bot.connected:
             await self.bot.change_presence(activity=Game(name="Database is Down!!!"))
         else:
-            await self.bot.change_presence(activity=Game(name=f"in the mind..."))
+            await self.bot.change_presence(activity=Game(name=f"with Razi. <3"))
 
 
         #+ Secret bullshit bro...  Don't question this...
