@@ -25,7 +25,7 @@ class server_info(Cog):
         embed1 = Embed(
             description=(
                 "# 🌍 Modded Minecraft Server Info\n"
-                "Welcome to **Serpent's Garden* — our chaotic blend of tech, magic, and absolute madness.\n\n"
+                "Welcome to **Serpent's Garden** — our chaotic blend of tech, magic, and absolute madness.\n\n"
                 "**IP:** `mc.serpents.garden`\n"
                 "**Version:** 1.20.1 (Forge)\n"
                 "**Modpack:** Available on CurseForge — search **Serpent's Garden**!\n"
