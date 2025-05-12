@@ -13,7 +13,6 @@ class server_info(Cog):
     def discord_log(self):
         return self.bot.get_channel(self.bot.config['logs']['server']) 
 
-
     @Cog.listener()
     async def on_ready(self):
         """Displays the role handler messages"""
