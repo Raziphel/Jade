@@ -23,99 +23,125 @@ class StoreHandler(Cog):
         embeds = [
             Embed(
                 description="# Garden Specials\n`All the listed items are worth real life money for the cost of gems!`",
-                color=0xFF0000)
-            .add_field(name="⊰ ✨ Discord Nitro ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}10,000,000x**\n\n```Get the 10$ Discord Nitro!```",
-                       inline=True)
-            .add_field(name="⊰ 💸 Get 5$USD! ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}5,000,000x**\n\n```Turn your coins into $USD!```",
-                       inline=True),
-            Embed(description="# Permissions\n`All these listed items give you general permissions on the server!`",
-                  color=0x00FF00)
-            .add_field(name="⊰ 📚 Library Pass ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get access to all of the "
-                             f"server's logs!```",
-                       inline=True)
-            .add_field(name="⊰ 🎫 Image Pass ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get permission for images & "
-                             f"embeds in General Chats.```",
-                       inline=True)
-            .add_field(name="⊰ 🔊 SoundBoard Pass ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get access to using the "
-                             f"soundboard in VC!```",
-                       inline=True)
-            .add_field(name="⊰ 🎁 Stats Channel ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}75,000x**\n\n```Get permission to the Stats Channels!```",
-                       inline=True)
-            .add_field(name="⊰ 🧶 Thread Perms ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}75,000x**\n\n```Get perms to create threads!```",
-                       inline=True)
-            .add_field(name="⊰ 🔮 External Emotes ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}75,000x**\n\n```Get access to using your external emotes and stickers!```",
-                       inline=True),
+                color=0xFF0000
+            )
+            .add_field(
+                name="⊰ ✨ Discord Nitro ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}10,000,000x**\n\n```Get the 10$ Discord Nitro!```",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 💸 Get 5$USD! ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}5,000,000x**\n\n```Turn your coins into $USD!```",
+                inline=True
+            ),
+
+            Embed(
+                description="# Permissions\n`All these listed items give you general permissions on the server!`",
+                color=0x00FF00
+            )
+            .add_field(
+                name="⊰ 📚 Library Pass ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get access to all of the server's logs!```",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🎫 Image Pass ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get permission for images & embeds in General Chats.```",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🔊 SoundBoard Pass ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get access to using the soundboard in VC!```",
+                inline=False
+            )
+            .add_field(
+                name="⊰ 🎁 Stats Channel ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}75,000x**\n\n```Get permission to the Stats Channels!```",
+                inline=True
+            ),
 
             Embed(
                 description="# Abilities\n`All these listed items give you the ability to do something here in the garden!`",
-                color=0xFF00FF)
-            .add_field(name="⊰ 🧤 Thievery ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
-                       inline=True)
-            .add_field(name="⊰ 4️⃣ Connect 4 ⊱",
-                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to Connect 4!```",
-                   inline=True)
-            .add_field(name="⊰ 📦 TicTacToe ⊱",
-                   value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to TicTacToe!```",
-                   inline=True),
+                color=0xFF00FF
+            )
+            .add_field(
+                name="⊰ 🧤 Thievery ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to steal from others!```",
+                inline=True
+            )
+            .add_field(
+                name="⊰4️⃣ Connect 4 ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to Connect 4!```",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 📦 TicTacToe ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}100,000x**\n\n```Gain the ability to Challenge others to TicTacToe!```",
+                inline=True
+            ),
 
             Embed(
-                description="# Colors\n`All these listed items let you be the colors you wanna be!\nDon't waste your "
-                            "coins staff, donators and nitro boosters!  These will not work!`",
-                color=0x0000FF)
-            .add_field(name="⊰ 🍑 Cutie Pinkie ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['cutie_pinkie']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}1,000,000x**",
-                       inline=True)
-            .add_field(name="⊰ ⛅ Snow Flakes ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['snow_flakes']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}1,000,000x**",
-                       inline=True)
-            .add_field(name="⊰ 🖤 Black Knight ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['black_knight']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}1,000,000x**",
-                       inline=True)
-            .add_field(name="⊰ 🍏 Nature Green ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['nature_green']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}100,000x**",
-                       inline=True)
-            .add_field(name="⊰ 🧊 Liquid Blue ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['liquid_blue']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}100,000x**",
-                       inline=True)
-            .add_field(name="⊰ 🌞 Sunshine Yellow ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['sunshine_yellow']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}100,000x**",
-                       inline=True)
-            .add_field(name="⊰ 🌋 Lava Red ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['lava_red']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}100,000x**",
-                       inline=True)
-            .add_field(name="⊰ 🧙‍♂️ Magic Purple ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['magic_purple']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}100,000x**",
-                       inline=True)
-            .add_field(name="⊰ ☔ Lush Magenta ⊱",
-                       value=f"<@&{self.bot.config['purchase_roles']['lush_magenta']}>\n**╰⊰"
-                             f" {self.bot.config['emojis']['coin']}100,000x**",
-                       inline=True),
+                description="# Colors\n`All these listed items let you be the colors you wanna be!\nDon't waste your coins staff, donators and nitro boosters! These will not work!`",
+                color=0x0000FF
+            )
+            .add_field(
+                name="⊰ 🍑 Cutie Pinkie ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['cutie_pinkie']}>\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ ⛅ Snow Flakes ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['snow_flakes']}>\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🖤 Black Knight ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['black_knight']}>\n**╰⊰ {self.bot.config['emojis']['coin']}1,000,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🍏 Nature Green ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['nature_green']}>\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🧊 Liquid Blue ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['liquid_blue']}>\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🌞 Sunshine Yellow ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['sunshine_yellow']}>\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🌋 Lava Red ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['lava_red']}>\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ 🧙‍♂️ Magic Purple ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['magic_purple']}>\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                inline=True
+            )
+            .add_field(
+                name="⊰ ☔ Lush Magenta ⊱",
+                value=f"<@&{self.bot.config['purchase_roles']['lush_magenta']}>\n**╰⊰ {self.bot.config['emojis']['coin']}100,000x**",
+                inline=True
+            ),
 
             Embed(
                 description="# Items\n`All these listed items that you can use at your own digression here in the garden!`",
-                color=0xF0F0F0)
-            .add_field(name="⊰ 🎈 Daily Saver ⊱",
-                       value=f"**╰⊰ {self.bot.config['emojis']['coin']}50,000x**\n\n```Make sure you never miss your daily streak again!```",
-                       inline=True)
-
+                color=0xF0F0F0
+            )
+            .add_field(
+                name="⊰ 🎈 Daily Saver ⊱",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}50,000x**\n\n```Make sure you never miss your daily streak again!```",
+                inline=True
+            )
         ]
+
 
         # Compact loop to handle both cases
         for i, msg in enumerate(messages):
@@ -158,8 +184,8 @@ class StoreHandler(Cog):
             "🎫": {"name": "Image Pass", "price": 150000, "role": 'image_pass'},
             "🔊": {"name": "Soundboard Pass", "price": 150000, "role": 'soundboard_pass'},
             "🎁": {"name": "Stats Channel", "price": 75000, "role": 'stats_channel_access'},
-            "🧶": {"name": "Thread Permissions", "price": 75000, "role": 'threads_perm'},
-            "🔮": {"name": "External Emojis", "price": 75000, "role": 'external_emojis'},
+            #"🧶": {"name": "Thread Permissions", "price": 75000, "role": 'threads_perm'},
+            #"🔮": {"name": "External Emojis", "price": 75000, "role": 'external_emojis'},
             # Abilities
             "🧤": {"name": "Thievery", "price": 100000, "role": None, "ability": "thievery"},
             "4️⃣": {"name": "Connect 4", "price": 100000, "role": None, "ability": "connect4"},
@@ -184,7 +210,7 @@ class StoreHandler(Cog):
 
         item = shop_items[emoji]
         confirmation_msg = await user.send(embed=utils.Embed(user=user,
-                                                             desc=f"# Purchase Confirmation:\nWould you like to buy {item['name']} for {item['price']} {self.bot.config['emojis']['coin']}x?"))
+                                                            desc=f"# Purchase Confirmation:\nWould you like to buy {item['name']} for {item['price']} {self.bot.config['emojis']['coin']}x?"))
 
         if await self.purchasing(confirmation_msg, payload, item):
             # Handle the successful purchase
