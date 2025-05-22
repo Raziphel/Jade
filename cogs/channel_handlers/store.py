@@ -53,7 +53,7 @@ class StoreHandler(Cog):
             .add_field(
                 name="⊰ 🔊 SoundBoard Pass ⊱",
                 value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get access to using the soundboard in VC!```",
-                inline=False
+                inline=True
             )
             .add_field(
                 name="⊰ 🎁 Stats Channel ⊱",
