@@ -47,7 +47,7 @@ class StoreHandler(Cog):
             )
             .add_field(
                 name="⊰ 🎫 Image Pass ⊱",
-                value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get permission for images & embeds in General Chats.```",
+                value=f"**╰⊰ {self.bot.config['emojis']['coin']}150,000x**\n\n```Get permission to post images & embeds.```",
                 inline=True
             )
             .add_field(
