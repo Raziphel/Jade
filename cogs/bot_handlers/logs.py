@@ -33,9 +33,9 @@ class log_handler(Cog):
         return self.bot.get_channel(self.bot.config['logs']['staff'])
 
     @property
-    def adult_log(self):
-        """Returns the adult log channel."""
-        return self.bot.get_channel(self.bot.config['logs']['adult'])
+    def welcome_log(self):
+        """Returns the welcome log channel."""
+        return self.bot.get_channel(self.bot.config['logs']['welcome'])
 
     # Colors for logging
     COLORS = {
@@ -48,7 +48,8 @@ class log_handler(Cog):
     #! Brand-new members joining
     @Cog.listener()
     async def on_member_join(self, member):
-        await self.discord_log.send(embed=utils.Embed(color=self.COLORS['positive'], title=f"{member.name} has entered the garden and needs verification."))
+        await self.discord_log.send(embed=utils.Embed(color=self.COLORS['positive'], title=f"{member.name} has entered the Syndicate."))
+        await self.welcome_log.send(content=f"{member.mention} Please enjoy your stay with us!", embed=utils.Embed(color=self.COLORS['special'], title=f"{member.name} has entered Dragon Syndicate"))
 
 
     #! Logs
@@ -142,9 +143,7 @@ class log_handler(Cog):
             image = message.attachments[0].url 
         name_list = list(message.channel.name)
 
-        if any(item in name_list for item in ["🔞"]):
-            channel = self.adult_log
-        elif any(item in name_list for item in ['😢', "✨"]):
+        if any(item in name_list for item in ['😢', "✨"]):
             channel = self.staff_log
         elif any(item in name_list for item in ['👑', "🌷", "📭", "📝"]):
             return
@@ -163,9 +162,7 @@ class log_handler(Cog):
         if before.author.id == 159516156728836097: return #? Not Razi tho
         name_list = list(before.channel.name)
 
-        if any(item in name_list for item in ['🔞']):
-            channel = self.adult_log
-        elif any(item in name_list for item in ['🔥', "✨"]):
+        if any(item in name_list for item in ['🔥', "✨"]):
             channel = self.staff_log
         elif any(item in name_list for item in ['👑', "🌷", "📯", "📝"]):
             return
